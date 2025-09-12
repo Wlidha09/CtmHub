@@ -42,17 +42,18 @@ export function DashboardNav() {
     <SidebarMenu>
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
-          <SidebarMenuButton
-            as={Link}
-            href={item.href}
-            isActive={pathname === item.href}
-            tooltip={item.label}
-          >
-            <div>
-              <item.icon />
-              <span>{item.label}</span>
-            </div>
-          </SidebarMenuButton>
+          <Link href={item.href} passHref>
+            <SidebarMenuButton
+              isActive={pathname === item.href}
+              tooltip={item.label}
+              asChild
+            >
+              <div>
+                <item.icon />
+                <span>{item.label}</span>
+              </div>
+            </SidebarMenuButton>
+          </Link>
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
