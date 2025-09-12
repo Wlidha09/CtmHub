@@ -1,7 +1,9 @@
+"use client";
+
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Bell, User } from "lucide-react";
+import { Search, Bell, User, Users, ChevronDown } from "lucide-react";
 
 import {
   SidebarProvider,
@@ -22,14 +24,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem
 } from "@/components/ui/dropdown-menu";
 import { DashboardNav } from "@/components/dashboard-nav";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [currentRole, setCurrentRole] = React.useState("Admin");
   return (
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
@@ -57,18 +70,36 @@ export default function DashboardLayout({
         <SidebarContent>
           <DashboardNav />
         </SidebarContent>
-        <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2">
+        <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2">
+          <div className="group-data-[collapsible=icon]:hidden">
+            <Label htmlFor="role-switcher" className="px-2 text-xs font-medium text-sidebar-foreground/70">Role</Label>
+            <Select value={currentRole} onValueChange={setCurrentRole}>
+              <SelectTrigger className="w-full mt-1 bg-sidebar-background border-sidebar-border h-9" id="role-switcher">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Admin">Admin</SelectItem>
+                <SelectItem value="Manager">Manager</SelectItem>
+                <SelectItem value="Employee">Employee</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-full h-px bg-sidebar-border" />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center">
-                <Avatar>
-                  <AvatarImage src="https://picsum.photos/seed/user-avatar/40/40" data-ai-hint="person portrait"/>
-                  <AvatarFallback>AD</AvatarFallback>
-                </Avatar>
-                <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@loophub.com</p>
-                </div>
+                <React.Fragment>
+                    <Avatar>
+                      <AvatarImage src="https://picsum.photos/seed/user-avatar/40/40" data-ai-hint="person portrait"/>
+                      <AvatarFallback>AD</AvatarFallback>
+                    </Avatar>
+                    <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
+                      <p className="text-sm font-medium">Admin User</p>
+                      <p className="text-xs text-muted-foreground">admin@loophub.com</p>
+                    </div>
+                </React.Fragment>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 mb-2" side="right" align="start">
