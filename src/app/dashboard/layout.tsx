@@ -11,6 +11,7 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarRail
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
+        <SidebarRail />
         <SidebarHeader className="items-center justify-center gap-2 group-data-[collapsible=icon]:-ml-2">
             <Link href="/dashboard" className="flex items-center gap-2 font-bold text-sidebar-foreground">
                 <svg
