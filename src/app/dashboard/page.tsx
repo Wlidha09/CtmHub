@@ -1,26 +1,37 @@
-import { Users, Building, ShieldCheck } from "lucide-react";
+import { Users, Building, ShieldCheck, Database } from "lucide-react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { employees, departmentData, roles } from "@/lib/data";
+import { getEmployees } from "@/lib/firebase/employees";
+import { getDepartments } from "@/lib/firebase/departments";
+import { getRoles } from "@/lib/firebase/roles";
+import { SeedButton } from "./seed-button";
 
-export default function DashboardPage() {
+
+export default async function DashboardPage() {
+  const employees = await getEmployees();
+  const departments = await getDepartments();
+  const roles = await getRoles();
+
   const totalEmployees = employees.length;
-  const totalDepartments = departmentData.length;
+  const totalDepartments = departments.length;
   const totalRoles = roles.length;
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Welcome to LoopHub! Here's a quick overview of your organization.
-        </p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Welcome to LoopHub! Here's a quick overview of your organization.
+          </p>
+        </div>
+        <SeedButton />
       </header>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>

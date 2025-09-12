@@ -22,6 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { useRouter } from "next/navigation";
 
 type DepartmentWithLead = Department & { lead: Employee };
 
@@ -34,7 +37,9 @@ export function DepartmentList({
 }) {
   const [departments, setDepartments] = React.useState(initialDepartments);
   const [selectedLead, setSelectedLead] = React.useState<string | undefined>();
+  const [isUpdating, setIsUpdating] = React.useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const getInitials = (name: string) => {
     const parts = name.split(" ");
@@ -44,25 +49,44 @@ export function DepartmentList({
     return parts[0].substring(0, 2);
   };
   
-  const handleLeadChange = (departmentId: string) => {
+  const handleLeadChange = async (departmentId: string) => {
     if (!selectedLead) return;
+    setIsUpdating(true);
 
     const newLead = allEmployees.find(e => e.id === selectedLead);
-    if (!newLead) return;
+    if (!newLead) {
+        setIsUpdating(false);
+        return;
+    }
 
-    // In a real app, this would be an API call.
-    // Here, we just update the local state.
-    setDepartments(prevDepartments => 
-      prevDepartments.map(dept => 
-        dept.id === departmentId ? { ...dept, lead: newLead } : dept
-      )
-    );
+    try {
+        const departmentRef = doc(db, 'departments', departmentId);
+        await updateDoc(departmentRef, {
+            leadId: selectedLead,
+        });
 
-    toast({
-        title: "Lead Changed",
-        description: `${newLead.name} is now the lead of the ${departments.find(d => d.id === departmentId)?.name} department.`,
-    });
-    setSelectedLead(undefined);
+        // Optimistically update UI
+        setDepartments(prevDepartments => 
+          prevDepartments.map(dept => 
+            dept.id === departmentId ? { ...dept, lead: newLead } : dept
+          )
+        );
+
+        toast({
+            title: "Lead Changed",
+            description: `${newLead.name} is now the lead of the ${departments.find(d => d.id === departmentId)?.name} department.`,
+        });
+        setSelectedLead(undefined);
+        router.refresh();
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to update the department lead.",
+        });
+    } finally {
+        setIsUpdating(false);
+    }
   };
 
 
@@ -74,14 +98,20 @@ export function DepartmentList({
             <CardTitle>{dept.name}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
-            <Avatar>
-              <AvatarImage src={dept.lead.avatarUrl} alt={dept.lead.name} data-ai-hint="person portrait"/>
-              <AvatarFallback>{getInitials(dept.lead.name)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold">{dept.lead.name}</p>
-              <p className="text-sm text-muted-foreground">Team Lead</p>
-            </div>
+            {dept.lead ? (
+                <>
+                <Avatar>
+                    <AvatarImage src={dept.lead.avatarUrl} alt={dept.lead.name} data-ai-hint="person portrait"/>
+                    <AvatarFallback>{getInitials(dept.lead.name)}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <p className="font-semibold">{dept.lead.name}</p>
+                    <p className="text-sm text-muted-foreground">Team Lead</p>
+                </div>
+                </>
+            ) : (
+                <p className="text-sm text-muted-foreground">No lead assigned.</p>
+            )}
           </CardContent>
           <CardFooter>
             <Dialog>
@@ -113,8 +143,8 @@ export function DepartmentList({
                         <Button type="button" variant="secondary">Cancel</Button>
                     </DialogClose>
                     <DialogClose asChild>
-                        <Button onClick={() => handleLeadChange(dept.id)} disabled={!selectedLead}>
-                            Save Changes
+                        <Button onClick={() => handleLeadChange(dept.id)} disabled={!selectedLead || isUpdating}>
+                            {isUpdating ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogClose>
                 </DialogFooter>

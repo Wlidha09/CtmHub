@@ -1,16 +1,28 @@
-import { departmentData, employees, getEmployeeById } from "@/lib/data";
+import { getDepartments } from "@/lib/firebase/departments";
+import { getEmployees } from "@/lib/firebase/employees";
 import { DepartmentList } from "./department-list";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import type { Department, Employee } from "@/lib/types";
 
-export default function DepartmentsPage() {
-  const departmentsWithLeads = departmentData.map(dept => {
-    const lead = getEmployeeById(dept.leadId);
-    return {
-      ...dept,
-      lead: lead!, 
-    };
-  });
+async function getEmployee(id: string): Promise<Employee | undefined> {
+  const employees = await getEmployees();
+  return employees.find(e => e.id === id);
+}
+
+export default async function DepartmentsPage() {
+  const departments = await getDepartments();
+  const employees = await getEmployees();
+
+  const departmentsWithLeads = await Promise.all(
+    departments.map(async (dept: Department) => {
+      const lead = await getEmployee(dept.leadId);
+      return {
+        ...dept,
+        lead: lead!,
+      };
+    })
+  );
 
   return (
     <div className="flex flex-col gap-6">

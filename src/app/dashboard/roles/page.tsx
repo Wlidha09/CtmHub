@@ -5,10 +5,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { roles } from "@/lib/data";
+import { getRoles } from "@/lib/firebase/roles";
 import { CheckCircle2 } from "lucide-react";
+import type { Role } from "@/lib/types";
 
-export default function RolesPage() {
+export default async function RolesPage() {
+  const roles: Role[] = await getRoles();
+
   return (
     <div className="flex flex-col gap-6">
       <header>

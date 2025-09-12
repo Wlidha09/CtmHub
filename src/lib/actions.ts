@@ -5,6 +5,9 @@ import {
   type CalculateEstimatedTimeOffInput,
 } from "@/ai/flows/calculate-estimated-time-off";
 import { z } from "zod";
+import { db } from '@/lib/firebase/config';
+import { collection, writeBatch, doc } from 'firebase/firestore';
+import { employees, departmentData, roles } from '@/lib/data';
 
 const schema = z.object({
   monthsWorked: z.coerce
@@ -52,5 +55,35 @@ export async function getEstimatedTimeOff(
       errors: null,
       data: null,
     };
+  }
+}
+
+export async function seedDatabase() {
+  try {
+    const batch = writeBatch(db);
+
+    const employeesCol = collection(db, 'employees');
+    employees.forEach(employee => {
+      const docRef = doc(employeesCol, employee.id);
+      batch.set(docRef, employee);
+    });
+
+    const departmentsCol = collection(db, 'departments');
+    departmentData.forEach(department => {
+      const docRef = doc(departmentsCol, department.id);
+      batch.set(docRef, department);
+    });
+
+    const rolesCol = collection(db, 'roles');
+    roles.forEach(role => {
+      const docRef = doc(rolesCol, role.name);
+      batch.set(docRef, role);
+    });
+
+    await batch.commit();
+    return { success: true, message: 'Database seeded successfully!' };
+  } catch (error) {
+    console.error('Error seeding database:', error);
+    return { success: false, message: 'Error seeding database.' };
   }
 }

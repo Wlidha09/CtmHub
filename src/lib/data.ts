@@ -55,6 +55,9 @@ export const roles: Role[] = [
   },
 ];
 
-export const getEmployeeById = (id: string) => employees.find(e => e.id === id);
+export async function getEmployeeById(id: string): Promise<Employee | undefined> {
+    // In a real app, this would fetch from a database.
+    return employees.find(e => e.id === id);
+};
 export const getDepartmentById = (id: string) => departmentData.find(d => d.id === id);
 export const getDepartmentName = (id: string) => departments.find(d => d.id === id)?.name || 'Unknown';
