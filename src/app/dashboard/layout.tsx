@@ -42,7 +42,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentRole, setCurrentRole] = React.useState("Admin");
+  const [currentRole, setCurrentRole] = React.useState("Dev");
   return (
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
@@ -78,7 +78,9 @@ export default function DashboardLayout({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Admin">Admin</SelectItem>
+                <SelectItem value="Dev">Dev</SelectItem>
+                <SelectItem value="Owner">Owner</SelectItem>
+                <SelectItem value="RH">RH</SelectItem>
                 <SelectItem value="Manager">Manager</SelectItem>
                 <SelectItem value="Employee">Employee</SelectItem>
               </SelectContent>

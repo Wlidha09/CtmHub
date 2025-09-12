@@ -12,12 +12,14 @@ export const employees: Employee[] = [
   { id: 'e2', name: 'Benjamin Carter', email: 'benjamin.carter@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar2/100/100', role: 'Employee', departmentId: 'd1' },
   { id: 'e3', name: 'Sophia Nguyen', email: 'sophia.nguyen@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar3/100/100', role: 'Employee', departmentId: 'd1' },
   { id: 'e4', name: 'Liam Rodriguez', email: 'liam.rodriguez@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar4/100/100', role: 'Manager', departmentId: 'd2' },
-  { id: 'e5', name: 'Ava Johnson', email: 'ava.johnson@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar5/100/100', role: 'Admin', departmentId: 'd2' },
+  { id: 'e5', name: 'Ava Johnson', email: 'ava.johnson@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar5/100/100', role: 'RH', departmentId: 'd2' },
   { id: 'e6', name: 'Noah Williams', email: 'noah.williams@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar6/100/100', role: 'Manager', departmentId: 'd3' },
   { id: 'e7', name: 'Isabella Brown', email: 'isabella.brown@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar7/100/100', role: 'Employee', departmentId: 'd3' },
   { id: 'e8', name: 'Mason Jones', email: 'mason.jones@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar8/100/100', role: 'Manager', departmentId: 'd4' },
   { id: 'e9', name: 'Harper Garcia', email: 'harper.garcia@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar9/100/100', role: 'Employee', departmentId: 'd4' },
   { id: 'e10', name: 'Ethan Miller', email: 'ethan.miller@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar10/100/100', role: 'Employee', departmentId: 'd4' },
+  { id: 'e11', name: 'Dev User', email: 'dev@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar11/100/100', role: 'Dev', departmentId: 'd1' },
+  { id: 'e12', name: 'Owner User', email: 'owner@loophub.com', avatarUrl: 'https://picsum.photos/seed/avatar12/100/100', role: 'Owner', departmentId: 'd1' },
 ];
 
 export const departmentData: Department[] = [
@@ -29,29 +31,28 @@ export const departmentData: Department[] = [
 
 export const roles: Role[] = [
   {
-    name: 'Admin',
-    permissions: [
-      'View and manage all employee data',
-      'Assign and re-assign department leads',
-      'Modify user roles and permissions',
-      'Access all pages and settings',
-    ],
+    name: 'Dev',
+    permissions: ['Full access'],
+  },
+  {
+    name: 'Owner',
+    permissions: ['Full access, except submit leaves page and Dev role'],
+  },
+  {
+    name: 'RH',
+    permissions: ['Full access'],
   },
   {
     name: 'Manager',
     permissions: [
-      'View employee data within their department',
-      'Access department-specific pages',
-      'Use Time-Off Calculator',
+      'Employees page',
+      'Candidates page',
+      'Send leave requests page',
     ],
   },
   {
     name: 'Employee',
-    permissions: [
-      'View their own profile',
-      'View public employee directory',
-      'Use Time-Off Calculator',
-    ],
+    permissions: ['Submit leave page', 'Leaves request pages (except Dev & Owner)'],
   },
 ];
 

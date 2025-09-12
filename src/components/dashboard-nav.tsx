@@ -9,6 +9,8 @@ import {
   Building,
   ShieldCheck,
   LucideIcon,
+  FileText,
+  Briefcase,
 } from "lucide-react";
 
 import {
@@ -33,6 +35,16 @@ const navItems: NavItem[] = [
     label: "Time Off Calculator",
     icon: Calculator,
   },
+  {
+    href: "/dashboard/submit-leave",
+    label: "Submit Leave",
+    icon: FileText,
+  },
+  {
+    href: "/dashboard/candidates",
+    label: "Candidates",
+    icon: Briefcase,
+  }
 ];
 
 export function DashboardNav() {
@@ -46,7 +58,6 @@ export function DashboardNav() {
             <SidebarMenuButton
               isActive={pathname === item.href}
               tooltip={item.label}
-              asChild
             >
               <div>
                 <item.icon />

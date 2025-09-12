@@ -6,11 +6,26 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { getRoles } from "@/lib/firebase/roles";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import type { Role } from "@/lib/types";
 
 export default async function RolesPage() {
   const roles: Role[] = await getRoles();
+
+  const getBadgeVariant = (roleName: string) => {
+    switch (roleName) {
+      case 'Dev':
+        return 'destructive';
+      case 'Owner':
+        return 'destructive';
+      case 'RH':
+        return 'secondary';
+      case 'Manager':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,12 +38,12 @@ export default async function RolesPage() {
         </p>
       </header>
       <Accordion type="single" collapsible className="w-full">
-        {roles.map((role) => (
+        {roles.filter(role => role.name !== 'Dev').map((role) => (
           <AccordionItem key={role.name} value={role.name}>
             <AccordionTrigger>
               <div className="flex items-center gap-3">
                 <span className="text-lg font-semibold">{role.name}</span>
-                <Badge variant={role.name === 'Admin' ? 'destructive' : role.name === 'Manager' ? 'secondary' : 'outline'}>
+                <Badge variant={getBadgeVariant(role.name)}>
                     {role.name}
                 </Badge>
               </div>
@@ -41,6 +56,12 @@ export default async function RolesPage() {
                     <span>{permission}</span>
                   </li>
                 ))}
+                 {role.name === 'Owner' && (
+                  <li className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 mt-0.5 text-red-500 flex-shrink-0" />
+                    <span>Submit leaves page</span>
+                  </li>
+                 )}
               </ul>
             </AccordionContent>
           </AccordionItem>

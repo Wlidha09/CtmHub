@@ -3,7 +3,7 @@ export type Employee = {
   name: string;
   email: string;
   avatarUrl: string;
-  role: 'Admin' | 'Manager' | 'Employee';
+  role: 'Dev' | 'Owner' | 'RH' | 'Manager' | 'Employee';
   departmentId: string;
 };
 
@@ -14,6 +14,6 @@ export type Department = {
 };
 
 export type Role = {
-  name: 'Admin' | 'Manager' | 'Employee';
+  name: 'Dev' | 'Owner' | 'RH' | 'Manager' | 'Employee';
   permissions: string[];
 };
