@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "avatar1",
+      "description": "Avatar for Olivia Martinez",
+      "imageUrl": "https://picsum.photos/seed/avatar1/100/100",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "avatar2",
+      "description": "Avatar for Benjamin Carter",
+      "imageUrl": "https://picsum.photos/seed/avatar2/100/100",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "avatar3",
+      "description": "Avatar for Sophia Nguyen",
+      "imageUrl": "https://picsum.photos/seed/avatar3/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar4",
+      "description": "Avatar for Liam Rodriguez",
+      "imageUrl": "https://picsum.photos/seed/avatar4/100/100",
+      "imageHint": "man smiling"
+    },
+    {
+      "id": "avatar5",
+      "description": "Avatar for Ava Johnson",
+      "imageUrl": "https://picsum.photos/seed/avatar5/100/100",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "avatar6",
+      "description": "Avatar for Noah Williams",
+      "imageUrl": "https://picsum.photos/seed/avatar6/100/100",
+      "imageHint": "person glasses"
+    },
+    {
+      "id": "avatar7",
+      "description": "Avatar for Isabella Brown",
+      "imageUrl": "https://picsum.photos/seed/avatar7/100/100",
+      "imageHint": "woman professional"
+    },
+    {
+      "id": "avatar8",
+      "description": "Avatar for Mason Jones",
+      "imageUrl": "https://picsum.photos/seed/avatar8/100/100",
+      "imageHint": "man professional"
+    },
+    {
+      "id": "avatar9",
+      "description": "Avatar for Harper Garcia",
+      "imageUrl": "https://picsum.photos/seed/avatar9/100/100",
+      "imageHint": "person professional"
+    },
+    {
+      "id": "avatar10",
+      "description": "Avatar for Ethan Miller",
+      "imageUrl": "https://picsum.photos/seed/avatar10/100/100",
+      "imageHint": "man casual"
+    }
+  ]
 }
