@@ -1,11 +1,11 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useEffect, useRef } from "react";
+import { useFormStatus } from "react-dom";
 import { getEstimatedTimeOff } from "@/lib/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
@@ -26,7 +26,7 @@ function SubmitButton() {
 }
 
 export function TimeOffForm() {
-  const [state, formAction] = useFormState(getEstimatedTimeOff, initialState);
+  const [state, formAction] = useActionState(getEstimatedTimeOff, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
