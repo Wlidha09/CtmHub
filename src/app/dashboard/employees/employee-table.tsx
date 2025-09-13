@@ -14,12 +14,22 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import type { Employee } from "@/lib/types";
-import { Search } from "lucide-react";
+import { Search, Edit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCurrentRole } from "@/hooks/use-current-role";
 
 type FormattedEmployee = Employee & { departmentName: string };
 
-export function EmployeeTable({ data }: { data: FormattedEmployee[] }) {
+export function EmployeeTable({ 
+  data,
+  onEditEmployee,
+}: { 
+  data: FormattedEmployee[],
+  onEditEmployee: (employee: FormattedEmployee) => void 
+}) {
   const [search, setSearch] = React.useState("");
+  const { currentRole } = useCurrentRole();
+  const canManageEmployees = currentRole === 'Owner' || currentRole === 'RH';
 
   const filteredData = React.useMemo(() => {
     if (!search) return data;
@@ -61,7 +71,8 @@ export function EmployeeTable({ data }: { data: FormattedEmployee[] }) {
               <TableHead>Employee</TableHead>
               <TableHead>Role</TableHead>
               <TableHead className="hidden md:table-cell">Department</TableHead>
-              <TableHead className="text-right">Contact</TableHead>
+              <TableHead>Contact</TableHead>
+              {canManageEmployees && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -87,12 +98,20 @@ export function EmployeeTable({ data }: { data: FormattedEmployee[] }) {
                   <TableCell className="hidden md:table-cell">
                     {employee.departmentName}
                   </TableCell>
-                  <TableCell className="text-right">{employee.email}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                  {canManageEmployees && (
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}>
+                        <Edit className="w-4 h-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center h-24">
+                <TableCell colSpan={canManageEmployees ? 5 : 4} className="text-center h-24">
                   No employees found.
                 </TableCell>
               </TableRow>
