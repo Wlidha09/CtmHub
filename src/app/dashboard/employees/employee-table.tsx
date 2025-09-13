@@ -35,15 +35,22 @@ export function EmployeeTable({
   const canManageEmployees = currentRole === 'Owner' || currentRole === 'RH';
 
   const filteredData = React.useMemo(() => {
-    const activeStatus = showInactive ? ['active', 'inactive'] : ['active'];
-    return data.filter(
-      (employee) =>
-        activeStatus.includes(employee.status) &&
-        (employee.name.toLowerCase().includes(search.toLowerCase()) ||
-        employee.email.toLowerCase().includes(search.toLowerCase()) ||
-        employee.role.toLowerCase().includes(search.toLowerCase()) ||
-        employee.departmentName.toLowerCase().includes(search.toLowerCase()))
-    );
+    return data.filter((employee) => {
+      const status = employee.status || 'active';
+      const isVisible = showInactive ? true : status === 'active';
+
+      if (!isVisible) {
+        return false;
+      }
+
+      const searchTerm = search.toLowerCase();
+      return (
+        employee.name.toLowerCase().includes(searchTerm) ||
+        employee.email.toLowerCase().includes(searchTerm) ||
+        employee.role.toLowerCase().includes(searchTerm) ||
+        employee.departmentName.toLowerCase().includes(searchTerm)
+      );
+    });
   }, [data, search, showInactive]);
 
   const getInitials = (name: string) => {
@@ -100,8 +107,8 @@ export function EmployeeTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                     <Badge variant={employee.status === 'active' ? 'secondary' : 'outline'}>
-                        {employee.status}
+                     <Badge variant={(employee.status || 'active') === 'active' ? 'secondary' : 'outline'}>
+                        {employee.status || 'active'}
                     </Badge>
                   </TableCell>
                   <TableCell>
