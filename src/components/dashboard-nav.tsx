@@ -37,7 +37,7 @@ const navItems: NavItem[] = [
   },
   {
     href: "/dashboard/submit-leave",
-    label: "Submit Leave",
+    label: "Leave Request",
     icon: FileText,
   },
   {
