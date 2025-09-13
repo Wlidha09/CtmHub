@@ -15,6 +15,17 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -28,6 +39,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import { useCurrentRole } from "@/hooks/use-current-role";
+import { deleteDepartment } from "@/lib/firebase/departments";
 
 type DepartmentWithLead = Department & { lead: Employee };
 
@@ -84,7 +96,6 @@ export function DepartmentList({
         const departmentRef = doc(db, 'departments', departmentId);
         await updateDoc(departmentRef, updates);
 
-        // Optimistically update UI
         setDepartments(prevDepartments => 
           prevDepartments.map(dept => {
             if (dept.id === departmentId) {
@@ -114,6 +125,27 @@ export function DepartmentList({
     }
   };
 
+  const handleDelete = async (departmentId: string) => {
+    setIsUpdating(true);
+    try {
+      await deleteDepartment(departmentId);
+      setDepartments(prev => prev.filter(d => d.id !== departmentId));
+      toast({
+        title: "Department Deleted",
+        description: "The department has been successfully deleted.",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete the department.",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -139,7 +171,7 @@ export function DepartmentList({
             )}
           </CardContent>
           {canManageDepartments && (
-            <CardFooter>
+            <CardFooter className="flex gap-2">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="w-full" onClick={() => handleEdit(dept)}>Edit</Button>
@@ -187,6 +219,25 @@ export function DepartmentList({
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+               <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full">Delete</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the department.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(dept.id)} disabled={isUpdating}>
+                      {isUpdating ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardFooter>
           )}
         </Card>
