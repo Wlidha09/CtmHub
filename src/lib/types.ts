@@ -24,6 +24,6 @@ export type LeaveRequest = {
   leaveType: 'Vacation' | 'Sick Leave' | 'Personal Day' | 'Unpaid Leave' | 'Day off';
   startDate: string;
   endDate: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Cancelled' | 'Action Required';
   createdAt: Date;
 };

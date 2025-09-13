@@ -50,8 +50,12 @@ export default function LeaveRequestPage() {
         return "default";
       case "Pending":
         return "secondary";
+      case "Action Required":
+        return "secondary";
       case "Rejected":
         return "destructive";
+      case "Cancelled":
+        return "outline";
       default:
         return "outline";
     }
