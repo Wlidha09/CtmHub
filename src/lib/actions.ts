@@ -62,21 +62,21 @@ export async function seedDatabase() {
   try {
     const batch = writeBatch(db);
 
-    const employeesCol = collection(db, 'employees');
+    // Seed Employees
     employees.forEach(employee => {
-      const docRef = doc(employeesCol, employee.id);
+      const docRef = doc(db, 'employees', employee.id);
       batch.set(docRef, employee);
     });
 
-    const departmentsCol = collection(db, 'departments');
+    // Seed Departments
     departmentData.forEach(department => {
-      const docRef = doc(departmentsCol, department.id);
+      const docRef = doc(db, 'departments', department.id);
       batch.set(docRef, department);
     });
 
-    const rolesCol = collection(db, 'roles');
+    // Seed Roles
     roles.forEach(role => {
-      const docRef = doc(rolesCol, role.name);
+      const docRef = doc(db, 'roles', role.name);
       batch.set(docRef, role);
     });
 
