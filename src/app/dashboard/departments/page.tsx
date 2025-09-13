@@ -1,14 +1,15 @@
 
+
 import { DepartmentList } from "./department-list";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import type { Department, Employee } from "@/lib/types";
-import { getDepartments } from "@/lib/firebase/departments";
-import { getEmployees } from "@/lib/firebase/employees";
+import { departmentData, employees as employeeData } from "@/lib/data";
+
 
 export default async function DepartmentsPage() {
-  const departments: Department[] = await getDepartments();
-  const employees: Employee[] = await getEmployees();
+  const departments: Department[] = departmentData;
+  const employees: Employee[] = employeeData;
 
   const employeeMap = new Map(employees.map(e => [e.id, e]));
 
