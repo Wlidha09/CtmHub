@@ -50,6 +50,8 @@ export default function LeaveRequestPage() {
         return "default";
       case "Pending":
         return "secondary";
+      case "Pending RH Approval":
+        return "secondary";
       case "Action Required":
         return "secondary";
       case "Rejected":

@@ -49,6 +49,8 @@ const getStatusVariant = (status: string) => {
       return "default";
     case "Pending":
       return "secondary";
+    case "Pending RH Approval":
+      return "secondary";
     case "Action Required":
       return "secondary";
     case "Rejected":
