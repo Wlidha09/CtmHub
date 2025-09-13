@@ -134,13 +134,15 @@ export default function EmployeesPage() {
         onEditEmployee={handleEditEmployee} 
       />
 
-      <EmployeeForm
-        isOpen={isFormOpen}
-        onClose={handleFormClose}
-        onSave={handleSave}
-        employee={editingEmployee}
-        departments={departments}
-      />
+      {isFormOpen && (
+        <EmployeeForm
+          isOpen={isFormOpen}
+          onClose={handleFormClose}
+          onSave={handleSave}
+          employee={editingEmployee}
+          departments={departments}
+        />
+      )}
     </div>
   );
 }
