@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
+import { useCurrentRole } from "@/hooks/use-current-role";
 
 type DepartmentWithLead = Department & { lead: Employee };
 
@@ -40,6 +41,8 @@ export function DepartmentList({
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { currentRole } = useCurrentRole();
+  const canManageDepartments = currentRole === 'Owner' || currentRole === 'RH';
 
   const getInitials = (name: string) => {
     const parts = name.split(" ");
@@ -113,44 +116,46 @@ export function DepartmentList({
                 <p className="text-sm text-muted-foreground">No lead assigned.</p>
             )}
           </CardContent>
-          <CardFooter>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full">Change Lead</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Change Lead for {dept.name}</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <Select onValueChange={setSelectedLead}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a new lead" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allEmployees
-                        .filter((e) => e.departmentId === dept.id)
-                        .map((employee) => (
-                          <SelectItem key={employee.id} value={employee.id}>
-                            {employee.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">Cancel</Button>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <Button onClick={() => handleLeadChange(dept.id)} disabled={!selectedLead || isUpdating}>
-                            {isUpdating ? "Saving..." : "Save Changes"}
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </CardFooter>
+          {canManageDepartments && (
+            <CardFooter>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full">Change Lead</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Change Lead for {dept.name}</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <Select onValueChange={setSelectedLead}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a new lead" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allEmployees
+                          .filter((e) => e.departmentId === dept.id)
+                          .map((employee) => (
+                            <SelectItem key={employee.id} value={employee.id}>
+                              {employee.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <DialogFooter>
+                      <DialogClose asChild>
+                          <Button type="button" variant="secondary">Cancel</Button>
+                      </DialogClose>
+                      <DialogClose asChild>
+                          <Button onClick={() => handleLeadChange(dept.id)} disabled={!selectedLead || isUpdating}>
+                              {isUpdating ? "Saving..." : "Save Changes"}
+                          </Button>
+                      </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardFooter>
+          )}
         </Card>
       ))}
     </div>
