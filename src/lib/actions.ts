@@ -9,7 +9,8 @@ import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { roles } from '@/lib/data';
-import type { Employee, Department } from "@/lib/types";
+import type { Employee, Department, LeaveRequest } from "@/lib/types";
+import { addLeaveRequest } from "./firebase/leave-requests";
 
 const schema = z.object({
   monthsWorked: z.coerce
@@ -71,6 +72,7 @@ const firstNames = ["Olivia", "Benjamin", "Sophia", "Liam", "Ava", "Noah", "Isab
 const lastNames = ["Martinez", "Carter", "Nguyen", "Rodriguez", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Smith"];
 const deptNames = ["Engineering", "Human Resources", "Design", "Sales", "Marketing", "Product", "Support", "Finance"];
 const rolesList: Employee['role'][] = ['Employee', 'Manager', 'RH'];
+const leaveTypes: LeaveRequest['leaveType'][] = ['Vacation', 'Sick Leave', 'Personal Day', 'Unpaid Leave', 'Day off'];
 
 const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -86,17 +88,17 @@ export async function seedDatabase() {
     const batch = writeBatch(db);
 
     // --- Generate and Add New Random Data ---
-    const numDepartments = 2; // Create 2 new departments each time
+    const numDepartments = 4; // Create 4 new departments each time
 
     for (let i = 0; i < numDepartments; i++) {
         const newDeptId = doc(collection(db, 'departments')).id;
-        const newDeptName = `${getRandomElement(deptNames)} #${Math.floor(Math.random() * 100)}`;
+        const newDeptName = `${getRandomElement(deptNames)} #${getRandomInt(1, 100)}`;
         const newDepartment: Omit<Department, 'leadId'> = {
             id: newDeptId,
             name: newDeptName,
         };
 
-        const numEmployees = getRandomInt(2, 5); // Create between 2 and 5 employees
+        const numEmployees = getRandomInt(3, 6); // Create between 3 and 6 employees
         const newEmployees: Employee[] = [];
         for (let j = 0; j < numEmployees; j++) {
             const newEmployeeId = doc(collection(db, 'employees')).id;
@@ -105,7 +107,7 @@ export async function seedDatabase() {
             const newEmployee: Employee = {
                 id: newEmployeeId,
                 name: `${firstName} ${lastName}`,
-                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@loophub.com`,
+                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${getRandomInt(1, 999)}@loophub.com`,
                 avatarUrl: `https://picsum.photos/seed/${newEmployeeId}/100/100`,
                 role: getRandomElement(rolesList),
                 departmentId: newDeptId,
@@ -128,6 +130,23 @@ export async function seedDatabase() {
           const docRef = doc(db, 'employees', employee.id);
           batch.set(docRef, employee);
         });
+        
+        // Create some leave requests for the new employees
+        const numLeaveRequests = getRandomInt(1, 3);
+        for (let k = 0; k < numLeaveRequests; k++) {
+            const employee = getRandomElement(newEmployees);
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() + getRandomInt(5, 30));
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + getRandomInt(1, 5));
+
+            await addLeaveRequest({
+                userId: employee.id,
+                leaveType: getRandomElement(leaveTypes),
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+            });
+        }
     }
 
     // Seed Roles (static, ensures they are always present)
