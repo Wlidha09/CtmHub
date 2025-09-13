@@ -24,7 +24,7 @@ import type { Employee, Department } from "@/lib/types";
 interface EmployeeFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (employee: Employee) => void;
+  onSave: (employee: Partial<Employee>) => void;
   employee: Employee | null;
   departments: Department[];
 }
@@ -37,7 +37,11 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
       setFormData(employee);
     } else {
       setFormData({
-        role: 'Employee', // Default role
+        name: '',
+        email: '',
+        avatarUrl: 'https://picsum.photos/seed/new-employee/100/100',
+        role: 'Employee',
+        departmentId: '',
       });
     }
   }, [employee, isOpen]);
@@ -53,12 +57,11 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Basic validation
     if (!formData.name || !formData.email || !formData.role || !formData.departmentId) {
       alert("Please fill out all fields.");
       return;
     }
-    onSave(formData as Employee);
+    onSave(formData);
   };
 
   return (

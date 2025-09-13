@@ -5,29 +5,56 @@ import { EmployeeTable } from "./employee-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import type { Employee, Department } from "@/lib/types";
-import { employees as employeeData, departmentData } from "@/lib/data";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { EmployeeForm } from "./employee-form";
+import { getEmployees, addEmployee, updateEmployee } from "@/lib/firebase/employees";
+import { getDepartments } from "@/lib/firebase/departments";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type FormattedEmployee = Employee & { departmentName: string };
 
 export default function EmployeesPage() {
   const { currentRole } = useCurrentRole();
   const canManageEmployees = currentRole === 'Owner' || currentRole === 'RH';
+  const { toast } = useToast();
+  const router = useRouter();
 
   const [employees, setEmployees] = React.useState<FormattedEmployee[]>([]);
-  const [departments] = React.useState<Department[]>(departmentData);
+  const [departments, setDepartments] = React.useState<Department[]>([]);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [editingEmployee, setEditingEmployee] = React.useState<FormattedEmployee | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const departmentMap = new Map(departments.map(d => [d.id, d.name]));
-    const formatted = employeeData.map((employee) => ({
-      ...employee,
-      departmentName: departmentMap.get(employee.departmentId) || "Unknown",
-    }));
-    setEmployees(formatted);
-  }, [departments]);
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [employeeList, departmentList] = await Promise.all([
+          getEmployees(),
+          getDepartments(),
+        ]);
+
+        setDepartments(departmentList);
+        const departmentMap = new Map(departmentList.map(d => [d.id, d.name]));
+        
+        const formatted = employeeList.map((employee) => ({
+          ...employee,
+          departmentName: departmentMap.get(employee.departmentId) || "Unknown",
+        }));
+        setEmployees(formatted);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error fetching data",
+          description: "Could not load employees and departments.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, [toast]);
   
   const handleAddEmployee = () => {
     setEditingEmployee(null);
@@ -44,23 +71,36 @@ export default function EmployeesPage() {
     setEditingEmployee(null);
   };
   
-  const handleSave = (employee: Employee) => {
-    // In a real app, you'd save to a database.
-    // For now, we update the local state.
-    const departmentMap = new Map(departments.map(d => [d.id, d.name]));
-    const formattedEmployee = {
-      ...employee,
-      departmentName: departmentMap.get(employee.departmentId) || "Unknown",
-    }
+  const handleSave = async (employeeData: Partial<Employee>) => {
+    try {
+      if (editingEmployee) {
+        // Update existing employee
+        await updateEmployee(editingEmployee.id, employeeData);
+        toast({ title: "Success", description: "Employee updated successfully." });
+      } else {
+        // Add new employee
+        await addEmployee(employeeData as Omit<Employee, 'id'>);
+        toast({ title: "Success", description: "Employee added successfully." });
+      }
+      router.refresh();
+      const updatedEmployees = await getEmployees();
+      const departmentMap = new Map(departments.map(d => [d.id, d.name]));
+      const formatted = updatedEmployees.map((employee) => ({
+        ...employee,
+        departmentName: departmentMap.get(employee.departmentId) || "Unknown",
+      }));
+      setEmployees(formatted);
 
-    if (editingEmployee) {
-      setEmployees(employees.map(e => e.id === employee.id ? formattedEmployee : e));
-    } else {
-      setEmployees([...employees, { ...formattedEmployee, id: `e${employees.length + 1}` }]);
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save employee information.",
+      });
+    } finally {
+      handleFormClose();
     }
-    handleFormClose();
   }
-
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,7 +120,10 @@ export default function EmployeesPage() {
           </Button>
         )}
       </div>
-      <EmployeeTable data={employees} onEditEmployee={handleEditEmployee} />
+      <EmployeeTable 
+        data={employees} 
+        onEditEmployee={handleEditEmployee} 
+      />
 
       <EmployeeForm
         isOpen={isFormOpen}

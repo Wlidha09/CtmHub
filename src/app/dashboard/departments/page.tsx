@@ -2,25 +2,22 @@ import { DepartmentList } from "./department-list";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import type { Department, Employee } from "@/lib/types";
-import { departmentData, employees as employeeData } from "@/lib/data";
-
-async function getEmployee(id: string): Promise<Employee | undefined> {
-  return employeeData.find(e => e.id === id);
-}
+import { getDepartments } from "@/lib/firebase/departments";
+import { getEmployees } from "@/lib/firebase/employees";
 
 export default async function DepartmentsPage() {
-  const departments: Department[] = departmentData;
-  const employees: Employee[] = employeeData;
+  const departments: Department[] = await getDepartments();
+  const employees: Employee[] = await getEmployees();
 
-  const departmentsWithLeads = await Promise.all(
-    departments.map(async (dept: Department) => {
-      const lead = await getEmployee(dept.leadId);
-      return {
-        ...dept,
-        lead: lead!,
-      };
-    })
-  );
+  const employeeMap = new Map(employees.map(e => [e.id, e]));
+
+  const departmentsWithLeads = departments.map((dept) => {
+    const lead = employeeMap.get(dept.leadId);
+    return {
+      ...dept,
+      lead: lead!,
+    };
+  });
 
   return (
     <div className="flex flex-col gap-6">

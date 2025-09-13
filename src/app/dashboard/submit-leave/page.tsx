@@ -12,33 +12,38 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewLeaveRequestForm } from "./new-leave-request-form";
-
-// Mock data for leave requests
-const leaveRequests = [
-  {
-    id: "LR001",
-    leaveType: "Vacation",
-    startDate: "2024-08-15",
-    endDate: "2024-08-20",
-    status: "Approved",
-  },
-  {
-    id: "LR002",
-    leaveType: "Sick Leave",
-    startDate: "2024-09-01",
-    endDate: "2024-09-01",
-    status: "Pending",
-  },
-  {
-    id: "LR003",
-    leaveType: "Personal Day",
-    startDate: "2024-09-10",
-    endDate: "2024-09-10",
-    status: "Rejected",
-  },
-];
+import type { LeaveRequest } from "@/lib/types";
+import { getLeaveRequests } from "@/lib/firebase/leave-requests";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 export default function LeaveRequestPage() {
+  const [requests, setRequests] = React.useState<LeaveRequest[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const { toast } = useToast();
+
+  const fetchRequests = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Assuming we have a way to get current user ID, for now fetching all
+      // In a real app, you'd pass a userId to getLeaveRequests
+      const leaveRequests = await getLeaveRequests();
+      setRequests(leaveRequests);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch leave requests.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
+  React.useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "Approved":
@@ -63,7 +68,7 @@ export default function LeaveRequestPage() {
             View your leave requests and submit new ones.
           </p>
         </header>
-        <NewLeaveRequestForm />
+        <NewLeaveRequestForm onFormSubmit={fetchRequests} />
       </div>
       <Card>
         <CardHeader>
@@ -80,18 +85,28 @@ export default function LeaveRequestPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leaveRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell>{request.leaveType}</TableCell>
-                  <TableCell>{request.startDate}</TableCell>
-                  <TableCell>{request.endDate}</TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={getStatusVariant(request.status)}>
-                      {request.status}
-                    </Badge>
-                  </TableCell>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">Loading...</TableCell>
                 </TableRow>
-              ))}
+              ) : requests.length > 0 ? (
+                requests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell>{request.leaveType}</TableCell>
+                    <TableCell>{format(new Date(request.startDate), "PPP")}</TableCell>
+                    <TableCell>{format(new Date(request.endDate), "PPP")}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={getStatusVariant(request.status)}>
+                        {request.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                 <TableRow>
+                  <TableCell colSpan={4} className="text-center">No leave requests found.</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
