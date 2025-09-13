@@ -5,19 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getEmployees } from "@/lib/firebase/employees";
-import { getDepartments } from "@/lib/firebase/departments";
-import { getRoles } from "@/lib/firebase/roles";
+import { employees, departmentData, roles } from "@/lib/data";
 import { SeedButton } from "./seed-button";
 
 
 export default async function DashboardPage() {
-  const employees = await getEmployees();
-  const departments = await getDepartments();
-  const roles = await getRoles();
-
   const totalEmployees = employees.length;
-  const totalDepartments = departments.length;
+  const totalDepartments = departmentData.length;
   const totalRoles = roles.length;
 
   return (
