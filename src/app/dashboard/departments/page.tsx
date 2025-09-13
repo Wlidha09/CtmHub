@@ -1,25 +1,60 @@
+"use client";
 
-
+import * as React from "react";
 import { DepartmentList } from "./department-list";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import type { Department, Employee } from "@/lib/types";
-import { departmentData, employees as employeeData } from "@/lib/data";
+import { getDepartments } from "@/lib/firebase/departments";
+import { getEmployees } from "@/lib/firebase/employees";
+import { useToast } from "@/hooks/use-toast";
+import { useCurrentRole } from "@/hooks/use-current-role";
 
+type DepartmentWithLead = Department & { lead: Employee | undefined };
 
-export default async function DepartmentsPage() {
-  const departments: Department[] = departmentData;
-  const employees: Employee[] = employeeData;
+export default function DepartmentsPage() {
+  const [departments, setDepartments] = React.useState<DepartmentWithLead[]>([]);
+  const [employees, setEmployees] = React.useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const { toast } = useToast();
+  const { currentRole } = useCurrentRole();
+  const canManageDepartments = currentRole === 'Owner' || currentRole === 'RH';
 
-  const employeeMap = new Map(employees.map(e => [e.id, e]));
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [departmentList, employeeList] = await Promise.all([
+          getDepartments(),
+          getEmployees(),
+        ]);
+        
+        setEmployees(employeeList);
+        const employeeMap = new Map(employeeList.map((e) => [e.id, e]));
 
-  const departmentsWithLeads = departments.map((dept) => {
-    const lead = employeeMap.get(dept.leadId);
-    return {
-      ...dept,
-      lead: lead!,
-    };
-  });
+        const departmentsWithLeads = departmentList.map((dept) => ({
+          ...dept,
+          lead: employeeMap.get(dept.leadId),
+        }));
+
+        setDepartments(departmentsWithLeads);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error fetching data",
+          description: "Could not load departments.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, [toast]);
+
+  if (isLoading) {
+    // You can replace this with a proper skeleton loader component
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,12 +67,14 @@ export default async function DepartmentsPage() {
             View and manage departments and their team leads.
           </p>
         </header>
-         <Button>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Add Department
-        </Button>
+        {canManageDepartments && (
+          <Button>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Add Department
+          </Button>
+        )}
       </div>
-      <DepartmentList initialDepartments={departmentsWithLeads} allEmployees={employees} />
+      <DepartmentList initialDepartments={departments} allEmployees={employees} />
     </div>
   );
 }
