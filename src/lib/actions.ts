@@ -73,6 +73,7 @@ const deptNames = ["Engineering", "Human Resources", "Design", "Sales", "Marketi
 const rolesList: Employee['role'][] = ['Employee', 'Manager', 'RH'];
 
 const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 
 export async function seedDatabase() {
@@ -85,47 +86,49 @@ export async function seedDatabase() {
     const batch = writeBatch(db);
 
     // --- Generate and Add New Random Data ---
-    
-    // Create 1 new Department
-    const newDeptId = doc(collection(db, 'departments')).id;
-    const newDeptName = `${getRandomElement(deptNames)} #${Math.floor(Math.random() * 100)}`;
-    const newDepartment: Omit<Department, 'leadId'> = {
-        id: newDeptId,
-        name: newDeptName,
-    };
+    const numDepartments = 2; // Create 2 new departments each time
 
-    // Create 3 new Employees for this department
-    const newEmployees: Employee[] = [];
-    for (let i = 0; i < 3; i++) {
-        const newEmployeeId = doc(collection(db, 'employees')).id;
-        const firstName = getRandomElement(firstNames);
-        const lastName = getRandomElement(lastNames);
-        const newEmployee: Employee = {
-            id: newEmployeeId,
-            name: `${firstName} ${lastName}`,
-            email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@loophub.com`,
-            avatarUrl: `https://picsum.photos/seed/${newEmployeeId}/100/100`,
-            role: getRandomElement(rolesList),
-            departmentId: newDeptId,
+    for (let i = 0; i < numDepartments; i++) {
+        const newDeptId = doc(collection(db, 'departments')).id;
+        const newDeptName = `${getRandomElement(deptNames)} #${Math.floor(Math.random() * 100)}`;
+        const newDepartment: Omit<Department, 'leadId'> = {
+            id: newDeptId,
+            name: newDeptName,
         };
-        newEmployees.push(newEmployee);
+
+        const numEmployees = getRandomInt(2, 5); // Create between 2 and 5 employees
+        const newEmployees: Employee[] = [];
+        for (let j = 0; j < numEmployees; j++) {
+            const newEmployeeId = doc(collection(db, 'employees')).id;
+            const firstName = getRandomElement(firstNames);
+            const lastName = getRandomElement(lastNames);
+            const newEmployee: Employee = {
+                id: newEmployeeId,
+                name: `${firstName} ${lastName}`,
+                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@loophub.com`,
+                avatarUrl: `https://picsum.photos/seed/${newEmployeeId}/100/100`,
+                role: getRandomElement(rolesList),
+                departmentId: newDeptId,
+            };
+            newEmployees.push(newEmployee);
+        }
+
+        // Assign a lead to the new department from the new employees
+        const lead = newEmployees[0];
+        const finalNewDepartment: Department = {
+          ...newDepartment,
+          leadId: lead.id,
+        };
+        
+        // Add new department and employees to the batch
+        const deptDocRef = doc(db, 'departments', newDeptId);
+        batch.set(deptDocRef, finalNewDepartment);
+
+        newEmployees.forEach(employee => {
+          const docRef = doc(db, 'employees', employee.id);
+          batch.set(docRef, employee);
+        });
     }
-
-    // Assign a lead to the new department from the new employees
-    const lead = newEmployees[0];
-    const finalNewDepartment: Department = {
-      ...newDepartment,
-      leadId: lead.id,
-    };
-    
-    // Add new department and employees to the batch
-    const deptDocRef = doc(db, 'departments', newDeptId);
-    batch.set(deptDocRef, finalNewDepartment);
-
-    newEmployees.forEach(employee => {
-      const docRef = doc(db, 'employees', employee.id);
-      batch.set(docRef, employee);
-    });
 
     // Seed Roles (static, ensures they are always present)
     roles.forEach(role => {
