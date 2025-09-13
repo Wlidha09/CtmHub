@@ -38,7 +38,7 @@ export default async function RolesPage() {
         </p>
       </header>
       <Accordion type="single" collapsible className="w-full">
-        {roles.filter(role => role.name !== 'Dev').map((role) => (
+        {roles.filter(role => role && role.name !== 'Dev').map((role) => (
           <AccordionItem key={role.name} value={role.name}>
             <AccordionTrigger>
               <div className="flex items-center gap-3">
