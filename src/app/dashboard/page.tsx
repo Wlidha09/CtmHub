@@ -17,31 +17,10 @@ import { SeedButton } from "./seed-button";
 import * as React from "react";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { Badge } from "@/components/ui/badge";
-
-// Mock data for leave requests
-const leaveRequests = [
-  {
-    id: "LR001",
-    leaveType: "Vacation",
-    startDate: "2024-08-15",
-    endDate: "2024-08-20",
-    status: "Approved",
-  },
-  {
-    id: "LR002",
-    leaveType: "Sick Leave",
-    startDate: "2024-09-01",
-    endDate: "2024-09-01",
-    status: "Pending",
-  },
-  {
-    id: "LR003",
-    leaveType: "Personal Day",
-    startDate: "2024-09-10",
-    endDate: "2024-09-10",
-    status: "Rejected",
-  },
-];
+import { getEmployees } from "@/lib/firebase/employees";
+import { getDepartments } from "@/lib/firebase/departments";
+import { getLeaveRequests } from "@/lib/firebase/leave-requests";
+import type { LeaveRequest } from "@/lib/types";
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -62,15 +41,38 @@ const getStatusVariant = (status: string) => {
   }
 };
 
-const totalEmployees = 12;
-const totalDepartments = 4;
-const totalRoles = 5;
+const totalRoles = 5; // This is static based on our defined roles
 
 export default function DashboardPage() {
   const { currentRole } = useCurrentRole();
+  const [totalEmployees, setTotalEmployees] = React.useState(0);
+  const [totalDepartments, setTotalDepartments] = React.useState(0);
+  const [leaveRequests, setLeaveRequests] = React.useState<LeaveRequest[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const pendingRequests = leaveRequests.filter(
-    (req) => req.status === "Pending"
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [employees, departments, requests] = await Promise.all([
+          getEmployees(),
+          getDepartments(),
+          getLeaveRequests(), // Assuming this fetches all for admin roles
+        ]);
+        setTotalEmployees(employees.length);
+        setTotalDepartments(departments.length);
+        setLeaveRequests(requests);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const pendingRequestsCount = leaveRequests.filter(
+    (req) => req.status === "Pending" || req.status === "Pending RH Approval"
   ).length;
 
   return (
@@ -96,24 +98,28 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {leaveRequests.map((request) => (
-                  <li
-                    key={request.id}
-                    className="flex items-center justify-between p-2 rounded-md bg-muted/50"
-                  >
-                    <div>
-                      <p className="font-semibold">{request.leaveType}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {request.startDate} to {request.endDate}
-                      </p>
-                    </div>
-                    <Badge variant={getStatusVariant(request.status)}>
-                      {request.status}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
+              {isLoading ? (
+                <p>Loading requests...</p>
+              ) : (
+                <ul className="space-y-2">
+                  {leaveRequests.slice(0, 3).map((request) => ( // Show a few recent ones
+                    <li
+                      key={request.id}
+                      className="flex items-center justify-between p-2 rounded-md bg-muted/50"
+                    >
+                      <div>
+                        <p className="font-semibold">{request.leaveType}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge variant={getStatusVariant(request.status)}>
+                        {request.status}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         ) : (
@@ -126,7 +132,7 @@ export default function DashboardPage() {
                 <Users className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalEmployees}</div>
+                {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalEmployees}</div>}
                 <p className="text-xs text-muted-foreground">
                   Currently active members in the organization.
                 </p>
@@ -140,7 +146,7 @@ export default function DashboardPage() {
                 <Building className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalDepartments}</div>
+                {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalDepartments}</div>}
                 <p className="text-xs text-muted-foreground">
                   Number of departments across the company.
                 </p>
@@ -168,7 +174,7 @@ export default function DashboardPage() {
                 <FileClock className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{pendingRequests}</div>
+                {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{pendingRequestsCount}</div>}
                 <p className="text-xs text-muted-foreground">
                   Leave requests awaiting approval.
                 </p>
