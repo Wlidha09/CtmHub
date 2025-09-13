@@ -58,6 +58,7 @@ export function NewLeaveRequestForm() {
                   <SelectItem value="sick">Sick Leave</SelectItem>
                   <SelectItem value="personal">Personal Day</SelectItem>
                   <SelectItem value="unpaid">Unpaid Leave</SelectItem>
+                  <SelectItem value="dayoff">Day off</SelectItem>
                 </SelectContent>
               </Select>
             </div>
