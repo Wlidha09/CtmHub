@@ -7,10 +7,11 @@ import {
 } from "@/ai/flows/calculate-estimated-time-off";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
-import { collection, writeBatch, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { roles } from '@/lib/data';
 import type { Employee, Department, LeaveRequest } from "@/lib/types";
 import { addLeaveRequest, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
+import { getEmployees } from "./firebase/employees";
 
 const schema = z.object({
   monthsWorked: z.coerce
@@ -164,7 +165,18 @@ export async function seedDatabase() {
     });
 
     await batch.commit();
-    return { success: true, message: 'New random data added to database!' };
+
+    // --- Update all existing employees with a random status ---
+    const updateBatch = writeBatch(db);
+    const allEmployees = await getEmployees();
+    allEmployees.forEach(employee => {
+        const empRef = doc(db, "employees", employee.id);
+        const randomStatus = getRandomElement(statuses);
+        updateBatch.update(empRef, { status: randomStatus });
+    });
+    await updateBatch.commit();
+    
+    return { success: true, message: 'New random data added and existing employees updated!' };
   } catch (error) {
     console.error('Error seeding database:', error);
     return { success: false, message: 'Error seeding database.' };
