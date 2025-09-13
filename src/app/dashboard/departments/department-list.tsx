@@ -21,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
@@ -38,6 +40,7 @@ export function DepartmentList({
 }) {
   const [departments, setDepartments] = React.useState(initialDepartments);
   const [selectedLead, setSelectedLead] = React.useState<string | undefined>();
+  const [departmentName, setDepartmentName] = React.useState<string>("");
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -52,40 +55,59 @@ export function DepartmentList({
     return parts[0].substring(0, 2);
   };
   
-  const handleLeadChange = async (departmentId: string) => {
-    if (!selectedLead) return;
+  const handleEdit = (dept: Department) => {
+    setDepartmentName(dept.name);
+    setSelectedLead(undefined);
+  };
+
+  const handleSaveChanges = async (departmentId: string) => {
     setIsUpdating(true);
+    const originalDept = departments.find(d => d.id === departmentId);
+    if (!originalDept) return;
 
     const newLead = allEmployees.find(e => e.id === selectedLead);
-    if (!newLead) {
-        setIsUpdating(false);
-        return;
+
+    const updates: Partial<Department> = {};
+    if (departmentName && departmentName !== originalDept.name) {
+      updates.name = departmentName;
+    }
+    if (selectedLead && selectedLead !== originalDept.leadId) {
+      updates.leadId = selectedLead;
+    }
+    
+    if (Object.keys(updates).length === 0) {
+      setIsUpdating(false);
+      return;
     }
 
     try {
         const departmentRef = doc(db, 'departments', departmentId);
-        await updateDoc(departmentRef, {
-            leadId: selectedLead,
-        });
+        await updateDoc(departmentRef, updates);
 
         // Optimistically update UI
         setDepartments(prevDepartments => 
-          prevDepartments.map(dept => 
-            dept.id === departmentId ? { ...dept, lead: newLead } : dept
-          )
+          prevDepartments.map(dept => {
+            if (dept.id === departmentId) {
+                return {
+                    ...dept,
+                    name: updates.name || dept.name,
+                    lead: newLead || dept.lead,
+                }
+            }
+            return dept;
+          })
         );
 
         toast({
-            title: "Lead Changed",
-            description: `${newLead.name} is now the lead of the ${departments.find(d => d.id === departmentId)?.name} department.`,
+            title: "Department Updated",
+            description: `The ${originalDept.name} department has been updated.`,
         });
-        setSelectedLead(undefined);
         router.refresh();
     } catch (error) {
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to update the department lead.",
+            description: "Failed to update the department.",
         });
     } finally {
         setIsUpdating(false);
@@ -120,34 +142,45 @@ export function DepartmentList({
             <CardFooter>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">Edit</Button>
+                  <Button variant="outline" className="w-full" onClick={() => handleEdit(dept)}>Edit</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Edit {dept.name}</DialogTitle>
                   </DialogHeader>
-                  <div className="py-4">
-                    <Select onValueChange={setSelectedLead}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a new lead" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {allEmployees
-                          .filter((e) => e.departmentId === dept.id)
-                          .map((employee) => (
-                            <SelectItem key={employee.id} value={employee.id}>
-                              {employee.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="py-4 space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="dept-name">Department Name</Label>
+                        <Input 
+                            id="dept-name"
+                            value={departmentName} 
+                            onChange={(e) => setDepartmentName(e.target.value)}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Department Lead</Label>
+                        <Select onValueChange={setSelectedLead} defaultValue={dept.leadId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a new lead" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allEmployees
+                              .filter((e) => e.departmentId === dept.id)
+                              .map((employee) => (
+                                <SelectItem key={employee.id} value={employee.id}>
+                                  {employee.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                    </div>
                   </div>
                   <DialogFooter>
                       <DialogClose asChild>
                           <Button type="button" variant="secondary">Cancel</Button>
                       </DialogClose>
                       <DialogClose asChild>
-                          <Button onClick={() => handleLeadChange(dept.id)} disabled={!selectedLead || isUpdating}>
+                          <Button onClick={() => handleSaveChanges(dept.id)} disabled={isUpdating}>
                               {isUpdating ? "Saving..." : "Save Changes"}
                           </Button>
                       </DialogClose>
