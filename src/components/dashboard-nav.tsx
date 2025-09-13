@@ -59,7 +59,7 @@ export function DashboardNav() {
               isActive={pathname === item.href}
               tooltip={item.label}
             >
-              <div>
+              <div className="flex items-center gap-2">
                 <item.icon />
                 <span>{item.label}</span>
               </div>
