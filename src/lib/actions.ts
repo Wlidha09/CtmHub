@@ -1,3 +1,4 @@
+
 "use server";
 
 import {
@@ -6,7 +7,7 @@ import {
 } from "@/ai/flows/calculate-estimated-time-off";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
-import { collection, writeBatch, doc, deleteDoc } from 'firebase/firestore';
+import { collection, writeBatch, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { employees, departmentData, roles } from '@/lib/data';
 
 const schema = z.object({
@@ -58,25 +59,21 @@ export async function getEstimatedTimeOff(
   }
 }
 
-async function createEmptyCollection(collectionName: string) {
+async function ensureCollection(collectionName: string) {
     const placeholderRef = doc(db, collectionName, '_placeholder');
-    const batch = writeBatch(db);
-    batch.set(placeholderRef, { createdAt: new Date() });
-    await batch.commit();
+    await setDoc(placeholderRef, { createdAt: new Date() });
     await deleteDoc(placeholderRef);
 }
 
 export async function seedDatabase() {
   try {
-    const batch = writeBatch(db);
-
-    // Ensure collections exist by creating and deleting a placeholder doc
-    const collectionsToCreate = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates'];
-    for (const collectionName of collectionsToCreate) {
-        const placeholderRef = doc(collection(db, collectionName));
-        batch.set(placeholderRef, { temp: true });
-        batch.delete(placeholderRef);
+    // Ensure collections exist before batch writing
+    const collectionsToEnsure = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates'];
+    for (const collectionName of collectionsToEnsure) {
+        await ensureCollection(collectionName);
     }
+    
+    const batch = writeBatch(db);
 
     // Seed Employees
     employees.forEach(employee => {
