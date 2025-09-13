@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, getDocs, doc, addDoc, serverTimestamp, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, serverTimestamp, query, where, updateDoc } from 'firebase/firestore';
 import type { LeaveRequest } from '@/lib/types';
 
 export async function getLeaveRequests(userId?: string): Promise<LeaveRequest[]> {
@@ -23,4 +23,9 @@ export async function addLeaveRequest(request: Omit<LeaveRequest, 'id' | 'status
         status: 'Pending',
         createdAt: serverTimestamp(),
     });
+}
+
+export async function updateLeaveRequestStatus(id: string, status: LeaveRequest['status']) {
+    const leaveRequestDoc = doc(db, 'leaveRequests', id);
+    await updateDoc(leaveRequestDoc, { status });
 }

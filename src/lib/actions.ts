@@ -10,7 +10,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { roles } from '@/lib/data';
 import type { Employee, Department, LeaveRequest } from "@/lib/types";
-import { addLeaveRequest } from "./firebase/leave-requests";
+import { addLeaveRequest, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 
 const schema = z.object({
   monthsWorked: z.coerce
@@ -63,8 +63,13 @@ export async function getEstimatedTimeOff(
 
 async function ensureCollection(collectionName: string) {
     const placeholderRef = doc(db, collectionName, '_placeholder');
-    await setDoc(placeholderRef, { createdAt: new Date() });
-    await deleteDoc(placeholderRef);
+    try {
+        await setDoc(placeholderRef, { createdAt: new Date() });
+        await deleteDoc(placeholderRef);
+    } catch (error) {
+        // This can fail if the collection already exists, which is fine.
+        // We just want to ensure it's there.
+    }
 }
 
 // Helper functions to generate random data
@@ -127,8 +132,8 @@ export async function seedDatabase() {
         batch.set(deptDocRef, finalNewDepartment);
 
         newEmployees.forEach(employee => {
-          const docRef = doc(db, 'employees', employee.id);
-          batch.set(docRef, employee);
+          const empDocRef = doc(db, 'employees', employee.id);
+          batch.set(empDocRef, employee);
         });
         
         // Create some leave requests for the new employees
@@ -161,4 +166,14 @@ export async function seedDatabase() {
     console.error('Error seeding database:', error);
     return { success: false, message: 'Error seeding database.' };
   }
+}
+
+export async function updateLeaveRequestStatus(id: string, status: LeaveRequest['status']) {
+    try {
+        await updateStatus(id, status);
+        return { success: true, message: `Request status updated to ${status}.` };
+    } catch (error) {
+        console.error('Error updating leave request status:', error);
+        return { success: false, message: 'Failed to update leave request status.' };
+    }
 }
