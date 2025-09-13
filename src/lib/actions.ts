@@ -78,6 +78,7 @@ const lastNames = ["Martinez", "Carter", "Nguyen", "Rodriguez", "Johnson", "Will
 const deptNames = ["Engineering", "Human Resources", "Design", "Sales", "Marketing", "Product", "Support", "Finance"];
 const rolesList: Employee['role'][] = ['Employee', 'Manager', 'RH'];
 const leaveTypes: LeaveRequest['leaveType'][] = ['Vacation', 'Sick Leave', 'Personal Day', 'Unpaid Leave', 'Day off'];
+const statuses: Employee['status'][] = ['active', 'inactive'];
 
 const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -116,7 +117,7 @@ export async function seedDatabase() {
                 avatarUrl: `https://picsum.photos/seed/${newEmployeeId}/100/100`,
                 role: getRandomElement(rolesList),
                 departmentId: newDeptId,
-                status: 'active',
+                status: getRandomElement(statuses),
                 startDate: new Date(new Date().setFullYear(new Date().getFullYear() - getRandomInt(0, 5))).toISOString(),
             };
             newEmployees.push(newEmployee);
