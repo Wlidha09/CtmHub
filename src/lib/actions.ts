@@ -116,6 +116,8 @@ export async function seedDatabase() {
                 avatarUrl: `https://picsum.photos/seed/${newEmployeeId}/100/100`,
                 role: getRandomElement(rolesList),
                 departmentId: newDeptId,
+                status: 'active',
+                startDate: new Date(new Date().setFullYear(new Date().getFullYear() - getRandomInt(0, 5))).toISOString(),
             };
             newEmployees.push(newEmployee);
         }

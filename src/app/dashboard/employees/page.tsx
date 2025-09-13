@@ -79,7 +79,12 @@ export default function EmployeesPage() {
         toast({ title: "Success", description: "Employee updated successfully." });
       } else {
         // Add new employee
-        await addEmployee(employeeData as Omit<Employee, 'id'>);
+        const newEmployeeData = {
+            ...employeeData,
+            status: 'active',
+            startDate: new Date().toISOString(),
+        }
+        await addEmployee(newEmployeeData as Omit<Employee, 'id'>);
         toast({ title: "Success", description: "Employee added successfully." });
       }
       router.refresh();

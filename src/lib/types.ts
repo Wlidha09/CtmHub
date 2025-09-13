@@ -5,6 +5,8 @@ export type Employee = {
   avatarUrl: string;
   role: 'Dev' | 'Owner' | 'RH' | 'Manager' | 'Employee';
   departmentId: string;
+  status: 'active' | 'inactive';
+  startDate: string;
 };
 
 export type Department = {
