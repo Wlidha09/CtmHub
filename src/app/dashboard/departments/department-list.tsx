@@ -120,11 +120,11 @@ export function DepartmentList({
             <CardFooter>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">Change Lead</Button>
+                  <Button variant="outline" className="w-full">Edit</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Change Lead for {dept.name}</DialogTitle>
+                    <DialogTitle>Edit {dept.name}</DialogTitle>
                   </DialogHeader>
                   <div className="py-4">
                     <Select onValueChange={setSelectedLead}>
