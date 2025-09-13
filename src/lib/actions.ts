@@ -8,7 +8,8 @@ import {
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { employees, departmentData, roles } from '@/lib/data';
+import { roles } from '@/lib/data';
+import type { Employee, Department } from "@/lib/types";
 
 const schema = z.object({
   monthsWorked: z.coerce
@@ -65,9 +66,17 @@ async function ensureCollection(collectionName: string) {
     await deleteDoc(placeholderRef);
 }
 
+// Helper functions to generate random data
+const firstNames = ["Olivia", "Benjamin", "Sophia", "Liam", "Ava", "Noah", "Isabella", "Mason", "Harper", "Ethan", "Emma", "James"];
+const lastNames = ["Martinez", "Carter", "Nguyen", "Rodriguez", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Smith"];
+const deptNames = ["Engineering", "Human Resources", "Design", "Sales", "Marketing", "Product", "Support", "Finance"];
+const rolesList: Employee['role'][] = ['Employee', 'Manager', 'RH'];
+
+const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+
 export async function seedDatabase() {
   try {
-    // Ensure collections exist before batch writing
     const collectionsToEnsure = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates'];
     for (const collectionName of collectionsToEnsure) {
         await ensureCollection(collectionName);
@@ -75,26 +84,57 @@ export async function seedDatabase() {
     
     const batch = writeBatch(db);
 
-    // Seed Employees
-    employees.forEach(employee => {
+    // --- Generate and Add New Random Data ---
+    
+    // Create 1 new Department
+    const newDeptId = doc(collection(db, 'departments')).id;
+    const newDeptName = `${getRandomElement(deptNames)} #${Math.floor(Math.random() * 100)}`;
+    const newDepartment: Omit<Department, 'leadId'> = {
+        id: newDeptId,
+        name: newDeptName,
+    };
+
+    // Create 3 new Employees for this department
+    const newEmployees: Employee[] = [];
+    for (let i = 0; i < 3; i++) {
+        const newEmployeeId = doc(collection(db, 'employees')).id;
+        const firstName = getRandomElement(firstNames);
+        const lastName = getRandomElement(lastNames);
+        const newEmployee: Employee = {
+            id: newEmployeeId,
+            name: `${firstName} ${lastName}`,
+            email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@loophub.com`,
+            avatarUrl: `https://picsum.photos/seed/${newEmployeeId}/100/100`,
+            role: getRandomElement(rolesList),
+            departmentId: newDeptId,
+        };
+        newEmployees.push(newEmployee);
+    }
+
+    // Assign a lead to the new department from the new employees
+    const lead = newEmployees[0];
+    const finalNewDepartment: Department = {
+      ...newDepartment,
+      leadId: lead.id,
+    };
+    
+    // Add new department and employees to the batch
+    const deptDocRef = doc(db, 'departments', newDeptId);
+    batch.set(deptDocRef, finalNewDepartment);
+
+    newEmployees.forEach(employee => {
       const docRef = doc(db, 'employees', employee.id);
       batch.set(docRef, employee);
     });
 
-    // Seed Departments
-    departmentData.forEach(department => {
-      const docRef = doc(db, 'departments', department.id);
-      batch.set(docRef, department);
-    });
-
-    // Seed Roles
+    // Seed Roles (static, ensures they are always present)
     roles.forEach(role => {
       const docRef = doc(db, 'roles', role.name);
       batch.set(docRef, role);
     });
 
     await batch.commit();
-    return { success: true, message: 'Database seeded successfully!' };
+    return { success: true, message: 'New random data added to database!' };
   } catch (error) {
     console.error('Error seeding database:', error);
     return { success: false, message: 'Error seeding database.' };
