@@ -1,18 +1,16 @@
-import { getDepartments } from "@/lib/firebase/departments";
-import { getEmployees } from "@/lib/firebase/employees";
 import { DepartmentList } from "./department-list";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import type { Department, Employee } from "@/lib/types";
+import { departmentData, employees as employeeData } from "@/lib/data";
 
 async function getEmployee(id: string): Promise<Employee | undefined> {
-  const employees = await getEmployees();
-  return employees.find(e => e.id === id);
+  return employeeData.find(e => e.id === id);
 }
 
 export default async function DepartmentsPage() {
-  const departments = await getDepartments();
-  const employees = await getEmployees();
+  const departments: Department[] = departmentData;
+  const employees: Employee[] = employeeData;
 
   const departmentsWithLeads = await Promise.all(
     departments.map(async (dept: Department) => {

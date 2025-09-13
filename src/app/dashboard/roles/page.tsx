@@ -5,12 +5,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { getRoles } from "@/lib/firebase/roles";
+import { roles as rolesData } from "@/lib/data";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { Role } from "@/lib/types";
 
 export default async function RolesPage() {
-  const roles: Role[] = await getRoles();
+  const roles: Role[] = rolesData;
 
   const getBadgeVariant = (roleName: string) => {
     switch (roleName) {
