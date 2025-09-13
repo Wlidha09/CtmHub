@@ -1,127 +1,99 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NewLeaveRequestForm } from "./new-leave-request-form";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+// Mock data for leave requests
+const leaveRequests = [
+  {
+    id: "LR001",
+    leaveType: "Vacation",
+    startDate: "2024-08-15",
+    endDate: "2024-08-20",
+    status: "Approved",
+  },
+  {
+    id: "LR002",
+    leaveType: "Sick Leave",
+    startDate: "2024-09-01",
+    endDate: "2024-09-01",
+    status: "Pending",
+  },
+  {
+    id: "LR003",
+    leaveType: "Personal Day",
+    startDate: "2024-09-10",
+    endDate: "2024-09-10",
+    status: "Rejected",
+  },
+];
 
 export default function LeaveRequestPage() {
-  const [startDate, setStartDate] = React.useState<Date | undefined>();
-  const [endDate, setEndDate] = React.useState<Date | undefined>();
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "Approved":
+        return "default";
+      case "Pending":
+        return "secondary";
+      case "Rejected":
+        return "destructive";
+      default:
+        return "outline";
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Leave Request
-        </h1>
-        <p className="text-muted-foreground">
-          Fill out the form to submit a leave request.
-        </p>
-      </header>
+      <div className="flex items-center justify-between">
+        <header>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Leave Requests
+          </h1>
+          <p className="text-muted-foreground">
+            View your leave requests and submit new ones.
+          </p>
+        </header>
+        <NewLeaveRequestForm />
+      </div>
       <Card>
         <CardHeader>
-          <CardTitle>New Leave Request</CardTitle>
-          <CardDescription>
-            Please fill in the details below to request time off.
-          </CardDescription>
+          <CardTitle>My Requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="leave-type">Leave Type</Label>
-              <Select>
-                <SelectTrigger id="leave-type">
-                  <SelectValue placeholder="Select a leave type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vacation">Vacation</SelectItem>
-                  <SelectItem value="sick">Sick Leave</SelectItem>
-                  <SelectItem value="personal">Personal Day</SelectItem>
-                  <SelectItem value="unpaid">Unpaid Leave</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="start-date">Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="start-date"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="end-date">End Date</Label>
-                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="end-date"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !endDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      disabled={{ before: startDate }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-             <Button type="submit" className="w-full">Submit Request</Button>
-          </form>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Leave Type</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>End Date</TableHead>
+                <TableHead className="text-right">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {leaveRequests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell>{request.leaveType}</TableCell>
+                  <TableCell>{request.startDate}</TableCell>
+                  <TableCell>{request.endDate}</TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant={getStatusVariant(request.status)}>
+                      {request.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
