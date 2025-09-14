@@ -159,7 +159,7 @@ export function DepartmentList({
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {departments.map((dept) => (
         <Card key={dept.id}>
-          <CardHeader className="flex flex-row items-center gap-4">
+          <CardHeader className="flex flex-col items-center justify-center gap-4">
              <div 
                 className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-background"
                 style={{ backgroundColor: generateColor(dept.name) }}
@@ -168,7 +168,7 @@ export function DepartmentList({
             </div>
             <CardTitle>{dept.name}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm">
+          <CardContent className="text-sm text-center">
             {dept.lead ? (
                 <p className="font-semibold">{dept.lead.name}</p>
             ) : (
@@ -176,7 +176,7 @@ export function DepartmentList({
             )}
           </CardContent>
           {canManageDepartments && (
-            <CardFooter className="flex gap-2">
+            <CardFooter className="flex justify-center gap-2">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="w-full" onClick={() => handleEdit(dept)}>Edit</Button>
