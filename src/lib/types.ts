@@ -9,6 +9,7 @@ export type Employee = {
   status: 'active' | 'inactive';
   startDate: string;
   birthDate?: string;
+  leaveBalance?: number;
 };
 
 export type Department = {

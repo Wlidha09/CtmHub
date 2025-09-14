@@ -42,6 +42,7 @@ export default function EmployeesPage() {
       const formatted = employeeList.map((employee) => ({
         ...employee,
         departmentName: departmentMap.get(employee.departmentId) || "Unknown",
+        leaveBalance: employee.leaveBalance ?? 0,
       }));
       setEmployees(formatted);
     } catch (error) {
@@ -87,6 +88,7 @@ export default function EmployeesPage() {
             status: 'active',
             startDate: new Date().toISOString(),
             birthDate: new Date().toISOString(),
+            leaveBalance: 0,
         }
         await addEmployee(newEmployeeData as Omit<Employee, 'id'>);
         toast({ title: "Success", description: "Employee added successfully." });

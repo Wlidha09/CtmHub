@@ -38,6 +38,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         ...employee,
         startDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : '',
         birthDate: employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : '',
+        leaveBalance: employee.leaveBalance ?? 0,
       });
     } else {
       setFormData({
@@ -49,13 +50,17 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         status: 'active',
         startDate: new Date().toISOString().split('T')[0],
         birthDate: new Date().toISOString().split('T')[0],
+        leaveBalance: 0,
       });
     }
   }, [employee, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    setFormData(prev => ({ 
+        ...prev, 
+        [name]: type === 'number' ? parseFloat(value) : value 
+    }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -175,16 +180,31 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 />
             </div>
           </div>
-           <div className="space-y-2">
-                <Label htmlFor="birth-date">Birth Date</Label>
-                <Input
-                    id="birth-date"
-                    name="birthDate"
-                    type="date"
-                    value={formData.birthDate || ''}
-                    onChange={handleChange}
-                />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+                    <Label htmlFor="birth-date">Birth Date</Label>
+                    <Input
+                        id="birth-date"
+                        name="birthDate"
+                        type="date"
+                        value={formData.birthDate || ''}
+                        onChange={handleChange}
+                    />
             </div>
+            {employee && (
+                <div className="space-y-2">
+                    <Label htmlFor="leaveBalance">Non-Consumed Leave Days</Label>
+                    <Input
+                        id="leaveBalance"
+                        name="leaveBalance"
+                        type="number"
+                        value={formData.leaveBalance ?? ''}
+                        onChange={handleChange}
+                        placeholder="e.g., 10"
+                    />
+                </div>
+            )}
+           </div>
            <DialogFooter>
              <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>
