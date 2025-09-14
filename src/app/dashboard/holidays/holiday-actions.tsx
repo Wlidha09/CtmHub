@@ -38,7 +38,9 @@ export function HolidayActions({ onDataSynced }: { onDataSynced: () => void }) {
     setIsSyncing(false);
   };
 
-  const handleAdd = (formData: FormData) => {
+  const handleAddSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       const result = await addHoliday(formData);
       if (result.success) {
@@ -69,7 +71,7 @@ export function HolidayActions({ onDataSynced }: { onDataSynced: () => void }) {
           <DialogHeader>
             <DialogTitle>Add New Holiday</DialogTitle>
           </DialogHeader>
-          <form action={handleAdd} ref={formRef} className="space-y-4 py-4">
+          <form onSubmit={handleAddSubmit} ref={formRef} className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Holiday Name</Label>
               <Input id="name" name="name" placeholder="e.g., New Year's Day" required />

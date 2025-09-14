@@ -5,6 +5,7 @@ import {
   calculateEstimatedTimeOff,
   type CalculateEstimatedTimeOffInput,
 } from "@/ai/flows/calculate-estimated-time-off";
+import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
@@ -104,23 +105,26 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const weekendDays = allDaysInMonth.filter(isWeekend).length;
 
         const publicHolidays = holidaysForYear.filter(h => {
-            const holidayDate = parseISO(h.date);
+            const holidayDate = new Date(h.date + 'T00:00:00'); // Ensure correct parsing
             return holidayDate >= start && holidayDate <= end && h.isPaid;
         }).length;
         
         const workableDays = totalDays - weekendDays - publicHolidays;
 
-        // Fetch approved leave requests for the employee within the selected month
         const q = query(
             collection(db, 'leaveRequests'),
             where('userId', '==', employeeId),
-            where('status', '==', 'Approved'),
-            where('startDate', '<=', format(end, 'yyyy-MM-dd')),
+            where('status', '==', 'Approved')
         );
         const leaveSnapshot = await getDocs(q);
         const leaveRequests = leaveSnapshot.docs
             .map(doc => doc.data() as LeaveRequest)
-            .filter(req => parseISO(req.endDate) >= start);
+            .filter(req => {
+                const leaveStart = parseISO(req.startDate);
+                const leaveEnd = parseISO(req.endDate);
+                return leaveEnd >= start && leaveStart <= end;
+            });
+
 
         let leaveDaysTaken = 0;
         const leaveDetails: Ticket['calculation']['leaveDetails'] = [];
@@ -129,7 +133,6 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
             const leaveStart = parseISO(req.startDate);
             const leaveEnd = parseISO(req.endDate);
 
-            // Calculate the intersection of the leave period and the selected month
             const effectiveStart = max([start, leaveStart]);
             const effectiveEnd = min([end, leaveEnd]);
             
