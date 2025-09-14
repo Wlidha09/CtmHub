@@ -3,11 +3,10 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, useDayPicker, useNavigation } from "react-day-picker"
+import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { format } from "date-fns"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -17,30 +16,6 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-
-  function TodayButton() {
-    const { today, goToMonth } = useNavigation();
-    const { selected } = useDayPicker();
-
-    const handleTodayClick = () => {
-      if (today) {
-        goToMonth(today);
-      }
-    };
-
-    return (
-      <button
-        type="button"
-        onClick={handleTodayClick}
-        disabled={!today}
-        className={cn(buttonVariants({ variant: "ghost" }), "h-7 w-auto px-2 font-normal text-xs")}
-      >
-        Go to Today
-      </button>
-    );
-  }
-
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -83,11 +58,6 @@ function Calendar({
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
-      footer={
-        <div className="flex items-center justify-center pt-2">
-            <TodayButton />
-        </div>
-      }
       {...props}
     />
   )
