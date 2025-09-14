@@ -40,6 +40,7 @@ import { db } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { deleteDepartment } from "@/lib/firebase/departments";
+import { Users } from "lucide-react";
 
 type DepartmentWithLead = Department & { lead: Employee };
 
@@ -169,20 +170,12 @@ export function DepartmentList({
             </div>
             <CardTitle>{dept.name}</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-4">
+          <CardContent className="flex items-center gap-2 text-sm">
+            <Users className="w-4 h-4 text-muted-foreground" />
             {dept.lead ? (
-                <>
-                <Avatar>
-                    <AvatarImage src={dept.lead.avatarUrl} alt={dept.lead.name} data-ai-hint="person portrait"/>
-                    <AvatarFallback>{getInitials(dept.lead.name)}</AvatarFallback>
-                </Avatar>
-                <div>
-                    <p className="font-semibold">{dept.lead.name}</p>
-                    <p className="text-sm text-muted-foreground">Team Lead</p>
-                </div>
-                </>
+                <p className="font-semibold">{dept.lead.name}</p>
             ) : (
-                <p className="text-sm text-muted-foreground">No lead assigned.</p>
+                <p className="text-muted-foreground">No lead assigned.</p>
             )}
           </CardContent>
           {canManageDepartments && (
