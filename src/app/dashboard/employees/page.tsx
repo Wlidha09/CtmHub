@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -84,11 +85,16 @@ export default function EmployeesPage() {
       } else {
         // Add new employee
         const newEmployeeData = {
+            name: '',
+            email: '',
+            avatarUrl: 'https://picsum.photos/seed/new-employee/100/100',
+            role: 'Employee',
+            departmentId: '',
             ...employeeData,
             status: 'active',
             startDate: new Date().toISOString(),
             birthDate: new Date().toISOString(),
-            leaveBalance: 0,
+            leaveBalance: employeeData.leaveBalance ?? 0,
         }
         await addEmployee(newEmployeeData as Omit<Employee, 'id'>);
         toast({ title: "Success", description: "Employee added successfully." });
