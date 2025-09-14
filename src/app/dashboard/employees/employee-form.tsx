@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -193,7 +194,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
             </div>
             {employee && (
                 <div className="space-y-2">
-                    <Label htmlFor="leaveBalance">Non-Consumed Leave Days</Label>
+                    <Label htmlFor="leaveBalance">Leave Balance</Label>
                     <Input
                         id="leaveBalance"
                         name="leaveBalance"
