@@ -1,10 +1,6 @@
 
 "use server";
 
-import {
-  calculateEstimatedTimeOff,
-  type CalculateEstimatedTimeOffInput,
-} from "@/ai/flows/calculate-estimated-time-off";
 import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
@@ -25,55 +21,6 @@ import {
   format,
   parseISO,
 } from 'date-fns';
-
-const timeOffSchema = z.object({
-  monthsWorked: z.coerce
-    .number()
-    .int()
-    .positive("Months worked must be a positive number.")
-    .max(1200, "Months worked cannot exceed 100 years."),
-});
-
-type TimeOffFormState = {
-  message: string;
-  errors: Record<string, string[]> | null;
-  data: number | null;
-};
-
-export async function getEstimatedTimeOff(
-  prevState: TimeOffFormState,
-  formData: FormData
-): Promise<TimeOffFormState> {
-  const validatedFields = timeOffSchema.safeParse({
-    monthsWorked: formData.get("monthsWorked"),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      message: "Invalid input.",
-      errors: validatedFields.error.flatten().fieldErrors,
-      data: null,
-    };
-  }
-
-  try {
-    const input: CalculateEstimatedTimeOffInput = {
-      monthsWorked: validatedFields.data.monthsWorked,
-    };
-    const result = await calculateEstimatedTimeOff(input);
-    return {
-      message: "Calculation successful.",
-      errors: null,
-      data: result.estimatedTimeOff,
-    };
-  } catch (error) {
-    return {
-      message: "An error occurred during calculation. Please try again.",
-      errors: null,
-      data: null,
-    };
-  }
-}
 
 type WorkTicketResult = {
     success: boolean;

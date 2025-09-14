@@ -37,11 +37,6 @@ const navItems: NavItem[] = [
   { href: "/dashboard/departments", label: "Departments", icon: Building },
   { href: "/dashboard/roles", label: "Roles", icon: ShieldCheck, roles: ['Dev', 'Owner', 'RH'] },
   {
-    href: "/dashboard/time-off-calculator",
-    label: "Time Off Calculator",
-    icon: Calculator,
-  },
-  {
     href: "/dashboard/submit-leave",
     label: "Leave Request",
     icon: FileText,
