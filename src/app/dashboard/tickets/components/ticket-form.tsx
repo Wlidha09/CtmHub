@@ -89,9 +89,6 @@ export function TicketForm({
                 selected={selectedMonth}
                 onSelect={setSelectedMonth}
                 initialFocus
-                captionLayout="dropdown-buttons"
-                fromYear={2020}
-                toYear={new Date().getFullYear() + 2}
               />
             </PopoverContent>
           </Popover>
