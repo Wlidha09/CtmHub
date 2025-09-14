@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import type { Department } from '@/lib/types';
 
 export async function getDepartments(): Promise<Department[]> {
@@ -16,6 +16,16 @@ export async function getDepartment(id: string): Promise<Department | null> {
         return departmentSnapshot.data() as Department;
     }
     return null;
+}
+
+export async function addDepartment(department: Omit<Department, 'id'>) {
+    const newDocRef = doc(collection(db, 'departments'));
+    const newDepartment: Department = {
+        id: newDocRef.id,
+        ...department,
+    };
+    await addDoc(collection(db, 'departments'), newDepartment);
+    return newDocRef.id;
 }
 
 export async function deleteDepartment(id: string): Promise<void> {
