@@ -20,7 +20,7 @@ import { addHoliday, syncHolidays } from "@/lib/actions";
 
 export function HolidayActions({ onDataSynced }: { onDataSynced: () => void }) {
   const [isSyncing, setIsSyncing] = React.useState(false);
-  const [isAdding, setIsAdding] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -38,18 +38,18 @@ export function HolidayActions({ onDataSynced }: { onDataSynced: () => void }) {
     setIsSyncing(false);
   };
 
-  const handleAdd = async (formData: FormData) => {
-    setIsAdding(true);
-    const result = await addHoliday(formData);
-    if (result.success) {
-      toast({ title: "Success", description: result.message });
-      setIsOpen(false);
-      onDataSynced();
-      formRef.current?.reset();
-    } else {
-      toast({ variant: "destructive", title: "Error", description: result.message });
-    }
-    setIsAdding(false);
+  const handleAdd = (formData: FormData) => {
+    startTransition(async () => {
+      const result = await addHoliday(formData);
+      if (result.success) {
+        toast({ title: "Success", description: result.message });
+        setIsOpen(false);
+        onDataSynced();
+        formRef.current?.reset();
+      } else {
+        toast({ variant: "destructive", title: "Error", description: result.message });
+      }
+    });
   };
 
   return (
@@ -82,8 +82,8 @@ export function HolidayActions({ onDataSynced }: { onDataSynced: () => void }) {
               <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>
               </DialogClose>
-              <Button type="submit" disabled={isAdding}>
-                {isAdding ? "Adding..." : "Add Holiday"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Adding..." : "Add Holiday"}
               </Button>
             </DialogFooter>
           </form>
