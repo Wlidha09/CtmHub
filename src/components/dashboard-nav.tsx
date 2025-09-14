@@ -61,6 +61,7 @@ const navItems: NavItem[] = [
     href: "/dashboard/tickets",
     label: "Tickets",
     icon: Ticket,
+    roles: ['Owner', 'RH', 'Manager'],
   }
 ];
 

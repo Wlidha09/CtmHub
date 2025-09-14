@@ -30,3 +30,23 @@ export type LeaveRequest = {
   status: 'Pending' | 'Pending RH Approval' | 'Approved' | 'Rejected' | 'Cancelled' | 'Action Required';
   createdAt: Date;
 };
+
+export type Ticket = {
+  id: string;
+  employee: Employee;
+  month: string; // e.g., "July 2024"
+  calculation: {
+    totalDays: number;
+    weekendDays: number;
+    publicHolidays: number;
+    workableDays: number;
+    leaveDaysTaken: number;
+    netWorkedDays: number;
+    leaveDetails: {
+      type: LeaveRequest['leaveType'];
+      days: number;
+      startDate: string; // "MMM d"
+      endDate: string; // "MMM d"
+    }[];
+  };
+};

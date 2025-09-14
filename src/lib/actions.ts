@@ -5,17 +5,23 @@ import {
   calculateEstimatedTimeOff,
   type CalculateEstimatedTimeOffInput,
 } from "@/ai/flows/calculate-estimated-time-off";
-import {
-  calculateWorkedDays,
-  type CalculateWorkedDaysInput,
-} from "@/ai/flows/calculate-worked-days";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
-import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
 import { roles } from '@/lib/data';
-import type { Employee, Department, LeaveRequest } from "@/lib/types";
-import { addLeaveRequest, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
-import { getEmployees } from "./firebase/employees";
+import type { Employee, Department, LeaveRequest, Ticket } from "@/lib/types";
+import { addLeaveRequest, updateLeaveRequestStatus as updateStatus, getLeaveRequests as fetchLeaveRequests } from "./firebase/leave-requests";
+import { getEmployees, getEmployee } from "./firebase/employees";
+import {
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isWeekend,
+  differenceInDays,
+  max,
+  min,
+  format,
+} from 'date-fns';
 
 const timeOffSchema = z.object({
   monthsWorked: z.coerce
@@ -66,60 +72,98 @@ export async function getEstimatedTimeOff(
   }
 }
 
-const workedDaysSchema = z.object({
-    year: z.coerce.number().int().min(1900).max(2100),
-    month: z.coerce.number().int().min(1).max(12),
-    holidays: z.coerce.number().int().min(0).optional(),
-    vacationDays: z.coerce.number().int().min(0).optional(),
-    sickDays: z.coerce.number().int().min(0).optional(),
-});
+type WorkTicketResult = {
+    success: boolean;
+    message?: string;
+    data?: Ticket | null;
+}
 
-type WorkedDaysFormState = {
-  message: string;
-  errors: Record<string, string[]> | null;
-  data: number | null;
-};
+// This is a simplified version. In a real app, holidays would come from a database or a service.
+const PUBLIC_HOLIDAYS_PER_MONTH = 1;
 
-export async function getWorkedDays(
-    prevState: WorkedDaysFormState,
-    formData: FormData
-): Promise<WorkedDaysFormState> {
-    const validatedFields = workedDaysSchema.safeParse({
-        year: formData.get("year"),
-        month: formData.get("month"),
-        holidays: formData.get("holidays"),
-        vacationDays: formData.get("vacationDays"),
-        sickDays: formData.get("sickDays"),
-    });
-
-    if (!validatedFields.success) {
-        return {
-            message: "Invalid input.",
-            errors: validatedFields.error.flatten().fieldErrors,
-            data: null,
-        };
+export async function generateWorkTicket(employeeId: string, month: Date): Promise<WorkTicketResult> {
+    if (!employeeId || !month) {
+        return { success: false, message: "Employee and month are required." };
     }
 
     try {
-        const input: CalculateWorkedDaysInput = {
-            year: validatedFields.data.year,
-            month: validatedFields.data.month,
-            holidays: validatedFields.data.holidays,
-            vacationDays: validatedFields.data.vacationDays,
-            sickDays: validatedFields.data.sickDays,
+        const employee = await getEmployee(employeeId);
+        if (!employee) {
+            return { success: false, message: "Employee not found." };
+        }
+
+        const start = startOfMonth(month);
+        const end = endOfMonth(month);
+        const interval = { start, end };
+
+        const allDaysInMonth = eachDayOfInterval(interval);
+        
+        const totalDays = allDaysInMonth.length;
+        const weekendDays = allDaysInMonth.filter(isWeekend).length;
+
+        // In a real-world scenario, you would fetch holidays for the specific month.
+        // For this example, we'll use a constant.
+        const publicHolidays = PUBLIC_HOLIDAYS_PER_MONTH; 
+        
+        const workableDays = totalDays - weekendDays - publicHolidays;
+
+        // Fetch approved leave requests for the employee within the selected month
+        const q = query(
+            collection(db, 'leaveRequests'),
+            where('userId', '==', employeeId),
+            where('status', '==', 'Approved'),
+            where('startDate', '<=', format(end, 'yyyy-MM-dd')),
+        );
+        const leaveSnapshot = await getDocs(q);
+        const leaveRequests = leaveSnapshot.docs
+            .map(doc => doc.data() as LeaveRequest)
+            .filter(req => new Date(req.endDate) >= start);
+
+        let leaveDaysTaken = 0;
+        const leaveDetails: Ticket['calculation']['leaveDetails'] = [];
+
+        for (const req of leaveRequests) {
+            const leaveStart = new Date(req.startDate);
+            const leaveEnd = new Date(req.endDate);
+
+            // Calculate the intersection of the leave period and the selected month
+            const effectiveStart = max([start, leaveStart]);
+            const effectiveEnd = min([end, leaveEnd]);
+            
+            if (effectiveStart <= effectiveEnd) {
+                const daysInMonth = differenceInDays(effectiveEnd, effectiveStart) + 1;
+                leaveDaysTaken += daysInMonth;
+                leaveDetails.push({
+                    type: req.leaveType,
+                    days: daysInMonth,
+                    startDate: format(effectiveStart, 'MMM d'),
+                    endDate: format(effectiveEnd, 'MMM d'),
+                });
+            }
+        }
+        
+        const netWorkedDays = workableDays - leaveDaysTaken;
+
+        const ticket: Ticket = {
+            id: doc(collection(db, 'tickets')).id,
+            employee,
+            month: format(month, 'MMMM yyyy'),
+            calculation: {
+                totalDays,
+                weekendDays,
+                publicHolidays,
+                workableDays,
+                leaveDaysTaken,
+                netWorkedDays,
+                leaveDetails
+            },
         };
-        const result = await calculateWorkedDays(input);
-        return {
-            message: "Calculation successful.",
-            errors: null,
-            data: result.workedDays,
-        };
+
+        return { success: true, data: ticket };
+
     } catch (error) {
-        return {
-            message: "An error occurred during calculation. Please try again.",
-            errors: null,
-            data: null,
-        };
+        console.error("Error generating work ticket:", error);
+        return { success: false, message: "An internal error occurred." };
     }
 }
 
