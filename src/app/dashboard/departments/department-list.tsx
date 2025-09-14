@@ -66,6 +66,14 @@ export function DepartmentList({
     const h = hash % 360;
     return `hsl(${h}, 70%, 80%)`;
   };
+  
+  const getInitials = (name: string) => {
+    return name
+        .split(' ')
+        .map(word => word.charAt(0))
+        .join('');
+  };
+
 
   const handleEdit = (dept: Department) => {
     setDepartmentName(dept.name);
@@ -156,11 +164,11 @@ export function DepartmentList({
                 className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-background"
                 style={{ backgroundColor: generateColor(dept.name) }}
             >
-                {dept.name.charAt(0)}
+                {getInitials(dept.name)}
             </div>
             <CardTitle>{dept.name}</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-2 text-sm">
+          <CardContent className="text-sm">
             {dept.lead ? (
                 <p className="font-semibold">{dept.lead.name}</p>
             ) : (
