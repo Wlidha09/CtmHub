@@ -67,6 +67,15 @@ export function DepartmentList({
     return parts[0].substring(0, 2);
   };
   
+  const generateColor = (name: string) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = hash % 360;
+    return `hsl(${h}, 70%, 80%)`;
+  };
+
   const handleEdit = (dept: Department) => {
     setDepartmentName(dept.name);
     setSelectedLead(undefined);
@@ -151,7 +160,13 @@ export function DepartmentList({
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {departments.map((dept) => (
         <Card key={dept.id}>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center gap-4">
+             <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-background"
+                style={{ backgroundColor: generateColor(dept.name) }}
+            >
+                {dept.name.charAt(0)}
+            </div>
             <CardTitle>{dept.name}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
