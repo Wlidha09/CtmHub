@@ -84,19 +84,18 @@ export default function EmployeesPage() {
         toast({ title: "Success", description: "Employee updated successfully." });
       } else {
         // Add new employee
-        const newEmployeeData = {
-            name: '',
-            email: '',
-            avatarUrl: 'https://picsum.photos/seed/new-employee/100/100',
-            role: 'Employee',
-            departmentId: '',
-            ...employeeData,
-            status: 'active',
-            startDate: new Date().toISOString(),
-            birthDate: new Date().toISOString(),
+        const newEmployeeData: Omit<Employee, 'id'> = {
+            name: employeeData.name || '',
+            email: employeeData.email || '',
+            avatarUrl: employeeData.avatarUrl || 'https://picsum.photos/seed/new-employee/100/100',
+            role: employeeData.role || 'Employee',
+            departmentId: employeeData.departmentId || '',
+            status: employeeData.status || 'active',
+            startDate: employeeData.startDate || new Date().toISOString(),
+            birthDate: employeeData.birthDate || new Date().toISOString(),
             leaveBalance: employeeData.leaveBalance ?? 0,
-        }
-        await addEmployee(newEmployeeData as Omit<Employee, 'id'>);
+        };
+        await addEmployee(newEmployeeData);
         toast({ title: "Success", description: "Employee added successfully." });
       }
       await fetchData();
