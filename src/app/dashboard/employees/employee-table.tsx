@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type FormattedEmployee = Employee & { departmentName: string };
 
@@ -26,13 +27,16 @@ export function EmployeeTable({
   data,
   onEditEmployee,
   onToggleStatus,
+  onBulkToggleStatus,
 }: { 
   data: FormattedEmployee[],
   onEditEmployee: (employee: FormattedEmployee) => void,
   onToggleStatus: (employee: FormattedEmployee) => void,
+  onBulkToggleStatus: (employeeIds: string[], status: 'active' | 'inactive') => void;
 }) {
   const [search, setSearch] = React.useState("");
   const [showInactive, setShowInactive] = React.useState(false);
+  const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
   const { currentRole } = useCurrentRole();
   const canManageEmployees = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
@@ -62,11 +66,33 @@ export function EmployeeTable({
     }
     return parts[0].substring(0, 2);
   };
+  
+  React.useEffect(() => {
+    setSelectedRows([]);
+  }, [search, showInactive]);
+  
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedRows(filteredData.map(e => e.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleRowSelect = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRows(prev => [...prev, id]);
+    } else {
+      setSelectedRows(prev => prev.filter(rowId => rowId !== id));
+    }
+  };
+
+  const isAllSelected = selectedRows.length > 0 && selectedRows.length === filteredData.length;
 
   return (
     <Card>
-      <div className="p-4 border-b flex items-center justify-between gap-4">
-        <div className="relative flex-1">
+      <div className="p-4 border-b flex items-center justify-between gap-4 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
@@ -76,6 +102,19 @@ export function EmployeeTable({
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        {canManageEmployees && selectedRows.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{selectedRows.length} selected</span>
+            <Button size="sm" onClick={() => onBulkToggleStatus(selectedRows, 'active')}>
+              <UserCheck className="mr-2 h-4 w-4"/>
+              Activate
+            </Button>
+             <Button size="sm" variant="destructive" onClick={() => onBulkToggleStatus(selectedRows, 'inactive')}>
+              <UserX className="mr-2 h-4 w-4"/>
+              Deactivate
+            </Button>
+          </div>
+        )}
         <div className="flex items-center space-x-2">
           <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
           <Label htmlFor="show-inactive">Show Inactive</Label>
@@ -85,6 +124,15 @@ export function EmployeeTable({
         <Table>
           <TableHeader>
             <TableRow>
+              {canManageEmployees && (
+                <TableHead padding="checkbox" className="w-[48px]">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+              )}
               <TableHead>Employee</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Role</TableHead>
@@ -96,7 +144,16 @@ export function EmployeeTable({
           <TableBody>
             {filteredData.length > 0 ? (
               filteredData.map((employee) => (
-                <TableRow key={employee.id}>
+                <TableRow key={employee.id} data-state={selectedRows.includes(employee.id) && "selected"}>
+                  {canManageEmployees && (
+                     <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedRows.includes(employee.id)}
+                        onCheckedChange={(checked) => handleRowSelect(employee.id, !!checked)}
+                        aria-label="Select row"
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
@@ -130,7 +187,7 @@ export function EmployeeTable({
                         onClick={() => onToggleStatus(employee)}
                       >
                         {(employee.status || 'active') === 'active' ? <UserX className="mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
-                        {(employee.status || 'active') === 'active' ? 'Deactivate' : 'Active'}
+                        {(employee.status || 'active') === 'active' ? 'Deactivate' : 'Activate'}
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}>
                         <Edit className="w-4 h-4" />
@@ -142,7 +199,7 @@ export function EmployeeTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={canManageEmployees ? 6 : 5} className="text-center h-24">
+                <TableCell colSpan={canManageEmployees ? 7 : 5} className="text-center h-24">
                   No employees found.
                 </TableCell>
               </TableRow>

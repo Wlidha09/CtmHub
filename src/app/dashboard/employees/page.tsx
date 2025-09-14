@@ -11,6 +11,8 @@ import { getEmployees, addEmployee, updateEmployee } from "@/lib/firebase/employ
 import { getDepartments } from "@/lib/firebase/departments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { writeBatch, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 type FormattedEmployee = Employee & { departmentName: string };
 
@@ -117,6 +119,29 @@ export default function EmployeesPage() {
       });
     }
   };
+
+  const handleBulkToggleStatus = async (employeeIds: string[], status: 'active' | 'inactive') => {
+    if (employeeIds.length === 0) return;
+    try {
+        const batch = writeBatch(db);
+        employeeIds.forEach(id => {
+            const employeeRef = doc(db, 'employees', id);
+            batch.update(employeeRef, { status });
+        });
+        await batch.commit();
+        toast({
+            title: 'Bulk Update Successful',
+            description: `${employeeIds.length} employee(s) have been set to ${status}.`
+        });
+        await fetchData();
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Bulk Update Failed",
+            description: "An error occurred while updating employee statuses.",
+        });
+    }
+  };
   
   return (
     <div className="flex flex-col gap-6">
@@ -143,6 +168,7 @@ export default function EmployeesPage() {
           data={employees} 
           onEditEmployee={handleEditEmployee}
           onToggleStatus={handleToggleStatus}
+          onBulkToggleStatus={handleBulkToggleStatus}
         />
       )}
 
