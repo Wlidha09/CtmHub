@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import type { Employee } from "@/lib/types";
-import { Search, Edit } from "lucide-react";
+import { Search, Edit, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { Switch } from "@/components/ui/switch";
@@ -25,9 +25,11 @@ type FormattedEmployee = Employee & { departmentName: string };
 export function EmployeeTable({ 
   data,
   onEditEmployee,
+  onToggleStatus,
 }: { 
   data: FormattedEmployee[],
-  onEditEmployee: (employee: FormattedEmployee) => void 
+  onEditEmployee: (employee: FormattedEmployee) => void,
+  onToggleStatus: (employee: FormattedEmployee) => void,
 }) {
   const [search, setSearch] = React.useState("");
   const [showInactive, setShowInactive] = React.useState(false);
@@ -121,7 +123,15 @@ export function EmployeeTable({
                   </TableCell>
                   <TableCell>{employee.email}</TableCell>
                   {canManageEmployees && (
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
+                       <Button 
+                        size="sm" 
+                        variant={(employee.status || 'active') === 'active' ? 'destructive' : 'default'}
+                        onClick={() => onToggleStatus(employee)}
+                      >
+                        {(employee.status || 'active') === 'active' ? <UserX className="mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
+                        {(employee.status || 'active') === 'active' ? 'Deactivate' : 'Activate'}
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}>
                         <Edit className="w-4 h-4" />
                         <span className="sr-only">Edit</span>

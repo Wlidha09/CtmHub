@@ -26,35 +26,36 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = React.useState<FormattedEmployee | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      try {
-        const [employeeList, departmentList] = await Promise.all([
-          getEmployees(),
-          getDepartments(),
-        ]);
+  const fetchData = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [employeeList, departmentList] = await Promise.all([
+        getEmployees(),
+        getDepartments(),
+      ]);
 
-        setDepartments(departmentList);
-        const departmentMap = new Map(departmentList.map(d => [d.id, d.name]));
-        
-        const formatted = employeeList.map((employee) => ({
-          ...employee,
-          departmentName: departmentMap.get(employee.departmentId) || "Unknown",
-        }));
-        setEmployees(formatted);
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Error fetching data",
-          description: "Could not load employees and departments.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      setDepartments(departmentList);
+      const departmentMap = new Map(departmentList.map(d => [d.id, d.name]));
+      
+      const formatted = employeeList.map((employee) => ({
+        ...employee,
+        departmentName: departmentMap.get(employee.departmentId) || "Unknown",
+      }));
+      setEmployees(formatted);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching data",
+        description: "Could not load employees and departments.",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    fetchData();
   }, [toast]);
+
+  React.useEffect(() => {
+    fetchData();
+  }, [fetchData]);
   
   const handleAddEmployee = () => {
     setEditingEmployee(null);
@@ -87,15 +88,7 @@ export default function EmployeesPage() {
         await addEmployee(newEmployeeData as Omit<Employee, 'id'>);
         toast({ title: "Success", description: "Employee added successfully." });
       }
-      router.refresh();
-      const updatedEmployees = await getEmployees();
-      const departmentMap = new Map(departments.map(d => [d.id, d.name]));
-      const formatted = updatedEmployees.map((employee) => ({
-        ...employee,
-        departmentName: departmentMap.get(employee.departmentId) || "Unknown",
-      }));
-      setEmployees(formatted);
-
+      await fetchData();
     } catch (error) {
        toast({
         variant: "destructive",
@@ -106,6 +99,24 @@ export default function EmployeesPage() {
       handleFormClose();
     }
   }
+
+  const handleToggleStatus = async (employee: FormattedEmployee) => {
+    const newStatus = (employee.status || 'active') === 'active' ? 'inactive' : 'active';
+    try {
+      await updateEmployee(employee.id, { status: newStatus });
+      toast({
+        title: "Status Updated",
+        description: `${employee.name}'s status has been updated to ${newStatus}.`,
+      });
+      await fetchData(); // Refresh data
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update employee status.",
+      });
+    }
+  };
   
   return (
     <div className="flex flex-col gap-6">
@@ -130,7 +141,8 @@ export default function EmployeesPage() {
       ) : (
         <EmployeeTable 
           data={employees} 
-          onEditEmployee={handleEditEmployee} 
+          onEditEmployee={handleEditEmployee}
+          onToggleStatus={handleToggleStatus}
         />
       )}
 
