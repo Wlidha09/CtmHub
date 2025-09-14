@@ -108,7 +108,9 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
 
         const publicHolidays = holidaysForYear.filter(h => {
             const holidayDate = new Date(h.date);
-            return holidayDate >= start && holidayDate <= end && h.isPaid;
+            // We need to account for timezone differences by comparing dates without time.
+            const holidayUTC = new Date(Date.UTC(holidayDate.getFullYear(), holidayDate.getMonth(), holidayDate.getDate()));
+            return holidayUTC >= start && holidayUTC <= end && h.isPaid;
         }).length;
         
         const workableDays = totalDays - weekendDays - publicHolidays;
