@@ -130,7 +130,7 @@ export function EmployeeTable({
                         onClick={() => onToggleStatus(employee)}
                       >
                         {(employee.status || 'active') === 'active' ? <UserX className="mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
-                        {(employee.status || 'active') === 'active' ? 'Deactivate' : 'Activate'}
+                        {(employee.status || 'active') === 'active' ? 'Deactivate' : 'Active'}
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}>
                         <Edit className="w-4 h-4" />
