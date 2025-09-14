@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -124,20 +125,22 @@ export default function DashboardPage() {
           </Card>
         ) : (
           <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium">
-                  Total Employees
-                </CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalEmployees}</div>}
-                <p className="text-xs text-muted-foreground">
-                  Currently active members in the organization.
-                </p>
-              </CardContent>
-            </Card>
+            {currentRole === "RH" && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">
+                      Total Employees
+                    </CardTitle>
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalEmployees}</div>}
+                    <p className="text-xs text-muted-foreground">
+                      Currently active members in the organization.
+                    </p>
+                  </CardContent>
+                </Card>
+            )}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">
