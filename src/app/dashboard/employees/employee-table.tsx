@@ -166,9 +166,15 @@ export function EmployeeTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                     <Badge variant={(employee.status || 'active') === 'active' ? 'secondary' : 'outline'}>
-                        {employee.status || 'active'}
-                    </Badge>
+                     <Button
+                        variant={(employee.status || 'active') === 'active' ? 'outline' : 'secondary'}
+                        size="sm"
+                        onClick={() => onToggleStatus(employee)}
+                        className="w-28"
+                     >
+                        {(employee.status || 'active') === 'active' ? <UserX className="mr-2 h-4 w-4 text-destructive" /> : <UserCheck className="mr-2 h-4 w-4 text-green-500" />}
+                        {(employee.status || 'active') === 'active' ? 'Inactive' : 'Active'}
+                     </Button>
                   </TableCell>
                   <TableCell>
                     <Badge variant={employee.role === 'Admin' ? 'destructive' : employee.role === 'Manager' ? 'secondary' : 'outline'}>
@@ -181,14 +187,6 @@ export function EmployeeTable({
                   <TableCell>{employee.email}</TableCell>
                   {canManageEmployees && (
                     <TableCell className="text-right space-x-2">
-                       <Button 
-                        size="sm" 
-                        variant={(employee.status || 'active') === 'active' ? 'destructive' : 'default'}
-                        onClick={() => onToggleStatus(employee)}
-                      >
-                        {(employee.status || 'active') === 'active' ? <UserX className="mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
-                        {(employee.status || 'active') === 'active' ? 'Deactivate' : 'Activate'}
-                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}>
                         <Edit className="w-4 h-4" />
                         <span className="sr-only">Edit</span>
