@@ -9,9 +9,11 @@ import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
 import { roles } from '@/lib/data';
-import type { Employee, Department, LeaveRequest, Ticket } from "@/lib/types";
-import { addLeaveRequest, updateLeaveRequestStatus as updateStatus, getLeaveRequests as fetchLeaveRequests } from "./firebase/leave-requests";
+import type { Employee, Department, LeaveRequest, Ticket, Holiday } from "@/lib/types";
+import { addLeaveRequest, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";
+import { getHolidaysByYear, addHoliday as addHolidayFB, updateHoliday as updateHolidayFB } from "./firebase/holidays";
+import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
 import {
   startOfMonth,
   endOfMonth,
@@ -91,6 +93,9 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         if (!employee) {
             return { success: false, message: "Employee not found." };
         }
+        
+        const year = month.getFullYear();
+        const holidaysForYear = await getHolidaysByYear(year.toString());
 
         const start = startOfMonth(month);
         const end = endOfMonth(month);
@@ -101,9 +106,10 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const totalDays = allDaysInMonth.length;
         const weekendDays = allDaysInMonth.filter(isWeekend).length;
 
-        // In a real-world scenario, you would fetch holidays for the specific month.
-        // For this example, we'll use a constant.
-        const publicHolidays = PUBLIC_HOLIDAYS_PER_MONTH; 
+        const publicHolidays = holidaysForYear.filter(h => {
+            const holidayDate = new Date(h.date);
+            return holidayDate >= start && holidayDate <= end && h.isPaid;
+        }).length;
         
         const workableDays = totalDays - weekendDays - publicHolidays;
 
@@ -297,5 +303,82 @@ export async function updateLeaveRequestStatus(id: string, status: LeaveRequest[
     } catch (error) {
         console.error('Error updating leave request status:', error);
         return { success: false, message: 'Failed to update leave request status.' };
+    }
+}
+
+export async function syncHolidays(year: number) {
+    try {
+        const result = await syncHolidaysFlow({ year });
+        if (!result.holidays) {
+            return { success: false, message: "AI failed to generate holidays." };
+        }
+
+        const existingHolidays = await getHolidaysByYear(year.toString());
+        const existingHolidayDates = new Set(existingHolidays.map(h => h.date));
+        
+        const batch = writeBatch(db);
+        let newHolidaysCount = 0;
+
+        for (const holiday of result.holidays) {
+            // Check for duplicates before adding
+            if (!existingHolidayDates.has(holiday.date)) {
+                const newHolidayRef = doc(collection(db, 'holidays'));
+                const newHoliday: Holiday = {
+                    id: newHolidayRef.id,
+                    name: holiday.name,
+                    date: holiday.date, // "YYYY-MM-DD"
+                    isPaid: true, // Default to paid
+                };
+                batch.set(newHolidayRef, newHoliday);
+                newHolidaysCount++;
+            }
+        }
+
+        if (newHolidaysCount > 0) {
+            await batch.commit();
+            return { success: true, message: `${newHolidaysCount} new holidays synced successfully.` };
+        } else {
+            return { success: true, message: "Holiday list is already up to date." };
+        }
+
+    } catch (error) {
+        console.error('Error syncing holidays:', error);
+        return { success: false, message: 'An internal error occurred during holiday sync.' };
+    }
+}
+
+const holidaySchema = z.object({
+  name: z.string().min(3, "Holiday name must be at least 3 characters."),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format."),
+});
+
+export async function addHoliday(formData: FormData) {
+    const validatedFields = holidaySchema.safeParse({
+        name: formData.get("name"),
+        date: formData.get("date"),
+    });
+
+    if (!validatedFields.success) {
+        return { success: false, message: "Invalid input.", errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    try {
+        await addHolidayFB({
+            name: validatedFields.data.name,
+            date: validatedFields.data.date,
+            isPaid: true, // Default new holidays to paid
+        });
+        return { success: true, message: "Holiday added successfully." };
+    } catch (error) {
+        return { success: false, message: "Failed to add holiday." };
+    }
+}
+
+export async function updateHoliday(id: string, data: Partial<Holiday>) {
+    try {
+        await updateHolidayFB(id, data);
+        return { success: true, message: "Holiday updated." };
+    } catch (error) {
+        return { success: false, message: "Failed to update holiday." };
     }
 }

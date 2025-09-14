@@ -1,3 +1,4 @@
+
 export type Employee = {
   id: string;
   name: string;
@@ -50,3 +51,10 @@ export type Ticket = {
     }[];
   };
 };
+
+export type Holiday = {
+    id: string;
+    name: string;
+    date: string; // YYYY-MM-DD
+    isPaid: boolean;
+}

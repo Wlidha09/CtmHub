@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -13,6 +14,7 @@ import {
   Briefcase,
   ShieldAlert,
   Ticket,
+  CalendarCheck,
 } from "lucide-react";
 
 import {
@@ -50,6 +52,12 @@ const navItems: NavItem[] = [
     label: "Manage Leave",
     icon: ShieldAlert,
     roles: ['Owner', 'RH']
+  },
+  {
+    href: "/dashboard/holidays",
+    label: "Holidays",
+    icon: CalendarCheck,
+    roles: ['Owner', 'RH', 'Manager'],
   },
   {
     href: "/dashboard/candidates",
