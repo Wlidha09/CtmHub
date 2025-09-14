@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   FileClock,
   FileText,
+  Plane,
 } from "lucide-react";
 import {
   Card,
@@ -22,6 +23,7 @@ import { getEmployees } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import { getLeaveRequests } from "@/lib/firebase/leave-requests";
 import type { LeaveRequest } from "@/lib/types";
+import { differenceInDays, parseISO } from "date-fns";
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -76,6 +78,18 @@ export default function DashboardPage() {
     (req) => req.status === "Pending" || req.status === "Pending RH Approval"
   ).length;
 
+  const totalLeaveDaysCumulated = leaveRequests.reduce((acc, req) => {
+    if (req.status === 'Approved') {
+        const startDate = parseISO(req.startDate);
+        const endDate = parseISO(req.endDate);
+        if (startDate && endDate) {
+            return acc + differenceInDays(endDate, startDate) + 1;
+        }
+    }
+    return acc;
+  }, 0);
+
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
@@ -89,7 +103,7 @@ export default function DashboardPage() {
         </div>
         <SeedButton />
       </header>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {currentRole === "Employee" ? (
           <Card className="col-span-full">
             <CardHeader>
@@ -182,6 +196,18 @@ export default function DashboardPage() {
                   Leave requests awaiting approval.
                 </p>
               </CardContent>
+            </Card>
+             <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">Total Leave Days</CardTitle>
+                    <Plane className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalLeaveDaysCumulated}</div>}
+                    <p className="text-xs text-muted-foreground">
+                        Approved leave days for the current year.
+                    </p>
+                </CardContent>
             </Card>
           </>
         )}
