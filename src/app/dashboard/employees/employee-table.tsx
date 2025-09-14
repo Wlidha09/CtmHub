@@ -134,10 +134,10 @@ export function EmployeeTable({
                 </TableHead>
               )}
               <TableHead>Employee</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Role</TableHead>
               <TableHead className="hidden md:table-cell">Department</TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>Status</TableHead>
               {canManageEmployees && <TableHead className="text-right">Actions:</TableHead>}
             </TableRow>
           </TableHeader>
@@ -166,17 +166,6 @@ export function EmployeeTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                     <Button
-                        variant={(employee.status || 'active') === 'active' ? 'outline' : 'secondary'}
-                        size="sm"
-                        onClick={() => onToggleStatus(employee)}
-                        className="w-28"
-                     >
-                        {(employee.status || 'active') === 'active' ? <UserX className="mr-2 h-4 w-4 text-destructive" /> : <UserCheck className="mr-2 h-4 w-4 text-green-500" />}
-                        {(employee.status || 'active') === 'active' ? 'Inactive' : 'Active'}
-                     </Button>
-                  </TableCell>
-                  <TableCell>
                     <Badge variant={employee.role === 'Admin' ? 'destructive' : employee.role === 'Manager' ? 'secondary' : 'outline'}>
                         {employee.role}
                     </Badge>
@@ -185,6 +174,15 @@ export function EmployeeTable({
                     {employee.departmentName}
                   </TableCell>
                   <TableCell>{employee.email}</TableCell>
+                   <TableCell>
+                      <Badge 
+                        variant={(employee.status || 'active') === 'active' ? 'default' : 'secondary'}
+                        className="cursor-pointer"
+                        onClick={() => onToggleStatus(employee)}
+                      >
+                        {(employee.status || 'active') === 'active' ? 'Active' : 'Inactive'}
+                      </Badge>
+                  </TableCell>
                   {canManageEmployees && (
                     <TableCell className="text-right space-x-2">
                       <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}>
