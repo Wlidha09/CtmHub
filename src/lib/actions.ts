@@ -13,7 +13,6 @@ import type { Employee, Department, LeaveRequest, Ticket, Holiday } from "@/lib/
 import { addLeaveRequest as addLeaveRequestFB, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";
 import { getHolidaysByYear, addHoliday as addHolidayFB, updateHoliday as updateHolidayFB } from "./firebase/holidays";
-import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
 import {
   startOfMonth,
   endOfMonth,
