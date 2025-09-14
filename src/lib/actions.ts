@@ -320,16 +320,15 @@ export async function syncHolidays(year: number) {
         let newHolidaysCount = 0;
 
         for (const holiday of result.holidays) {
-            // Check for duplicates before adding
             if (!existingHolidayDates.has(holiday.date)) {
                 const newHolidayRef = doc(collection(db, 'holidays'));
-                // Note: The addHolidayFB function creates the ID, so we pass Omit<Holiday, 'id'>
-                const newHoliday: Omit<Holiday, 'id'> = {
+                const newHoliday: Holiday = {
+                    id: newHolidayRef.id,
                     name: holiday.name,
-                    date: holiday.date, // "YYYY-MM-DD"
-                    isPaid: true, // Default to paid
+                    date: holiday.date,
+                    isPaid: true, 
                 };
-                batch.set(newHolidayRef, {id: newHolidayRef.id, ...newHoliday});
+                batch.set(newHolidayRef, newHoliday);
                 newHolidaysCount++;
             }
         }
