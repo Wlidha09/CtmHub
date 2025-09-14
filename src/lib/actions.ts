@@ -5,6 +5,10 @@ import {
   calculateEstimatedTimeOff,
   type CalculateEstimatedTimeOffInput,
 } from "@/ai/flows/calculate-estimated-time-off";
+import {
+  calculateWorkedDays,
+  type CalculateWorkedDaysInput,
+} from "@/ai/flows/calculate-worked-days";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
@@ -13,7 +17,7 @@ import type { Employee, Department, LeaveRequest } from "@/lib/types";
 import { addLeaveRequest, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees } from "./firebase/employees";
 
-const schema = z.object({
+const timeOffSchema = z.object({
   monthsWorked: z.coerce
     .number()
     .int()
@@ -21,17 +25,17 @@ const schema = z.object({
     .max(1200, "Months worked cannot exceed 100 years."),
 });
 
-type FormState = {
+type TimeOffFormState = {
   message: string;
   errors: Record<string, string[]> | null;
   data: number | null;
 };
 
 export async function getEstimatedTimeOff(
-  prevState: FormState,
+  prevState: TimeOffFormState,
   formData: FormData
-): Promise<FormState> {
-  const validatedFields = schema.safeParse({
+): Promise<TimeOffFormState> {
+  const validatedFields = timeOffSchema.safeParse({
     monthsWorked: formData.get("monthsWorked"),
   });
 
@@ -61,6 +65,64 @@ export async function getEstimatedTimeOff(
     };
   }
 }
+
+const workedDaysSchema = z.object({
+    year: z.coerce.number().int().min(1900).max(2100),
+    month: z.coerce.number().int().min(1).max(12),
+    holidays: z.coerce.number().int().min(0).optional(),
+    vacationDays: z.coerce.number().int().min(0).optional(),
+    sickDays: z.coerce.number().int().min(0).optional(),
+});
+
+type WorkedDaysFormState = {
+  message: string;
+  errors: Record<string, string[]> | null;
+  data: number | null;
+};
+
+export async function getWorkedDays(
+    prevState: WorkedDaysFormState,
+    formData: FormData
+): Promise<WorkedDaysFormState> {
+    const validatedFields = workedDaysSchema.safeParse({
+        year: formData.get("year"),
+        month: formData.get("month"),
+        holidays: formData.get("holidays"),
+        vacationDays: formData.get("vacationDays"),
+        sickDays: formData.get("sickDays"),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            message: "Invalid input.",
+            errors: validatedFields.error.flatten().fieldErrors,
+            data: null,
+        };
+    }
+
+    try {
+        const input: CalculateWorkedDaysInput = {
+            year: validatedFields.data.year,
+            month: validatedFields.data.month,
+            holidays: validatedFields.data.holidays,
+            vacationDays: validatedFields.data.vacationDays,
+            sickDays: validatedFields.data.sickDays,
+        };
+        const result = await calculateWorkedDays(input);
+        return {
+            message: "Calculation successful.",
+            errors: null,
+            data: result.workedDays,
+        };
+    } catch (error) {
+        return {
+            message: "An error occurred during calculation. Please try again.",
+            errors: null,
+            data: null,
+        };
+    }
+}
+
 
 async function ensureCollection(collectionName: string) {
     const placeholderRef = doc(db, collectionName, '_placeholder');

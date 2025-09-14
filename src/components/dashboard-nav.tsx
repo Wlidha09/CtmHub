@@ -12,6 +12,7 @@ import {
   FileText,
   Briefcase,
   ShieldAlert,
+  Ticket,
 } from "lucide-react";
 
 import {
@@ -55,6 +56,11 @@ const navItems: NavItem[] = [
     label: "Candidates",
     icon: Briefcase,
     roles: ['Owner', 'RH', 'Manager']
+  },
+  {
+    href: "/dashboard/tickets",
+    label: "Tickets",
+    icon: Ticket,
   }
 ];
 
