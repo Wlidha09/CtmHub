@@ -185,6 +185,9 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                         mode="single"
                         selected={formData.startDate ? new Date(formData.startDate) : undefined}
                         onSelect={(date) => handleDateChange("startDate", date)}
+                        captionLayout="dropdown-buttons"
+                        fromYear={2010}
+                        toYear={new Date().getFullYear()}
                         initialFocus
                         />
                     </PopoverContent>
