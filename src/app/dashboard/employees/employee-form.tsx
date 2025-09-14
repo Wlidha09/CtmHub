@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Employee, Department } from "@/lib/types";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -39,7 +34,11 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
 
   React.useEffect(() => {
     if (employee) {
-      setFormData(employee);
+      setFormData({
+        ...employee,
+        startDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : '',
+        birthDate: employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : '',
+      });
     } else {
       setFormData({
         name: '',
@@ -48,8 +47,8 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         role: 'Employee',
         departmentId: '',
         status: 'active',
-        startDate: new Date().toISOString(),
-        birthDate: new Date().toISOString(),
+        startDate: new Date().toISOString().split('T')[0],
+        birthDate: new Date().toISOString().split('T')[0],
       });
     }
   }, [employee, isOpen]);
@@ -63,19 +62,20 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDateChange = (name: 'startDate' | 'birthDate', date: Date | undefined) => {
-    if (date) {
-        setFormData(prev => ({ ...prev, [name]: date.toISOString() }));
-    }
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.role || !formData.departmentId) {
       alert("Please fill out all fields.");
       return;
     }
-    onSave(formData);
+    
+    // Convert date strings back to ISO strings before saving
+    const dataToSave = {
+        ...formData,
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
+        birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : undefined,
+    };
+    onSave(dataToSave);
   };
 
   return (
@@ -164,64 +164,26 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     </SelectContent>
                 </Select>
             </div>
-            <div className="space-y-2">
+             <div className="space-y-2">
                 <Label htmlFor="start-date">Start Date</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                        id="start-date"
-                        variant={"outline"}
-                        className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !formData.startDate && "text-muted-foreground"
-                        )}
-                        >
-                        <CalendarIcon className="w-4 h-4 mr-2" />
-                        {formData.startDate ? format(new Date(formData.startDate), "PPP") : <span>Pick a date</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar
-                        mode="single"
-                        selected={formData.startDate ? new Date(formData.startDate) : undefined}
-                        onSelect={(date) => handleDateChange("startDate", date)}
-                        captionLayout="dropdown-buttons"
-                        fromYear={2010}
-                        toYear={new Date().getFullYear()}
-                        initialFocus
-                        />
-                    </PopoverContent>
-                </Popover>
+                <Input
+                    id="start-date"
+                    name="startDate"
+                    type="date"
+                    value={formData.startDate || ''}
+                    onChange={handleChange}
+                />
             </div>
           </div>
            <div className="space-y-2">
                 <Label htmlFor="birth-date">Birth Date</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                        id="birth-date"
-                        variant={"outline"}
-                        className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !formData.birthDate && "text-muted-foreground"
-                        )}
-                        >
-                        <CalendarIcon className="w-4 h-4 mr-2" />
-                        {formData.birthDate ? format(new Date(formData.birthDate), "PPP") : <span>Pick a date</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar
-                        mode="single"
-                        selected={formData.birthDate ? new Date(formData.birthDate) : undefined}
-                        onSelect={(date) => handleDateChange("birthDate", date)}
-                        captionLayout="dropdown-buttons"
-                        fromYear={1950}
-                        toYear={new Date().getFullYear()}
-                        initialFocus
-                        />
-                    </PopoverContent>
-                </Popover>
+                <Input
+                    id="birth-date"
+                    name="birthDate"
+                    type="date"
+                    value={formData.birthDate || ''}
+                    onChange={handleChange}
+                />
             </div>
            <DialogFooter>
              <DialogClose asChild>
