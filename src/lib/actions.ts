@@ -180,6 +180,7 @@ export async function seedDatabase() {
                 status: getRandomElement(statuses),
                 startDate: new Date(new Date().setFullYear(new Date().getFullYear() - getRandomInt(0, 5))).toISOString(),
                 birthDate: new Date(new Date().setFullYear(new Date().getFullYear() - getRandomInt(20, 60))).toISOString(),
+                leaveBalance: getRandomInt(0, 21),
             };
             newEmployees.push(newEmployee);
         }
@@ -226,13 +227,14 @@ export async function seedDatabase() {
 
     await batch.commit();
 
-    // --- Update all existing employees with a random status ---
+    // --- Update all existing employees with a random status and leave balance ---
     const updateBatch = writeBatch(db);
     const allEmployees = await getEmployees();
     allEmployees.forEach(employee => {
         const empRef = doc(db, "employees", employee.id);
         const randomStatus = getRandomElement(statuses);
-        updateBatch.update(empRef, { status: randomStatus });
+        const randomLeaveBalance = getRandomInt(0, 21);
+        updateBatch.update(empRef, { status: randomStatus, leaveBalance: randomLeaveBalance });
     });
     await updateBatch.commit();
     
