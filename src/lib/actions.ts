@@ -105,7 +105,7 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const weekendDays = allDaysInMonth.filter(isWeekend).length;
 
         const publicHolidays = holidaysForYear.filter(h => {
-            const holidayDate = new Date(h.date + 'T00:00:00'); // Ensure correct parsing
+            const holidayDate = parseISO(h.date);
             return holidayDate >= start && holidayDate <= end && h.isPaid;
         }).length;
         
