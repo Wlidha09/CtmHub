@@ -18,7 +18,7 @@ export default function DepartmentsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
-  const canManageDepartments = currentRole === 'Owner' || currentRole === 'RH';
+  const canManageDepartments = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
   React.useEffect(() => {
     async function fetchData() {

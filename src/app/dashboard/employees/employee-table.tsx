@@ -32,7 +32,7 @@ export function EmployeeTable({
   const [search, setSearch] = React.useState("");
   const [showInactive, setShowInactive] = React.useState(false);
   const { currentRole } = useCurrentRole();
-  const canManageEmployees = currentRole === 'Owner' || currentRole === 'RH';
+  const canManageEmployees = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
   const filteredData = React.useMemo(() => {
     return data.filter((employee) => {

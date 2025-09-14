@@ -57,7 +57,7 @@ export function DepartmentList({
   const { toast } = useToast();
   const router = useRouter();
   const { currentRole } = useCurrentRole();
-  const canManageDepartments = currentRole === 'Owner' || currentRole === 'RH';
+  const canManageDepartments = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
   const getInitials = (name: string) => {
     const parts = name.split(" ");

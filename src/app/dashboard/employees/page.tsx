@@ -16,7 +16,7 @@ type FormattedEmployee = Employee & { departmentName: string };
 
 export default function EmployeesPage() {
   const { currentRole } = useCurrentRole();
-  const canManageEmployees = currentRole === 'Owner' || currentRole === 'RH';
+  const canManageEmployees = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
   const { toast } = useToast();
   const router = useRouter();
 
