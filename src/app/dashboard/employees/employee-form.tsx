@@ -49,6 +49,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         departmentId: '',
         status: 'active',
         startDate: new Date().toISOString(),
+        birthDate: new Date().toISOString(),
       });
     }
   }, [employee, isOpen]);
@@ -62,9 +63,9 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDateChange = (date: Date | undefined) => {
+  const handleDateChange = (name: 'startDate' | 'birthDate', date: Date | undefined) => {
     if (date) {
-        setFormData(prev => ({ ...prev, startDate: date.toISOString() }));
+        setFormData(prev => ({ ...prev, [name]: date.toISOString() }));
     }
   }
 
@@ -183,13 +184,42 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                         <Calendar
                         mode="single"
                         selected={formData.startDate ? new Date(formData.startDate) : undefined}
-                        onSelect={handleDateChange}
+                        onSelect={(date) => handleDateChange("startDate", date)}
                         initialFocus
                         />
                     </PopoverContent>
                 </Popover>
             </div>
           </div>
+           <div className="space-y-2">
+                <Label htmlFor="birth-date">Birth Date</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        id="birth-date"
+                        variant={"outline"}
+                        className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.birthDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="w-4 h-4 mr-2" />
+                        {formData.birthDate ? format(new Date(formData.birthDate), "PPP") : <span>Pick a date</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                        mode="single"
+                        selected={formData.birthDate ? new Date(formData.birthDate) : undefined}
+                        onSelect={(date) => handleDateChange("birthDate", date)}
+                        captionLayout="dropdown-buttons"
+                        fromYear={1950}
+                        toYear={new Date().getFullYear()}
+                        initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
            <DialogFooter>
              <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>

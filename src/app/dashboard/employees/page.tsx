@@ -86,6 +86,7 @@ export default function EmployeesPage() {
             ...employeeData,
             status: 'active',
             startDate: new Date().toISOString(),
+            birthDate: new Date().toISOString(),
         }
         await addEmployee(newEmployeeData as Omit<Employee, 'id'>);
         toast({ title: "Success", description: "Employee added successfully." });
@@ -143,6 +144,30 @@ export default function EmployeesPage() {
     }
   };
   
+  if (isLoading) {
+    return (
+       <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+            <header>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    Employee Directory
+                </h1>
+                <p className="text-muted-foreground">
+                    Browse and manage all employees in your organization.
+                </p>
+            </header>
+            {canManageEmployees && (
+                <Button onClick={handleAddEmployee}>
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    Add Employee
+                </Button>
+            )}
+        </div>
+        <div>Loading...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -161,16 +186,13 @@ export default function EmployeesPage() {
           </Button>
         )}
       </div>
-       {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        <EmployeeTable 
-          data={employees} 
-          onEditEmployee={handleEditEmployee}
-          onToggleStatus={handleToggleStatus}
-          onBulkToggleStatus={handleBulkToggleStatus}
-        />
-      )}
+      
+      <EmployeeTable 
+        data={employees} 
+        onEditEmployee={handleEditEmployee}
+        onToggleStatus={handleToggleStatus}
+        onBulkToggleStatus={handleBulkToggleStatus}
+      />
 
       {isFormOpen && (
         <EmployeeForm

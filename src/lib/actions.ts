@@ -120,6 +120,7 @@ export async function seedDatabase() {
                 departmentId: newDeptId,
                 status: getRandomElement(statuses),
                 startDate: new Date(new Date().setFullYear(new Date().getFullYear() - getRandomInt(0, 5))).toISOString(),
+                birthDate: new Date(new Date().setFullYear(new Date().getFullYear() - getRandomInt(20, 60))).toISOString(),
             };
             newEmployees.push(newEmployee);
         }

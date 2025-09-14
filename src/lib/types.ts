@@ -7,6 +7,7 @@ export type Employee = {
   departmentId: string;
   status: 'active' | 'inactive';
   startDate: string;
+  birthDate?: string;
 };
 
 export type Department = {
