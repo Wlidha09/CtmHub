@@ -23,6 +23,7 @@ import {
   max,
   min,
   format,
+  parseISO,
 } from 'date-fns';
 
 const timeOffSchema = z.object({
@@ -80,9 +81,6 @@ type WorkTicketResult = {
     data?: Ticket | null;
 }
 
-// This is a simplified version. In a real app, holidays would come from a database or a service.
-const PUBLIC_HOLIDAYS_PER_MONTH = 1;
-
 export async function generateWorkTicket(employeeId: string, month: Date): Promise<WorkTicketResult> {
     if (!employeeId || !month) {
         return { success: false, message: "Employee and month are required." };
@@ -107,10 +105,8 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const weekendDays = allDaysInMonth.filter(isWeekend).length;
 
         const publicHolidays = holidaysForYear.filter(h => {
-            const holidayDate = new Date(h.date);
-            // We need to account for timezone differences by comparing dates without time.
-            const holidayUTC = new Date(Date.UTC(holidayDate.getFullYear(), holidayDate.getMonth(), holidayDate.getDate()));
-            return holidayUTC >= start && holidayUTC <= end && h.isPaid;
+            const holidayDate = parseISO(h.date);
+            return holidayDate >= start && holidayDate <= end && h.isPaid;
         }).length;
         
         const workableDays = totalDays - weekendDays - publicHolidays;
@@ -125,14 +121,14 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const leaveSnapshot = await getDocs(q);
         const leaveRequests = leaveSnapshot.docs
             .map(doc => doc.data() as LeaveRequest)
-            .filter(req => new Date(req.endDate) >= start);
+            .filter(req => parseISO(req.endDate) >= start);
 
         let leaveDaysTaken = 0;
         const leaveDetails: Ticket['calculation']['leaveDetails'] = [];
 
         for (const req of leaveRequests) {
-            const leaveStart = new Date(req.startDate);
-            const leaveEnd = new Date(req.endDate);
+            const leaveStart = parseISO(req.startDate);
+            const leaveEnd = parseISO(req.endDate);
 
             // Calculate the intersection of the leave period and the selected month
             const effectiveStart = max([start, leaveStart]);
