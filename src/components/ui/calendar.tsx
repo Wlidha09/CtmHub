@@ -1,11 +1,13 @@
+
 "use client"
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { format } from "date-fns"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -15,6 +17,30 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+
+  function TodayButton() {
+    const { today, goToMonth } = useNavigation();
+    const { selected } = useDayPicker();
+
+    const handleTodayClick = () => {
+      if (today) {
+        goToMonth(today);
+      }
+    };
+
+    return (
+      <button
+        type="button"
+        onClick={handleTodayClick}
+        disabled={!today}
+        className={cn(buttonVariants({ variant: "ghost" }), "h-7 w-auto px-2 font-normal text-xs")}
+      >
+        Go to Today
+      </button>
+    );
+  }
+
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -46,7 +72,7 @@ function Calendar({
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground",
         day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
+          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
@@ -54,13 +80,14 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
-        ),
+        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
+      footer={
+        <div className="flex items-center justify-center pt-2">
+            <TodayButton />
+        </div>
+      }
       {...props}
     />
   )
