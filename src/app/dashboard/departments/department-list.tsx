@@ -3,7 +3,6 @@
 import * as React from "react";
 import type { Department, Employee } from "@/lib/types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,7 +39,6 @@ import { db } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { deleteDepartment } from "@/lib/firebase/departments";
-import { Users } from "lucide-react";
 
 type DepartmentWithLead = Department & { lead: Employee };
 
@@ -60,14 +58,6 @@ export function DepartmentList({
   const { currentRole } = useCurrentRole();
   const canManageDepartments = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
-  const getInitials = (name: string) => {
-    const parts = name.split(" ");
-    if (parts.length > 1) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`;
-    }
-    return parts[0].substring(0, 2);
-  };
-  
   const generateColor = (name: string) => {
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -171,7 +161,6 @@ export function DepartmentList({
             <CardTitle>{dept.name}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2 text-sm">
-            <Users className="w-4 h-4 text-muted-foreground" />
             {dept.lead ? (
                 <p className="font-semibold">{dept.lead.name}</p>
             ) : (
