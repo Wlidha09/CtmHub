@@ -10,7 +10,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
 import { roles } from '@/lib/data';
 import type { Employee, Department, LeaveRequest, Ticket, Holiday } from "@/lib/types";
-import { addLeaveRequest, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
+import { addLeaveRequest as addLeaveRequestFB, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";
 import { getHolidaysByYear, addHoliday as addHolidayFB, updateHoliday as updateHolidayFB } from "./firebase/holidays";
 import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
@@ -262,7 +262,7 @@ export async function seedDatabase() {
             const endDate = new Date(startDate);
             endDate.setDate(startDate.getDate() + getRandomInt(1, 5));
 
-            await addLeaveRequest({
+            await addLeaveRequestFB({
                 userId: employee.id,
                 leaveType: getRandomElement(leaveTypes),
                 startDate: startDate.toISOString(),
@@ -323,13 +323,13 @@ export async function syncHolidays(year: number) {
             // Check for duplicates before adding
             if (!existingHolidayDates.has(holiday.date)) {
                 const newHolidayRef = doc(collection(db, 'holidays'));
-                const newHoliday: Holiday = {
-                    id: newHolidayRef.id,
+                // Note: The addHolidayFB function creates the ID, so we pass Omit<Holiday, 'id'>
+                const newHoliday: Omit<Holiday, 'id'> = {
                     name: holiday.name,
                     date: holiday.date, // "YYYY-MM-DD"
                     isPaid: true, // Default to paid
                 };
-                batch.set(newHolidayRef, newHoliday);
+                batch.set(newHolidayRef, {id: newHolidayRef.id, ...newHoliday});
                 newHolidaysCount++;
             }
         }
@@ -352,14 +352,24 @@ const holidaySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format."),
 });
 
-export async function addHoliday(formData: FormData) {
+type AddHolidayResult = {
+    success: boolean;
+    message: string;
+    errors?: Record<string, string[]>;
+}
+
+export async function addHoliday(formData: FormData): Promise<AddHolidayResult> {
     const validatedFields = holidaySchema.safeParse({
         name: formData.get("name"),
         date: formData.get("date"),
     });
 
     if (!validatedFields.success) {
-        return { success: false, message: "Invalid input.", errors: validatedFields.error.flatten().fieldErrors };
+        return { 
+            success: false, 
+            message: "Invalid input.", 
+            errors: validatedFields.error.flatten().fieldErrors 
+        };
     }
 
     try {

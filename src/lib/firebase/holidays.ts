@@ -1,6 +1,6 @@
 
 import { db } from './config';
-import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, query, where, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, query, where, setDoc } from 'firebase/firestore';
 import type { Holiday } from '@/lib/types';
 
 export async function getHolidaysByYear(year: string): Promise<Holiday[]> {
@@ -10,7 +10,7 @@ export async function getHolidaysByYear(year: string): Promise<Holiday[]> {
         where('date', '<=', `${year}-12-31`)
     );
     const holidaySnapshot = await getDocs(q);
-    const holidayList = holidaySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Holiday));
+    const holidayList = holidaySnapshot.docs.map(doc => (doc.data() as Holiday));
     return holidayList.sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -20,7 +20,7 @@ export async function addHoliday(holiday: Omit<Holiday, 'id'>): Promise<string> 
         id: newDocRef.id,
         ...holiday,
     };
-    await addDoc(collection(db, 'holidays'), newHoliday);
+    await setDoc(newDocRef, newHoliday);
     return newDocRef.id;
 }
 

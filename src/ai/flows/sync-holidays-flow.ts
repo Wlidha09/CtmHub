@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview An AI agent for fetching nationwide public holidays.
+ * @fileOverview An AI agent for fetching nationwide public holidays for Tunisia.
  *
  * - syncHolidays - A function that fetches public holidays for a given year.
  * - SyncHolidaysInput - The input type for the syncHolidays function.
@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'syncHolidaysPrompt',
   input: { schema: SyncHolidaysInputSchema },
   output: { schema: SyncHolidaysOutputSchema },
-  prompt: `You are an expert HR assistant. Your task is to generate a list of all official, nationwide public holidays for the specified year.
+  prompt: `You are an expert HR assistant. Your task is to generate a list of all official, nationwide public holidays in Tunisia for the specified year.
 
 Provide the response as a structured list of holiday objects, where each object contains the holiday's name and its date in "YYYY-MM-DD" format.
 
