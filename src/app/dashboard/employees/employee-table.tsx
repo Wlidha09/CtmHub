@@ -88,7 +88,7 @@ export function EmployeeTable({
               <TableHead>Role</TableHead>
               <TableHead className="hidden md:table-cell">Department</TableHead>
               <TableHead>Contact</TableHead>
-              {canManageEmployees && <TableHead className="text-right">Actions</TableHead>}
+              {canManageEmployees && <TableHead className="text-right">Actions:</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
