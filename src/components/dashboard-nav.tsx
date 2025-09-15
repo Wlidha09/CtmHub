@@ -87,9 +87,9 @@ export function DashboardNav() {
     }
     return item.roles.includes(currentRole);
   }).sort((a, b) => {
-    // Custom sort to move Availability up
-    if (a.href === '/dashboard/availability') return -1;
-    if (b.href === '/dashboard/availability') return 1;
+    // Custom sort to move Availability to the end
+    if (a.href === '/dashboard/availability') return 1;
+    if (b.href === '/dashboard/availability') return -1;
     return 0;
   });
 
