@@ -178,7 +178,7 @@ export function EmployeeTable({
                   <TableCell>
                     <div className="flex flex-col">
                         <span>{employee.email}</span>
-                        {employee.phoneNumber && <span className="text-muted-foreground text-xs">{employee.phoneNumber}</span>}
+                        {employee.phoneNumber && <span className="text-muted-foreground text-xs md:hidden">{employee.phoneNumber}</span>}
                     </div>
                   </TableCell>
                    <TableCell>
