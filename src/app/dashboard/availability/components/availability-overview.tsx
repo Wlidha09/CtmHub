@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import type { WeeklySchedule } from "@/lib/types";
-import { startOfWeek, endOfWeek, format, eachDayOfInterval } from 'date-fns';
+import { startOfWeek, endOfWeek, format, eachDayOfInterval, isWeekend } from 'date-fns';
 import { getWeeklySchedule } from "@/lib/firebase/availability";
 import { useToast } from "@/hooks/use-toast";
 
@@ -51,14 +51,16 @@ export function AvailabilityOverview({ initialSchedule }: AvailabilityOverviewPr
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
-  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+  const allWeekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+  const weekDays = allWeekDays.filter(day => !isWeekend(day));
+  const weekDisplayEnd = weekDays[weekDays.length - 1];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Team Availability</CardTitle>
         <CardDescription>
-          Showing who is scheduled to be in the office from {format(weekStart, 'MMM d')} to {format(weekEnd, 'MMM d, yyyy')}.
+          Showing who is scheduled to be in the office from {format(weekStart, 'MMM d')} to {format(weekDisplayEnd, 'MMM d, yyyy')}.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -81,7 +83,7 @@ export function AvailabilityOverview({ initialSchedule }: AvailabilityOverviewPr
             <TableBody>
                 {isLoading ? (
                     <TableRow>
-                        <TableCell colSpan={8} className="h-24 text-center">Loading schedule...</TableCell>
+                        <TableCell colSpan={6} className="h-24 text-center">Loading schedule...</TableCell>
                     </TableRow>
                 ) : schedule.length > 0 ? (
                     schedule.map((entry) => (
@@ -99,7 +101,7 @@ export function AvailabilityOverview({ initialSchedule }: AvailabilityOverviewPr
                     ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={8} className="h-24 text-center">No availability data submitted for this week yet.</TableCell>
+                        <TableCell colSpan={6} className="h-24 text-center">No availability data submitted for this week yet.</TableCell>
                     </TableRow>
                 )}
             </TableBody>

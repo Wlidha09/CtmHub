@@ -3,7 +3,7 @@ import { db } from './config';
 import { collection, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
 import type { Availability, WeeklySchedule, Employee } from '@/lib/types';
 import { getEmployees } from './employees';
-import { startOfWeek, format, eachDayOfInterval, endOfWeek } from 'date-fns';
+import { startOfWeek, format, eachDayOfInterval, endOfWeek, isWeekend } from 'date-fns';
 
 export async function getAvailabilitiesForWeek(weekStartDate: string): Promise<Availability[]> {
     const availabilitiesCol = collection(db, 'availability');
@@ -53,7 +53,7 @@ export async function getWeeklySchedule(): Promise<WeeklySchedule[]> {
     const weekDays = eachDayOfInterval({
         start: weekStart,
         end: endOfWeek(today, { weekStartsOn: 1 }),
-    }).map(day => format(day, 'EEEE'));
+    }).filter(day => !isWeekend(day)).map(day => format(day, 'EEEE'));
 
 
     const weeklySchedules = employees.map(employee => {

@@ -18,6 +18,7 @@ import {
   eachDayOfInterval,
   endOfWeek,
   format,
+  isWeekend,
 } from "date-fns";
 import { saveWeeklyAvailability } from "@/lib/actions";
 import { CheckCircle } from "lucide-react";
@@ -34,10 +35,11 @@ export function SubmitAvailability({ userId, weekStartDate, onScheduleSubmit }: 
   const { toast } = useToast();
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Monday
-  const weekDays = eachDayOfInterval({
+  const allWeekDays = eachDayOfInterval({
     start: weekStart,
     end: endOfWeek(weekStart, { weekStartsOn: 1 }),
   });
+  const weekDays = allWeekDays.filter(day => !isWeekend(day));
 
   const handleDayClick = (day: string) => {
     setSelectedDays((prev) => {
@@ -89,11 +91,11 @@ export function SubmitAvailability({ userId, weekStartDate, onScheduleSubmit }: 
         <CardTitle>Select Your In-Office Days</CardTitle>
         <CardDescription>
           Choose up to 3 days you plan to work from the office this week (
-          {format(weekDays[0], "MMM d")} - {format(weekDays[6], "MMM d, yyyy")}).
+          {format(weekDays[0], "MMM d")} - {format(weekDays[weekDays.length - 1], "MMM d, yyyy")}).
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {weekDays.map((day) => {
             const dayName = format(day, "EEEE");
             const isSelected = selectedDays.includes(dayName);
