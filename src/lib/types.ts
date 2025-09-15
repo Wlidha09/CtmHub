@@ -86,3 +86,20 @@ export type WeeklySchedule = {
   employeeName: string;
   schedule: { [day: string]: boolean }; // e.g., { "Monday": false, "Tuesday": true, ... }
 };
+
+export type MeetingRoom = {
+  id: string;
+  name: string;
+  capacity: number;
+  amenities: string[]; // e.g., ['Projector', 'Whiteboard']
+};
+
+export type Booking = {
+  id: string;
+  roomId: string;
+  userId: string;
+  title: string;
+  startTime: string; // ISO string
+  endTime: string; // ISO string
+  date: string; // YYYY-MM-DD
+};

@@ -41,6 +41,8 @@ export const appPages = [
   'Holidays',
   'Candidates',
   'Tickets',
+  'Book a Room',
+  'Manage Rooms',
 ];
 
 
@@ -77,11 +79,11 @@ export const initialRoles: Role[] = [
     isCore: true,
     permissions: appPages.reduce((acc, page) => {
       acc[page] = { view: false, create: false, edit: false, delete: false };
-      if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates'].includes(page)) {
+      if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates', 'Book a Room', 'Manage Rooms'].includes(page)) {
         acc[page] = { view: true, create: true, edit: true, delete: false };
       }
-       if (page === 'Dashboard') {
-        acc[page] = { view: true, create: false, edit: false, delete: false };
+       if (page === 'Dashboard' || page === 'Book a Room') {
+        acc[page] = { view: true, create: true, edit: false, delete: false };
       }
       return acc;
     }, {} as { [key:string]: any }),
@@ -91,7 +93,7 @@ export const initialRoles: Role[] = [
     isCore: true,
     permissions: appPages.reduce((acc, page) => {
       acc[page] = { view: false, create: false, edit: false, delete: false };
-      if (['Dashboard', 'Availability', 'Leave Request'].includes(page)) {
+      if (['Dashboard', 'Availability', 'Leave Request', 'Book a Room'].includes(page)) {
         acc[page] = { view: true, create: true, edit: false, delete: false };
       }
       if (page === 'Dashboard') {

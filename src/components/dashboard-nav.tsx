@@ -14,7 +14,9 @@ import {
   ShieldAlert,
   Ticket,
   CalendarCheck,
-  CalendarClock
+  CalendarClock,
+  BookMarked,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -35,11 +37,6 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/employees", label: "Employees", icon: Users },
   { href: "/dashboard/departments", label: "Departments", icon: Building },
-  {
-    href: "/dashboard/availability",
-    label: "Availability",
-    icon: CalendarClock,
-  },
   { href: "/dashboard/roles", label: "Roles", icon: ShieldCheck, roles: ['Dev', 'Owner', 'RH'] },
   {
     href: "/dashboard/submit-leave",
@@ -70,7 +67,23 @@ const navItems: NavItem[] = [
     label: "Tickets",
     icon: Ticket,
     roles: ['Owner', 'RH', 'Manager'],
-  }
+  },
+  {
+    href: "/dashboard/book-room",
+    label: "Book a Room",
+    icon: BookMarked,
+  },
+  {
+    href: "/dashboard/manage-rooms",
+    label: "Manage Rooms",
+    icon: Settings,
+    roles: ['Owner', 'RH', 'Manager', 'Dev'],
+  },
+  {
+    href: "/dashboard/availability",
+    label: "Availability",
+    icon: CalendarClock,
+  },
 ];
 
 export function DashboardNav() {
