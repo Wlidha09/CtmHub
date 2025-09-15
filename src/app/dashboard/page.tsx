@@ -8,6 +8,7 @@ import {
   FileClock,
   FileText,
   Plane,
+  Coins,
 } from "lucide-react";
 import {
   Card,
@@ -22,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { getEmployees } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import { getLeaveRequests } from "@/lib/firebase/leave-requests";
-import type { LeaveRequest } from "@/lib/types";
+import type { Employee, LeaveRequest } from "@/lib/types";
 import { differenceInDays, parseISO } from "date-fns";
 
 const getStatusVariant = (status: string) => {
@@ -44,6 +45,8 @@ const getStatusVariant = (status: string) => {
   }
 };
 
+// In a real app, this would come from the authenticated user
+const FAKE_CURRENT_USER_ID = "e2";
 const totalRoles = 5; // This is static based on our defined roles
 
 export default function DashboardPage() {
@@ -51,6 +54,7 @@ export default function DashboardPage() {
   const [totalEmployees, setTotalEmployees] = React.useState(0);
   const [totalDepartments, setTotalDepartments] = React.useState(0);
   const [leaveRequests, setLeaveRequests] = React.useState<LeaveRequest[]>([]);
+  const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -64,7 +68,16 @@ export default function DashboardPage() {
         ]);
         setTotalEmployees(employees.length);
         setTotalDepartments(departments.length);
-        setLeaveRequests(requests);
+        
+        if (currentRole === 'Employee') {
+            const user = employees.find(e => e.id === FAKE_CURRENT_USER_ID) || null;
+            setCurrentUser(user);
+            const userRequests = requests.filter(r => r.userId === FAKE_CURRENT_USER_ID);
+            setLeaveRequests(userRequests);
+        } else {
+            setLeaveRequests(requests);
+        }
+
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
@@ -72,7 +85,7 @@ export default function DashboardPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [currentRole]);
 
   const pendingRequestsCount = leaveRequests.filter(
     (req) => req.status === "Pending" || req.status === "Pending RH Approval"
@@ -105,38 +118,54 @@ export default function DashboardPage() {
       </header>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {currentRole === "Employee" ? (
-          <Card className="col-span-full">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>My Leave Requests</span>
-                <FileText className="w-4 h-4 text-muted-foreground" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <p>Loading requests...</p>
-              ) : (
-                <ul className="space-y-2">
-                  {leaveRequests.slice(0, 3).map((request) => ( // Show a few recent ones
-                    <li
-                      key={request.id}
-                      className="flex items-center justify-between p-2 rounded-md bg-muted/50"
-                    >
-                      <div>
-                        <p className="font-semibold">{request.leaveType}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Badge variant={getStatusVariant(request.status)}>
-                        {request.status}
-                      </Badge>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+          <>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">My Leave Balance</CardTitle>
+                    <Coins className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{currentUser?.leaveBalance ?? 0} days</div>}
+                    <p className="text-xs text-muted-foreground">
+                        Your remaining leave days for the year.
+                    </p>
+                </CardContent>
+            </Card>
+            <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+                <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                    <span>My Leave Requests</span>
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                </CardTitle>
+                </CardHeader>
+                <CardContent>
+                {isLoading ? (
+                    <p>Loading requests...</p>
+                ) : leaveRequests.length > 0 ? (
+                    <ul className="space-y-2">
+                    {leaveRequests.slice(0, 3).map((request) => ( // Show a few recent ones
+                        <li
+                        key={request.id}
+                        className="flex items-center justify-between p-2 rounded-md bg-muted/50"
+                        >
+                        <div>
+                            <p className="font-semibold">{request.leaveType}</p>
+                            <p className="text-sm text-muted-foreground">
+                            {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
+                            </p>
+                        </div>
+                        <Badge variant={getStatusVariant(request.status)}>
+                            {request.status}
+                        </Badge>
+                        </li>
+                    ))}
+                    </ul>
+                ) : (
+                    <p>You have no leave requests.</p>
+                )}
+                </CardContent>
+            </Card>
+          </>
         ) : (
           <>
             {currentRole === "RH" && (
