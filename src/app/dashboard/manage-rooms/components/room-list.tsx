@@ -24,7 +24,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Monitor, Tv, Whiteboard, Video, Wind } from "lucide-react";
+import { Edit, Trash2, Monitor, Tv, Presentation, Video, Wind } from "lucide-react";
 import type { MeetingRoom } from "@/lib/types";
 import { RoomForm } from "./room-form";
 
@@ -39,7 +39,7 @@ interface RoomListProps {
 const amenityIcons: { [key: string]: React.ElementType } = {
     Projector: Monitor,
     TV: Tv,
-    Whiteboard: Whiteboard,
+    Whiteboard: Presentation,
     Videoconference: Video,
     "Air Conditioner": Wind,
 };
@@ -149,4 +149,3 @@ export function RoomList({ rooms, isLoading, canManage, onUpdate, onDelete }: Ro
     </>
   );
 }
-
