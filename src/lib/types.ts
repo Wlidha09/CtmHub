@@ -5,7 +5,7 @@ export type Employee = {
   name: string;
   email: string;
   avatarUrl: string;
-  role: 'Dev' | 'Owner' | 'RH' | 'Manager' | 'Employee';
+  role: string; // Now a string to accommodate custom roles
   departmentId: string;
   status: 'active' | 'inactive';
   startDate: string;
@@ -19,10 +19,23 @@ export type Department = {
   leadId: string;
 };
 
-export type Role = {
-  name: 'Dev' | 'Owner' | 'RH' | 'Manager' | 'Employee';
-  permissions: string[];
+export type Permission = {
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
 };
+
+export type PagePermissions = {
+  [page: string]: Permission;
+};
+
+export type Role = {
+  name: string;
+  isCore: boolean; // Core roles cannot be deleted
+  permissions: PagePermissions;
+};
+
 
 export type LeaveRequest = {
   id: string;

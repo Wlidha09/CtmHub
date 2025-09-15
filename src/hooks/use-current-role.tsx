@@ -1,11 +1,11 @@
+
 "use client";
 
 import * as React from "react";
-import type { Role } from "@/lib/types";
 
 type RoleContextType = {
-  currentRole: Role["name"];
-  setCurrentRole: (role: Role["name"]) => void;
+  currentRole: string; // Changed to string to allow for custom roles
+  setCurrentRole: (role: string) => void;
 };
 
 const RoleContext = React.createContext<RoleContextType | undefined>(
@@ -13,7 +13,7 @@ const RoleContext = React.createContext<RoleContextType | undefined>(
 );
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [currentRole, setCurrentRole] = React.useState<Role["name"]>("Dev");
+  const [currentRole, setCurrentRole] = React.useState<string>("Dev");
 
   return (
     <RoleContext.Provider value={{ currentRole, setCurrentRole }}>

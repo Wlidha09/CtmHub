@@ -5,7 +5,7 @@ import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow"
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
-import { roles } from '@/lib/data';
+import { initialRoles as roles } from '@/lib/data';
 import type { Employee, Department, LeaveRequest, Ticket, Holiday } from "@/lib/types";
 import { addLeaveRequest as addLeaveRequestFB, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";

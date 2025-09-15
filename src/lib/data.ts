@@ -1,3 +1,4 @@
+
 import type { Employee, Department, Role } from '@/lib/types';
 
 export const departments: Omit<Department, 'leadId'>[] = [
@@ -29,35 +30,80 @@ export const departmentData: Department[] = [
     { id: 'd4', name: 'Sales', leadId: 'e8' },
 ];
 
-export const roles: Role[] = [
+export const appPages = [
+  'Dashboard',
+  'Employees',
+  'Departments',
+  'Availability',
+  'Roles',
+  'Leave Request',
+  'Manage Leave',
+  'Holidays',
+  'Candidates',
+  'Tickets',
+];
+
+
+export const initialRoles: Role[] = [
   {
     name: 'Dev',
-    permissions: ['Full access'],
+    isCore: true,
+    permissions: appPages.reduce((acc, page) => {
+      acc[page] = { view: true, create: true, edit: true, delete: true };
+      return acc;
+    }, {} as { [key: string]: any }),
   },
   {
     name: 'Owner',
-    permissions: ['Full access, except submit leaves page and Dev role'],
+    isCore: true,
+    permissions: appPages.reduce((acc, page) => {
+      acc[page] = { view: true, create: true, edit: true, delete: true };
+      return acc;
+    }, {} as { [key: string]: any }),
   },
   {
     name: 'RH',
-    permissions: ['Full access'],
+    isCore: true,
+    permissions: appPages.reduce((acc, page) => {
+      acc[page] = { view: true, create: true, edit: true, delete: true };
+      if (page === 'Roles') {
+        acc[page] = { view: true, create: false, edit: false, delete: false };
+      }
+      return acc;
+    }, {} as { [key: string]: any }),
   },
   {
     name: 'Manager',
-    permissions: [
-      'Employees page',
-      'Candidates page',
-      'Send leave requests page',
-    ],
+    isCore: true,
+    permissions: appPages.reduce((acc, page) => {
+      acc[page] = { view: false, create: false, edit: false, delete: false };
+      if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates'].includes(page)) {
+        acc[page] = { view: true, create: true, edit: true, delete: false };
+      }
+       if (page === 'Dashboard') {
+        acc[page] = { view: true, create: false, edit: false, delete: false };
+      }
+      return acc;
+    }, {} as { [key:string]: any }),
   },
   {
     name: 'Employee',
-    permissions: ['Submit leave page', 'Leaves request pages (except Dev & Owner)'],
+    isCore: true,
+    permissions: appPages.reduce((acc, page) => {
+      acc[page] = { view: false, create: false, edit: false, delete: false };
+      if (['Dashboard', 'Availability', 'Leave Request'].includes(page)) {
+        acc[page] = { view: true, create: true, edit: false, delete: false };
+      }
+      if (page === 'Dashboard') {
+        acc[page] = { view: true, create: false, edit: false, delete: false };
+      }
+      return acc;
+    }, {} as { [key: string]: any }),
   },
 ];
 
+
 export async function getEmployeeById(id: string): Promise<Employee | undefined> {
-    // In a real app, this would fetch from a database.
     return employees.find(e => e.id === id);
 };
 export const getDepartmentById = (id: string) => departmentData.find(d => d.id === id);
