@@ -60,7 +60,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
     const { name, value, type } = e.target;
     setFormData(prev => ({ 
         ...prev, 
-        [name]: type === 'number' ? parseFloat(value) : value 
+        [name]: type === 'number' ? (value === '' ? '' : parseFloat(value)) : value 
     }));
   };
 
@@ -80,6 +80,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         ...formData,
         startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
         birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : undefined,
+        leaveBalance: typeof formData.leaveBalance === 'number' ? formData.leaveBalance : 0,
     };
     onSave(dataToSave);
   };
@@ -192,19 +193,17 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                         onChange={handleChange}
                     />
             </div>
-            {employee && (
-                <div className="space-y-2">
-                    <Label htmlFor="leaveBalance">Leave Balance</Label>
-                    <Input
-                        id="leaveBalance"
-                        name="leaveBalance"
-                        type="number"
-                        value={formData.leaveBalance ?? ''}
-                        onChange={handleChange}
-                        placeholder="e.g., 10"
-                    />
-                </div>
-            )}
+            <div className="space-y-2">
+                <Label htmlFor="leaveBalance">Leave Balance</Label>
+                <Input
+                    id="leaveBalance"
+                    name="leaveBalance"
+                    type="number"
+                    value={formData.leaveBalance ?? ''}
+                    onChange={handleChange}
+                    placeholder="e.g., 10"
+                />
+            </div>
            </div>
            <DialogFooter>
              <DialogClose asChild>
