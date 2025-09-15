@@ -45,7 +45,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
       setFormData({
         name: '',
         email: '',
-        phoneNumber: '',
+        phoneNumber: '+216',
         avatarUrl: 'https://picsum.photos/seed/new-employee/100/100',
         role: 'Employee',
         departmentId: '',
@@ -125,7 +125,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 type="tel"
                 value={formData.phoneNumber || ""}
                 onChange={handleChange}
-                placeholder="e.g., +1 555-123-4567"
+                placeholder="e.g., +216 12 345 678"
                 />
             </div>
           </div>
