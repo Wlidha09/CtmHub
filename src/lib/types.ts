@@ -98,8 +98,11 @@ export type Booking = {
   id: string;
   roomId: string;
   userId: string;
+  employeeName: string;
+  departmentName: string;
   title: string;
   startTime: string; // ISO string
   endTime: string; // ISO string
   date: string; // YYYY-MM-DD
 };
+

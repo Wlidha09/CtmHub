@@ -3,11 +3,12 @@ import { db } from './config';
 import { collection, getDocs, query, where, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 
-export async function getBookingsForRoom(roomId: string, date: string): Promise<Booking[]> {
+export async function getBookingsForRoomByDate(roomId: string, date: string): Promise<Booking[]> {
   const bookingsCol = collection(db, 'bookings');
   const q = query(bookingsCol, where('roomId', '==', roomId), where('date', '==', date));
   const bookingSnapshot = await getDocs(q);
-  return bookingSnapshot.docs.map(doc => doc.data() as Booking);
+  const bookings = bookingSnapshot.docs.map(doc => doc.data() as Booking);
+  return bookings.sort((a,b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
 }
 
 export async function addBooking(booking: Omit<Booking, 'id'>): Promise<string> {
