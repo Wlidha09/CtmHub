@@ -82,7 +82,10 @@ export const initialRoles: Role[] = [
       if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates', 'Book a Room', 'Manage Rooms'].includes(page)) {
         acc[page] = { view: true, create: true, edit: true, delete: false };
       }
-       if (page === 'Dashboard' || page === 'Book a Room') {
+       if (page === 'Dashboard') {
+        acc[page] = { view: true, create: false, edit: false, delete: false };
+      }
+      if (page === 'Book a Room') {
         acc[page] = { view: true, create: true, edit: false, delete: false };
       }
       return acc;
@@ -98,6 +101,9 @@ export const initialRoles: Role[] = [
       }
       if (page === 'Dashboard') {
         acc[page] = { view: true, create: false, edit: false, delete: false };
+      }
+      if (page === 'Manage Rooms') {
+        acc[page] = { view: false, create: false, edit: false, delete: false };
       }
       return acc;
     }, {} as { [key: string]: any }),
