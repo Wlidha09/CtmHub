@@ -10,6 +10,7 @@ import type { Employee, Department, LeaveRequest, Ticket, Holiday } from "@/lib/
 import { addLeaveRequest as addLeaveRequestFB, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";
 import { getHolidaysByYear, addHoliday as addHolidayFB, updateHoliday as updateHolidayFB } from "./firebase/holidays";
+import { saveAvailability } from "./firebase/availability";
 import {
   startOfMonth,
   endOfMonth,
@@ -21,6 +22,16 @@ import {
   format,
   parseISO,
 } from 'date-fns';
+
+export async function saveWeeklyAvailability(userId: string, weekStartDate: string, selectedDays: string[]) {
+    try {
+        await saveAvailability(userId, weekStartDate, selectedDays);
+        return { success: true, message: "Availability saved successfully." };
+    } catch (error) {
+        console.error("Error saving availability:", error);
+        return { success: false, message: "Failed to save availability." };
+    }
+}
 
 type WorkTicketResult = {
     success: boolean;
@@ -53,7 +64,7 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const weekendDays = allDaysInMonth.filter(isWeekend).length;
 
         const publicHolidays = allDaysInMonth.filter(day => 
-            paidHolidayDates.has(format(day, 'yyyy-MM-dd'))
+            !isWeekend(day) && paidHolidayDates.has(format(day, 'yyyy-MM-dd'))
         ).length;
         
         const workableDays = totalDays - weekendDays - publicHolidays;
@@ -161,7 +172,7 @@ const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (m
 
 export async function seedDatabase() {
   try {
-    const collectionsToEnsure = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates'];
+    const collectionsToEnsure = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates', 'availability'];
     for (const collectionName of collectionsToEnsure) {
         await ensureCollection(collectionName);
     }

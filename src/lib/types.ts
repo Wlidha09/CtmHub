@@ -1,4 +1,5 @@
 
+
 export type Employee = {
   id: string;
   name: string;
@@ -58,4 +59,17 @@ export type Holiday = {
     name: string;
     date: string; // YYYY-MM-DD
     isPaid: boolean;
-}
+};
+
+export type Availability = {
+  id: string;
+  userId: string;
+  weekStartDate: string; // YYYY-MM-DD format, always a Monday
+  selectedDays: string[]; // Array of day names e.g., ["Tuesday", "Wednesday", "Friday"]
+};
+
+export type WeeklySchedule = {
+  employeeId: string;
+  employeeName: string;
+  schedule: { [day: string]: boolean }; // e.g., { "Monday": false, "Tuesday": true, ... }
+};

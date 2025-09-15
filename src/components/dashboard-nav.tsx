@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Ticket,
   CalendarCheck,
+  CalendarClock
 } from "lucide-react";
 
 import {
@@ -34,6 +35,11 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/employees", label: "Employees", icon: Users },
   { href: "/dashboard/departments", label: "Departments", icon: Building },
+  {
+    href: "/dashboard/availability",
+    label: "Availability",
+    icon: CalendarClock,
+  },
   { href: "/dashboard/roles", label: "Roles", icon: ShieldCheck, roles: ['Dev', 'Owner', 'RH'] },
   {
     href: "/dashboard/submit-leave",
@@ -80,6 +86,11 @@ export function DashboardNav() {
         return item.href !== '/dashboard/submit-leave';
     }
     return item.roles.includes(currentRole);
+  }).sort((a, b) => {
+    // Custom sort to move Availability up
+    if (a.href === '/dashboard/availability') return -1;
+    if (b.href === '/dashboard/availability') return 1;
+    return 0;
   });
 
   return (
