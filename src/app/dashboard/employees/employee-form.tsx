@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Employee, Department } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ interface EmployeeFormProps {
 
 export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }: EmployeeFormProps) {
   const [formData, setFormData] = React.useState<Partial<Employee>>({});
+  const { toast } = useToast();
 
   React.useEffect(() => {
     if (employee) {
@@ -59,10 +61,22 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({ 
-        ...prev, 
-        [name]: type === 'number' ? (value === '' ? '' : parseFloat(value)) : value 
-    }));
+     if (name === "phoneNumber") {
+      // Allow only digits after +216 and limit length
+      const prefix = "+216";
+      if (value.startsWith(prefix)) {
+        const numericPart = value.substring(prefix.length).replace(/[^0-9]/g, "");
+        setFormData(prev => ({ ...prev, [name]: `${prefix}${numericPart}` }));
+      } else {
+        // If they delete the prefix, reset it
+        setFormData(prev => ({ ...prev, [name]: prefix }));
+      }
+    } else {
+      setFormData(prev => ({ 
+          ...prev, 
+          [name]: type === 'number' ? (value === '' ? '' : parseFloat(value)) : value 
+      }));
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -72,7 +86,22 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.role || !formData.departmentId) {
-      alert("Please fill out all fields.");
+       toast({
+        variant: "destructive",
+        title: "Missing Fields",
+        description: "Please fill out all required fields.",
+      });
+      return;
+    }
+    
+    // Validate phone number
+    const phoneRegex = /^\+216\d{8}$/;
+    if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Phone Number",
+        description: "Phone number must be in the format +216 followed by 8 digits.",
+      });
       return;
     }
     
@@ -125,7 +154,8 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 type="tel"
                 value={formData.phoneNumber || ""}
                 onChange={handleChange}
-                placeholder="e.g., +216 12 345 678"
+                placeholder="+216 12345678"
+                maxLength={12}
                 />
             </div>
           </div>
