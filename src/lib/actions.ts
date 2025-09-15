@@ -41,6 +41,7 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         
         const year = month.getFullYear();
         const holidaysForYear = await getHolidaysByYear(year.toString());
+        const paidHolidayDates = new Set(holidaysForYear.filter(h => h.isPaid).map(h => h.date));
 
         const start = startOfMonth(month);
         const end = endOfMonth(month);
@@ -51,10 +52,9 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
         const totalDays = allDaysInMonth.length;
         const weekendDays = allDaysInMonth.filter(isWeekend).length;
 
-        const publicHolidays = holidaysForYear.filter(h => {
-            const holidayDate = parseISO(h.date);
-            return holidayDate >= start && holidayDate <= end && h.isPaid;
-        }).length;
+        const publicHolidays = allDaysInMonth.filter(day => 
+            paidHolidayDates.has(format(day, 'yyyy-MM-dd'))
+        ).length;
         
         const workableDays = totalDays - weekendDays - publicHolidays;
 
@@ -84,14 +84,29 @@ export async function generateWorkTicket(employeeId: string, month: Date): Promi
             const effectiveEnd = min([end, leaveEnd]);
             
             if (effectiveStart <= effectiveEnd) {
-                const daysInMonth = differenceInDays(effectiveEnd, effectiveStart) + 1;
-                leaveDaysTaken += daysInMonth;
-                leaveDetails.push({
-                    type: req.leaveType,
-                    days: daysInMonth,
-                    startDate: format(effectiveStart, 'MMM d'),
-                    endDate: format(effectiveEnd, 'MMM d'),
-                });
+                const leaveInterval = { start: effectiveStart, end: effectiveEnd };
+                const daysOfLeave = eachDayOfInterval(leaveInterval);
+
+                let actualLeaveDaysInPeriod = 0;
+                for (const day of daysOfLeave) {
+                    const isWeekendDay = isWeekend(day);
+                    const isPublicHoliday = paidHolidayDates.has(format(day, 'yyyy-MM-dd'));
+
+                    // Only count the day if it's not a weekend and not a public holiday
+                    if (!isWeekendDay && !isPublicHoliday) {
+                        actualLeaveDaysInPeriod++;
+                    }
+                }
+                
+                if (actualLeaveDaysInPeriod > 0) {
+                    leaveDaysTaken += actualLeaveDaysInPeriod;
+                    leaveDetails.push({
+                        type: req.leaveType,
+                        days: actualLeaveDaysInPeriod,
+                        startDate: format(effectiveStart, 'MMM d'),
+                        endDate: format(effectiveEnd, 'MMM d'),
+                    });
+                }
             }
         }
         
