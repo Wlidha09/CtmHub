@@ -78,7 +78,7 @@ function PermissionsTable({
                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                 >
                     <div className="flex justify-center space-x-4">
-                    {(Object.keys(roles[0].permissions[page]) as (keyof Permission)[]).map(
+                    {role.permissions[page] && (Object.keys(role.permissions[page]) as (keyof Permission)[]).map(
                         (p) => (
                         <div key={p} className="flex items-center space-x-1">
                             <Checkbox
