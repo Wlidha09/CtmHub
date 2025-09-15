@@ -36,7 +36,7 @@ export function SubmitAvailability({ userId, weekStartDate, onScheduleSubmit }: 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Monday
   const weekDays = eachDayOfInterval({
     start: weekStart,
-    end: endOfWeek(weekStart),
+    end: endOfWeek(weekStart, { weekStartsOn: 1 }),
   });
 
   const handleDayClick = (day: string) => {
