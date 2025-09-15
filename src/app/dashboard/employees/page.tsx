@@ -78,9 +78,42 @@ export default function EmployeesPage() {
   
   const handleSave = async (employeeData: Partial<Employee>) => {
     try {
-      if (editingEmployee) {
+      const isEditing = !!editingEmployee;
+      const employeeId = isEditing ? editingEmployee.id : null;
+  
+      // Uniqueness check for email
+      if (employeeData.email) {
+        const emailExists = employees.some(
+          (emp) => emp.email === employeeData.email && emp.id !== employeeId
+        );
+        if (emailExists) {
+          toast({
+            variant: "destructive",
+            title: "Email already exists",
+            description: "Please use a unique email address.",
+          });
+          return;
+        }
+      }
+  
+      // Uniqueness check for phone number
+      if (employeeData.phoneNumber && employeeData.phoneNumber !== '+216') {
+        const phoneExists = employees.some(
+          (emp) => emp.phoneNumber === employeeData.phoneNumber && emp.id !== employeeId
+        );
+        if (phoneExists) {
+          toast({
+            variant: "destructive",
+            title: "Phone number already exists",
+            description: "Please use a unique phone number.",
+          });
+          return;
+        }
+      }
+
+      if (isEditing) {
         // Update existing employee
-        await updateEmployee(editingEmployee.id, employeeData);
+        await updateEmployee(employeeId!, employeeData);
         toast({ title: "Success", description: "Employee updated successfully." });
       } else {
         // Add new employee
