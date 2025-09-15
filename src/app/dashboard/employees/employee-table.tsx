@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -53,6 +54,7 @@ export function EmployeeTable({
       return (
         employee.name.toLowerCase().includes(searchTerm) ||
         employee.email.toLowerCase().includes(searchTerm) ||
+        (employee.phoneNumber && employee.phoneNumber.toLowerCase().includes(searchTerm)) ||
         employee.role.toLowerCase().includes(searchTerm) ||
         employee.departmentName.toLowerCase().includes(searchTerm)
       );
@@ -173,7 +175,12 @@ export function EmployeeTable({
                   <TableCell className="hidden md:table-cell">
                     {employee.departmentName}
                   </TableCell>
-                  <TableCell>{employee.email}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                        <span>{employee.email}</span>
+                        {employee.phoneNumber && <span className="text-muted-foreground text-xs">{employee.phoneNumber}</span>}
+                    </div>
+                  </TableCell>
                    <TableCell>
                       <Badge 
                         variant={(employee.status || 'active') === 'active' ? 'default' : 'secondary'}

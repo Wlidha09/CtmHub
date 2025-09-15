@@ -4,6 +4,7 @@ export type Employee = {
   id: string;
   name: string;
   email: string;
+  phoneNumber?: string;
   avatarUrl: string;
   role: string; // Now a string to accommodate custom roles
   departmentId: string;
@@ -105,4 +106,5 @@ export type Booking = {
   endTime: string; // ISO string
   date: string; // YYYY-MM-DD
 };
+
 

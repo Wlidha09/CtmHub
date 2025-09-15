@@ -87,6 +87,7 @@ export default function EmployeesPage() {
         const newEmployeeData: Omit<Employee, 'id'> = {
             name: employeeData.name || '',
             email: employeeData.email || '',
+            phoneNumber: employeeData.phoneNumber || '',
             avatarUrl: employeeData.avatarUrl || 'https://picsum.photos/seed/new-employee/100/100',
             role: employeeData.role || 'Employee',
             departmentId: employeeData.departmentId || '',

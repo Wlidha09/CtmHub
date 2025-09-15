@@ -45,6 +45,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
       setFormData({
         name: '',
         email: '',
+        phoneNumber: '',
         avatarUrl: 'https://picsum.photos/seed/new-employee/100/100',
         role: 'Employee',
         departmentId: '',
@@ -92,18 +93,18 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
           <DialogTitle>{employee ? "Edit Employee" : "Add Employee"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="py-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+            id="name"
+            name="name"
+            value={formData.name || ""}
+            onChange={handleChange}
+            placeholder="e.g., John Doe"
+            required
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                id="name"
-                name="name"
-                value={formData.name || ""}
-                onChange={handleChange}
-                placeholder="e.g., John Doe"
-                required
-                />
-            </div>
             <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -114,6 +115,17 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 onChange={handleChange}
                 placeholder="e.g., john.doe@example.com"
                 required
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                value={formData.phoneNumber || ""}
+                onChange={handleChange}
+                placeholder="e.g., +1 555-123-4567"
                 />
             </div>
           </div>
