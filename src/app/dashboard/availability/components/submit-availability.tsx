@@ -42,20 +42,19 @@ export function SubmitAvailability({ userId, weekStartDate, onScheduleSubmit }: 
   const weekDays = allWeekDays.filter(day => !isWeekend(day));
 
   const handleDayClick = (day: string) => {
-    setSelectedDays((prev) => {
-      if (prev.includes(day)) {
-        return prev.filter((d) => d !== day);
+    if (selectedDays.includes(day)) {
+      setSelectedDays((prev) => prev.filter((d) => d !== day));
+    } else {
+      if (selectedDays.length < 3) {
+        setSelectedDays((prev) => [...prev, day]);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Limit Reached",
+          description: "You can only select up to 3 days.",
+        });
       }
-      if (prev.length < 3) {
-        return [...prev, day];
-      }
-      toast({
-        variant: "destructive",
-        title: "Limit Reached",
-        description: "You can only select up to 3 days.",
-      });
-      return prev;
-    });
+    }
   };
 
   const handleSubmit = async () => {
