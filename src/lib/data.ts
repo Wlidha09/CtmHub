@@ -107,10 +107,10 @@ export const initialRoles: Role[] = [
         acc[page] = { view: true, create: false, edit: false, delete: false };
       }
       if (page === 'Book a Room') {
-        acc[page] = { view: true, create: true, edit: false, delete: true };
+        acc[page] = { view: true, create: true, edit: true, delete: true };
       }
       if (page === 'Manage Rooms') {
-        acc[page] = { view: false, create: false, edit: false, delete: false };
+        acc[page] = { view: true, create: true, edit: true, delete: true };
       }
       return acc;
     }, {} as { [key: string]: any }),
