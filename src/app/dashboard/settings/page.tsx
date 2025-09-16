@@ -1,4 +1,69 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+"use client";
+
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { accumulateLeave } from "@/lib/actions";
+import { useCurrentRole } from "@/hooks/use-current-role";
+
+function LeaveAccumulationCard() {
+    const [isAccumulating, setIsAccumulating] = React.useState(false);
+    const { toast } = useToast();
+    const { currentRole } = useCurrentRole();
+
+    const canManageSettings = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
+
+    const handleAccumulate = async () => {
+        if (!canManageSettings) {
+             toast({
+                variant: "destructive",
+                title: "Permission Denied",
+                description: "You do not have permission to perform this action.",
+            });
+            return;
+        }
+
+        setIsAccumulating(true);
+        const result = await accumulateLeave();
+        if (result.success) {
+            toast({
+                title: "Success",
+                description: result.message,
+            });
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: result.message,
+            });
+        }
+        setIsAccumulating(false);
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Leave Accumulation</CardTitle>
+                <CardDescription>
+                    Manually add 1.7 days to the leave balance for all active employees. This should typically be run once per month.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={handleAccumulate} disabled={isAccumulating || !canManageSettings}>
+                    {isAccumulating ? "Processing..." : "Run Monthly Leave Accumulation"}
+                </Button>
+                 {!canManageSettings && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                        Only Dev, Owner, or RH roles can run this process.
+                    </p>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
 
 export default function SettingsPage() {
   return (
@@ -11,14 +76,7 @@ export default function SettingsPage() {
           Manage your application settings and configurations.
         </p>
       </header>
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This page is under construction.</p>
-        </CardContent>
-      </Card>
+      <LeaveAccumulationCard />
     </div>
   );
 }

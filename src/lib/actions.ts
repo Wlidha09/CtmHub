@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
@@ -364,5 +365,34 @@ export async function updateHoliday(id: string, data: Partial<Holiday>) {
         return { success: true, message: "Holiday updated." };
     } catch (error) {
         return { success: false, message: "Failed to update holiday." };
+    }
+}
+
+export async function accumulateLeave() {
+    try {
+        const q = query(collection(db, 'employees'), where('status', '==', 'active'));
+        const employeeSnapshot = await getDocs(q);
+        const activeEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
+
+        if (activeEmployees.length === 0) {
+            return { success: true, message: "No active employees found to accumulate leave for." };
+        }
+
+        const batch = writeBatch(db);
+        const accumulationAmount = 1.7;
+
+        activeEmployees.forEach(employee => {
+            const employeeRef = doc(db, 'employees', employee.id);
+            const currentBalance = employee.leaveBalance || 0;
+            const newBalance = currentBalance + accumulationAmount;
+            batch.update(employeeRef, { leaveBalance: newBalance });
+        });
+
+        await batch.commit();
+        
+        return { success: true, message: `Successfully updated leave balance for ${activeEmployees.length} active employees.` };
+    } catch (error) {
+        console.error('Error accumulating leave:', error);
+        return { success: false, message: 'An internal error occurred while accumulating leave.' };
     }
 }
