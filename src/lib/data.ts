@@ -44,6 +44,7 @@ export const appPages = [
   'Tickets',
   'Book a Room',
   'Manage Rooms',
+  'Settings',
 ];
 
 
@@ -84,17 +85,17 @@ export const initialRoles: Role[] = [
       const noPermissions = { view: false, create: false, edit: false, delete: false };
       acc[page] = noPermissions;
 
-      if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates', 'Tickets', 'My Profile'].includes(page)) {
+      if (['Dashboard', 'My Profile', 'Availability', 'Leave Request'].includes(page)) {
         acc[page] = { view: true, create: true, edit: true, delete: false };
       }
-       if (page === 'Dashboard' || page === 'My Profile') {
-        acc[page] = { view: true, create: false, edit: true, delete: false };
-      }
-       if (page === 'Employees') {
-        acc[page] = { view: false, create: false, edit: false, delete: false };
+      if (page === 'Holidays' || page === 'Candidates' || page === 'Tickets') {
+        acc[page] = { view: true, create: false, edit: false, delete: false };
       }
       if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
+      }
+      if (page === 'Settings') {
+        acc[page] = { view: true, create: false, edit: false, delete: false };
       }
       return acc;
     }, {} as PagePermissions),
@@ -106,17 +107,14 @@ export const initialRoles: Role[] = [
       const noPermissions = { view: false, create: false, edit: false, delete: false };
       acc[page] = noPermissions;
 
-      if (['Dashboard', 'Availability', 'Leave Request', 'My Profile'].includes(page)) {
-        acc[page] = { view: true, create: true, edit: false, delete: false };
+      if (['Dashboard', 'My Profile', 'Availability', 'Leave Request'].includes(page)) {
+        acc[page] = { view: true, create: true, edit: true, delete: false };
       }
-      if (page === 'Dashboard' || page === 'My Profile') {
-        acc[page] = { view: true, create: false, edit: true, delete: false };
-      }
-       if (page === 'Employees') {
-        acc[page] = { view: false, create: false, edit: false, delete: false };
-      }
-      if (page === 'Book a Room' || page === 'Manage Rooms') {
+       if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
+      }
+       if (page === 'Settings') {
+        acc[page] = { view: false, create: false, edit: false, delete: false };
       }
       return acc;
     }, {} as PagePermissions),

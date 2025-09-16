@@ -86,6 +86,11 @@ const navItems: NavItem[] = [
     label: "Availability",
     icon: CalendarClock,
   },
+   {
+    href: "/dashboard/settings",
+    label: "Settings",
+    icon: Settings,
+  },
 ];
 
 export function DashboardNav() {
