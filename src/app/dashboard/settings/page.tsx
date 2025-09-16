@@ -77,7 +77,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
         }));
     };
     
-    const handleColorInputChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'logoSvgColor' | 'logoTextColor') => {
+    const handleColorInputChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof AppSettings) => {
         const hex = e.target.value;
         const hsl = hexToHsl(hex);
         if (hsl) {
@@ -152,6 +152,72 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
                             onChange={handleSettingsChange}
                             disabled={!canManageSettings}
                         />
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Theme Settings</CardTitle>
+                    <CardDescription>Customize the main colors of your application.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                     <div className="space-y-2">
+                        <Label htmlFor="primary-color">Primary Color</Label>
+                        <div className="flex items-center gap-2">
+                             <Input
+                                id="primary-color"
+                                value={getHexFromHslString(settings.primaryColor)}
+                                onChange={(e) => handleColorInputChange(e, 'primaryColor')}
+                                disabled={!canManageSettings}
+                                className="font-mono"
+                            />
+                            <Input 
+                                type="color"
+                                value={getHexFromHslString(settings.primaryColor)}
+                                onChange={(e) => handleColorInputChange(e, 'primaryColor')}
+                                className="w-12 h-10 p-1"
+                                disabled={!canManageSettings}
+                            />
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="background-color">Background Color</Label>
+                        <div className="flex items-center gap-2">
+                             <Input
+                                id="background-color"
+                                value={getHexFromHslString(settings.backgroundColor)}
+                                onChange={(e) => handleColorInputChange(e, 'backgroundColor')}
+                                disabled={!canManageSettings}
+                                className="font-mono"
+                            />
+                            <Input 
+                                type="color"
+                                value={getHexFromHslString(settings.backgroundColor)}
+                                onChange={(e) => handleColorInputChange(e, 'backgroundColor')}
+                                className="w-12 h-10 p-1"
+                                disabled={!canManageSettings}
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="accent-color">Accent Color</Label>
+                        <div className="flex items-center gap-2">
+                             <Input
+                                id="accent-color"
+                                value={getHexFromHslString(settings.accentColor)}
+                                onChange={(e) => handleColorInputChange(e, 'accentColor')}
+                                disabled={!canManageSettings}
+                                className="font-mono"
+                            />
+                            <Input 
+                                type="color"
+                                value={getHexFromHslString(settings.accentColor)}
+                                onChange={(e) => handleColorInputChange(e, 'accentColor')}
+                                className="w-12 h-10 p-1"
+                                disabled={!canManageSettings}
+                            />
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -295,5 +361,3 @@ export default function SettingsPage() {
         </div>
     );
 }
-
-    

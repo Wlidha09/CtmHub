@@ -103,12 +103,15 @@ export default function DashboardLayout({
         :root {
           --sidebar-primary: ${settings.logoSvgColor};
           --logo-text-color: ${settings.logoTextColor};
+          --primary: ${settings.primaryColor};
+          --background: ${settings.backgroundColor};
+          --accent: ${settings.accentColor};
         }
       `}</style>
       <SidebarProvider>
         <Sidebar side="left" variant="sidebar" collapsible="icon">
           <SidebarRail />
-          <SidebarHeader className="border-b border-sidebar-border group-data-[collapsible=icon]:-ml-2">
+          <SidebarHeader className="border-b border-sidebar-border">
             <Link
               href="/dashboard"
               className="flex items-center gap-2 font-bold"

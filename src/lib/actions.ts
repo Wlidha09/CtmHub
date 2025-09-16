@@ -406,6 +406,9 @@ const settingsSchema = z.object({
     leaveAccumulationAmount: z.number().min(0, "Leave accumulation amount cannot be negative."),
     logoSvgColor: z.string().optional(),
     logoTextColor: z.string().optional(),
+    primaryColor: z.string().optional(),
+    backgroundColor: z.string().optional(),
+    accentColor: z.string().optional(),
 });
 
 export async function updateSettings(data: AppSettings) {

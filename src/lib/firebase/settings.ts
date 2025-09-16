@@ -17,6 +17,9 @@ export async function getSettings(): Promise<AppSettings> {
         leaveAccumulationAmount: 1.5,
         logoSvgColor: '208 44% 49%',
         logoTextColor: '220 13% 90%',
+        primaryColor: '210 11% 50%',
+        backgroundColor: '220 13% 96%',
+        accentColor: '208 44% 49%',
     };
 }
 

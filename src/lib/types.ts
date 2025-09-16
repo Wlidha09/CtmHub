@@ -5,6 +5,9 @@ export type AppSettings = {
     leaveAccumulationAmount: number;
     logoSvgColor?: string;
     logoTextColor?: string;
+    primaryColor?: string;
+    backgroundColor?: string;
+    accentColor?: string;
 };
 
 export type Employee = {
