@@ -7,11 +7,12 @@ import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
 import { initialRoles as roles } from '@/lib/data';
-import type { Employee, Department, LeaveRequest, Ticket, Holiday } from "@/lib/types";
+import type { Employee, Department, LeaveRequest, Ticket, Holiday, AppSettings } from "@/lib/types";
 import { addLeaveRequest as addLeaveRequestFB, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";
 import { getHolidaysByYear, addHoliday as addHolidayFB, updateHoliday as updateHolidayFB } from "./firebase/holidays";
 import { saveAvailability } from "./firebase/availability";
+import { updateSettings as updateSettingsFB } from "./firebase/settings";
 import {
   startOfMonth,
   endOfMonth,
@@ -173,7 +174,7 @@ const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (m
 
 export async function seedDatabase() {
   try {
-    const collectionsToEnsure = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates', 'availability'];
+    const collectionsToEnsure = ['employees', 'departments', 'roles', 'leaveRequests', 'candidates', 'availability', 'settings'];
     for (const collectionName of collectionsToEnsure) {
         await ensureCollection(collectionName);
     }
@@ -397,5 +398,29 @@ export async function accumulateLeave(accumulationAmount: number) {
     } catch (error) {
         console.error('Error accumulating leave:', error);
         return { success: false, message: 'An internal error occurred while accumulating leave.' };
+    }
+}
+
+const settingsSchema = z.object({
+    projectName: z.string().min(1, "Project name cannot be empty."),
+    leaveAccumulationAmount: z.number().min(0, "Leave accumulation amount cannot be negative."),
+});
+
+export async function updateSettings(data: AppSettings) {
+    const validatedFields = settingsSchema.safeParse(data);
+
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            message: "Invalid input.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    try {
+        await updateSettingsFB(validatedFields.data);
+        return { success: true, message: 'Settings updated successfully.' };
+    } catch (error) {
+        return { success: false, message: 'Failed to update settings.' };
     }
 }

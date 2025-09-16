@@ -1,5 +1,10 @@
 
 
+export type AppSettings = {
+    projectName: string;
+    leaveAccumulationAmount: number;
+};
+
 export type Employee = {
   id: string;
   name: string;
@@ -106,5 +111,6 @@ export type Booking = {
   endTime: string; // ISO string
   date: string; // YYYY-MM-DD
 };
+
 
 
