@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { RoleProvider, useCurrentRole } from "@/hooks/use-current-role";
+import { getSettings } from "@/lib/firebase/settings";
 
 function RoleSwitcher() {
   const { currentRole, setCurrentRole } = useCurrentRole();
@@ -77,6 +78,21 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [projectName, setProjectName] = React.useState('LoopHub');
+
+  React.useEffect(() => {
+    const fetchProjectName = async () => {
+        try {
+            const settings = await getSettings();
+            setProjectName(settings.projectName);
+        } catch (error) {
+            console.error("Failed to fetch project name", error);
+            // Keep the default name 'LoopHub'
+        }
+    };
+    fetchProjectName();
+  }, []);
+
   return (
     <RoleProvider>
       <SidebarProvider>
@@ -103,7 +119,7 @@ export default function DashboardLayout({
                 <path d="M12 22a10 10 0 0 0 10-10" />
               </svg>
               <span className="duration-200 group-data-[collapsible=icon]:opacity-0">
-                LoopHub
+                {projectName}
               </span>
             </Link>
           </SidebarHeader>
