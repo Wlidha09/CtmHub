@@ -50,6 +50,8 @@ function PermissionsTable({
   ) => void;
   canManage: boolean;
 }) {
+  const permissionsKeys: (keyof Permission)[] = ["view", "create", "edit", "delete"];
+  
   return (
     <div className="overflow-x-auto">
         <Table className="min-w-full divide-y divide-gray-200">
@@ -80,12 +82,13 @@ function PermissionsTable({
                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                 >
                     <div className="flex justify-center space-x-4">
-                    {role.permissions[page] ? (Object.keys(role.permissions[page]) as (keyof Permission)[]).map(
-                        (p) => (
+                    {permissionsKeys.map((p) => {
+                      const isChecked = role.permissions[page]?.[p] || false;
+                      return (
                         <div key={p} className="flex items-center space-x-1">
                             <Checkbox
                             id={`${role.name}-${page}-${p}`}
-                            checked={role.permissions[page]?.[p] || false}
+                            checked={isChecked}
                             onCheckedChange={(checked) =>
                                 handlePermissionChange(
                                 role.name,
@@ -103,10 +106,8 @@ function PermissionsTable({
                             {p.charAt(0)}
                             </label>
                         </div>
-                        )
-                    ) : (
-                        <span className="text-xs text-muted-foreground">Not Set</span>
-                    )}
+                      )
+                    })}
                     </div>
                 </TableCell>
                 ))}
