@@ -71,10 +71,6 @@ export function BookingTimeline({ bookings, onBookingDeleted }: BookingTimelineP
                         {format(new Date(booking.startTime), "h:mm a")} - {format(new Date(booking.endTime), "h:mm a")}
                     </p>
                     <p className="text-muted-foreground font-medium">{booking.title}</p>
-                    <div className="text-sm text-muted-foreground mt-1">
-                        Booked by {booking.employeeName} 
-                        <Badge variant="outline" className="ml-2">{booking.departmentName}</Badge>
-                    </div>
                 </div>
                 {canDelete && (
                     <AlertDialog>
