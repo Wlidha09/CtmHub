@@ -114,10 +114,15 @@ export default function DashboardLayout({
                 strokeLinejoin="round"
                 className="h-6 w-6 text-sidebar-primary"
               >
-                <path d="M12 2a10 10 0 1 0 10 10" />
-                <path d="M12 2a10 10 0 0 1 10 10" />
-                <path d="M12 22a10 10 0 0 1-10-10" />
-                <path d="M12 22a10 10 0 0 0 10-10" />
+                <path d="M12 2 L14.5 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L9.5 9 Z" />
+                <path d="M12 2 V -1" />
+                <path d="M12 22 V 25" />
+                <path d="M22 9 H 25" />
+                <path d="M2 9 H -1" />
+                <path d="M18.5 4.5 L 20.5 2.5" />
+                <path d="M5.5 19.5 L 3.5 21.5" />
+                <path d="M5.5 4.5 L 3.5 2.5" />
+                <path d="M18.5 19.5 L 20.5 21.5" />
               </svg>
               <span className="duration-200 group-data-[collapsible=icon]:opacity-0">
                 {projectName}
