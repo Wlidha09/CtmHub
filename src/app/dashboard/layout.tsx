@@ -107,7 +107,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <Sidebar side="left" variant="sidebar" collapsible="icon">
           <SidebarRail />
-          <SidebarHeader className="items-center justify-center gap-2 group-data-[collapsible=icon]:-ml-2">
+          <SidebarHeader className="h-16 items-center justify-center gap-2 border-b border-sidebar-border group-data-[collapsible=icon]:-ml-2">
             <Link
               href="/dashboard"
               className="flex items-center gap-2 font-bold text-sidebar-foreground"
