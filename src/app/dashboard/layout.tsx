@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarRail,
+  SidebarCollapse,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,6 +123,7 @@ export default function DashboardLayout({
                 {projectName}
               </span>
             </Link>
+             <SidebarCollapse />
           </SidebarHeader>
           <SidebarContent>
             <DashboardNav />

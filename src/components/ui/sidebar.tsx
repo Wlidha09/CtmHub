@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, ChevronLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -285,6 +285,33 @@ const SidebarTrigger = React.forwardRef<
 })
 SidebarTrigger.displayName = "SidebarTrigger"
 
+const SidebarCollapse = React.forwardRef<
+    React.ElementRef<typeof Button>,
+    React.ComponentProps<typeof Button>
+>(({ className, onClick, ...props }, ref) => {
+    const { toggleSidebar, state } = useSidebar();
+
+    return (
+        <Button
+            ref={ref}
+            data-sidebar="collapse-trigger"
+            variant="ghost"
+            size="icon"
+            className={cn("h-7 w-7 absolute top-1/2 -translate-y-1/2 right-2 group-data-[collapsible=icon]:hidden", className)}
+            onClick={(event) => {
+                onClick?.(event);
+                toggleSidebar();
+            }}
+            {...props}
+        >
+            <ChevronLeft className="transform transition-transform duration-200 group-data-[state=collapsed]:-rotate-180" />
+            <span className="sr-only">Toggle Sidebar</span>
+        </Button>
+    );
+});
+SidebarCollapse.displayName = "SidebarCollapse";
+
+
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
@@ -358,7 +385,7 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn("flex flex-col gap-2 p-2 relative", className)}
       {...props}
     />
   )
@@ -737,6 +764,7 @@ SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
 export {
   Sidebar,
+  SidebarCollapse,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
