@@ -123,12 +123,11 @@ export default function DashboardLayout({
                 {projectName}
               </span>
             </Link>
-             <SidebarCollapse />
           </SidebarHeader>
           <SidebarContent>
             <DashboardNav />
           </SidebarContent>
-          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2">
+          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative">
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
             <DropdownMenu>
@@ -167,6 +166,7 @@ export default function DashboardLayout({
                 <DropdownMenuItem>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <SidebarCollapse />
           </SidebarFooter>
         </Sidebar>
         <div className="flex flex-col flex-1 min-h-screen">

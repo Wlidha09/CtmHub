@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -289,7 +290,7 @@ const SidebarCollapse = React.forwardRef<
     React.ElementRef<typeof Button>,
     React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-    const { toggleSidebar, state } = useSidebar();
+    const { toggleSidebar } = useSidebar();
 
     return (
         <Button
@@ -297,7 +298,7 @@ const SidebarCollapse = React.forwardRef<
             data-sidebar="collapse-trigger"
             variant="ghost"
             size="icon"
-            className={cn("h-7 w-7 absolute top-1/2 -translate-y-1/2 right-2 group-data-[collapsible=icon]:hidden", className)}
+            className={cn("h-7 w-7 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:bottom-4 group-data-[collapsible=icon]:left-1/2 group-data-[collapsible=icon]:-translate-x-1/2", className)}
             onClick={(event) => {
                 onClick?.(event);
                 toggleSidebar();
