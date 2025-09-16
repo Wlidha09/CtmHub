@@ -33,6 +33,7 @@ export const departmentData: Department[] = [
 export const appPages = [
   'Dashboard',
   'Employees',
+  'My Profile',
   'Departments',
   'Availability',
   'Roles',
@@ -83,11 +84,14 @@ export const initialRoles: Role[] = [
       const noPermissions = { view: false, create: false, edit: false, delete: false };
       acc[page] = noPermissions;
 
-      if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates', 'Tickets'].includes(page)) {
+      if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates', 'Tickets', 'My Profile'].includes(page)) {
         acc[page] = { view: true, create: true, edit: true, delete: false };
       }
-       if (page === 'Dashboard') {
-        acc[page] = { view: true, create: false, edit: false, delete: false };
+       if (page === 'Dashboard' || page === 'My Profile') {
+        acc[page] = { view: true, create: false, edit: true, delete: false };
+      }
+       if (page === 'Employees') {
+        acc[page] = { view: false, create: false, edit: false, delete: false };
       }
       if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
@@ -102,11 +106,14 @@ export const initialRoles: Role[] = [
       const noPermissions = { view: false, create: false, edit: false, delete: false };
       acc[page] = noPermissions;
 
-      if (['Dashboard', 'Availability', 'Leave Request'].includes(page)) {
+      if (['Dashboard', 'Availability', 'Leave Request', 'My Profile'].includes(page)) {
         acc[page] = { view: true, create: true, edit: false, delete: false };
       }
-      if (page === 'Dashboard') {
-        acc[page] = { view: true, create: false, edit: false, delete: false };
+      if (page === 'Dashboard' || page === 'My Profile') {
+        acc[page] = { view: true, create: false, edit: true, delete: false };
+      }
+       if (page === 'Employees') {
+        acc[page] = { view: false, create: false, edit: false, delete: false };
       }
       if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
@@ -122,4 +129,3 @@ export async function getEmployeeById(id: string): Promise<Employee | undefined>
 };
 export const getDepartmentById = (id: string) => departmentData.find(d => d.id === id);
 export const getDepartmentName = (id: string) => departments.find(d => d.id === id)?.name || 'Unknown';
-

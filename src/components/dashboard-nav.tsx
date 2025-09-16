@@ -17,6 +17,7 @@ import {
   CalendarClock,
   BookMarked,
   Settings,
+  User,
 } from "lucide-react";
 
 import {
@@ -35,9 +36,10 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/employees", label: "Employees", icon: Users },
+  { href: "/dashboard/employees", label: "Employees", icon: Users, roles: ['Dev', 'Owner', 'RH'] },
+  { href: "/dashboard/my-profile", label: "My Profile", icon: User, roles: ['Manager', 'Employee'] },
   { href: "/dashboard/departments", label: "Departments", icon: Building },
-  { href: "/dashboard/roles", label: "Roles", icon: ShieldCheck, roles: ['Dev', 'Owner', 'RH'] },
+  { href: "/dashboard/roles", label: "Roles", icon: ShieldCheck, roles: ['Dev', 'Owner'] },
   {
     href: "/dashboard/submit-leave",
     label: "Leave Request",
@@ -96,7 +98,7 @@ export function DashboardNav() {
     }
     // For Dev role, show everything except 'Submit Leave'
     if (currentRole === 'Dev') {
-        return item.href !== '/dashboard/submit-leave';
+        return item.href !== '/dashboard/submit-leave' && item.href !== '/dashboard/my-profile';
     }
     return item.roles.includes(currentRole);
   }).sort((a, b) => {

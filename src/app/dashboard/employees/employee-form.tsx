@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import type { Employee, Department } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrentRole } from "@/hooks/use-current-role";
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -34,6 +35,9 @@ interface EmployeeFormProps {
 export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }: EmployeeFormProps) {
   const [formData, setFormData] = React.useState<Partial<Employee>>({});
   const { toast } = useToast();
+  const { currentRole } = useCurrentRole();
+
+  const canEditSensitiveFields = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
   React.useEffect(() => {
     if (employee) {
@@ -166,6 +170,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 name="role"
                 value={formData.role || ""}
                 onValueChange={(value) => handleSelectChange("role", value)}
+                disabled={!canEditSensitiveFields}
                 >
                 <SelectTrigger id="role">
                     <SelectValue placeholder="Select a role" />
@@ -184,6 +189,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 name="departmentId"
                 value={formData.departmentId || ""}
                 onValueChange={(value) => handleSelectChange("departmentId", value)}
+                disabled={!canEditSensitiveFields}
                 >
                 <SelectTrigger id="departmentId">
                     <SelectValue placeholder="Select a department" />
@@ -203,6 +209,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     name="status"
                     value={formData.status || ""}
                     onValueChange={(value) => handleSelectChange("status", value as 'active' | 'inactive')}
+                    disabled={!canEditSensitiveFields}
                 >
                     <SelectTrigger id="status">
                         <SelectValue placeholder="Select status" />
@@ -221,6 +228,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     type="date"
                     value={formData.startDate || ''}
                     onChange={handleChange}
+                    disabled={!canEditSensitiveFields}
                 />
             </div>
           </div>
@@ -244,6 +252,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     value={formData.leaveBalance ?? ''}
                     onChange={handleChange}
                     placeholder="e.g., 10"
+                    disabled={!canEditSensitiveFields}
                 />
             </div>
            </div>

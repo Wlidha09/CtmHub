@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -40,6 +41,10 @@ import { RoleProvider, useCurrentRole } from "@/hooks/use-current-role";
 
 function RoleSwitcher() {
   const { currentRole, setCurrentRole } = useCurrentRole();
+  const canSwitchRole = currentRole === 'Dev' || currentRole === 'Owner';
+
+  if (!canSwitchRole) return null;
+
   return (
     <div className="group-data-[collapsible=icon]:hidden">
       <Label
