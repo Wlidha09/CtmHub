@@ -158,7 +158,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Theme Settings</CardTitle>
+                    <CardTitle>Logo Settings</CardTitle>
                     <CardDescription>Customize the look and feel of your application logo.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -295,3 +295,5 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
