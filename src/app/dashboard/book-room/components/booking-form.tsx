@@ -59,10 +59,10 @@ export function BookingForm({ roomId, date, currentUser, bookings, onBookingCrea
   }
   
   const getFilteredTimeSlots = () => {
-    if (!bookings.length) return timeSlots;
+    if (!date || !bookings.length) return timeSlots;
     return timeSlots.filter(slot => {
       const [hour, minute] = slot.split(':').map(Number);
-      const slotTime = setMilliseconds(setSeconds(setMinutes(setHours(date!, hour), minute), 0), 0).getTime();
+      const slotTime = setMilliseconds(setSeconds(setMinutes(setHours(date, hour), minute), 0), 0).getTime();
       
       for (const booking of bookings) {
         const bookingStart = new Date(booking.startTime).getTime();
