@@ -92,7 +92,7 @@ function PermissionsTable({
                                 !!checked
                                 )
                             }
-                            disabled={!canManage || role.isCore && role.name === 'Dev'}
+                            disabled={!canManage || (role.isCore && role.name === 'Dev')}
                             />
                             <label
                             htmlFor={`${role.name}-${page}-${p}`}
@@ -241,6 +241,12 @@ export default function RolesPage() {
     const updatedRoles = roles.map((role) => {
       if (role.name === roleName) {
         const newPermissions = { ...role.permissions };
+        
+        // Ensure the page permission object exists
+        if (!newPermissions[page]) {
+          newPermissions[page] = { view: false, create: false, edit: false, delete: false };
+        }
+
         const pagePermission = { ...newPermissions[page] };
         pagePermission[permission] = checked;
 
