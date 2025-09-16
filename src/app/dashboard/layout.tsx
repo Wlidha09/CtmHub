@@ -124,46 +124,48 @@ export default function DashboardLayout({
           <SidebarContent>
             <DashboardNav />
           </SidebarContent>
-          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative">
+          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col group-data-[collapsible=icon]:gap-2">
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
+            <div className="flex flex-col group-data-[collapsible=icon]:flex-col-reverse gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
+                  >
+                    <React.Fragment>
+                      <Avatar>
+                        <AvatarImage
+                          src="https://picsum.photos/seed/user-avatar/40/40"
+                          data-ai-hint="person portrait"
+                        />
+                        <AvatarFallback>AD</AvatarFallback>
+                      </Avatar>
+                      <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
+                        <p className="text-sm font-medium">Admin User</p>
+                        <p className="text-xs text-muted-foreground">
+                          admin@loophub.com
+                        </p>
+                      </div>
+                    </React.Fragment>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 mb-2"
+                  side="right"
+                  align="start"
                 >
-                  <React.Fragment>
-                    <Avatar>
-                      <AvatarImage
-                        src="https://picsum.photos/seed/user-avatar/40/40"
-                        data-ai-hint="person portrait"
-                      />
-                      <AvatarFallback>AD</AvatarFallback>
-                    </Avatar>
-                    <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                      <p className="text-sm font-medium">Admin User</p>
-                      <p className="text-xs text-muted-foreground">
-                        admin@loophub.com
-                      </p>
-                    </div>
-                  </React.Fragment>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-56 mb-2"
-                side="right"
-                align="start"
-              >
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <SidebarCollapse />
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <SidebarCollapse />
+            </div>
           </SidebarFooter>
         </Sidebar>
         <div className="flex flex-col flex-1 min-h-screen">

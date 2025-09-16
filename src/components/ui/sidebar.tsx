@@ -298,7 +298,7 @@ const SidebarCollapse = React.forwardRef<
             data-sidebar="collapse-trigger"
             variant="ghost"
             size="icon"
-            className={cn("h-7 w-7 absolute bottom-2 right-2 group-data-[collapsible=icon]:left-1/2 group-data-[collapsible=icon]:-translate-x-1/2", className)}
+            className={cn("h-7 w-7 group-data-[collapsible=icon]:left-1/2 group-data-[collapsible=icon]:-translate-x-1/2", className)}
             onClick={(event) => {
                 onClick?.(event);
                 toggleSidebar();
@@ -401,7 +401,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn("flex flex-col gap-2 p-2 mt-auto", className)}
       {...props}
     />
   )
