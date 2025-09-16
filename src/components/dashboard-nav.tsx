@@ -97,7 +97,15 @@ export function DashboardNav() {
   const pathname = usePathname();
   const { currentRole } = useCurrentRole();
 
-  const filteredNavItems = navItems.filter(item => {
+  const primaryNavItems = navItems.filter(item => item.href !== '/dashboard/settings');
+  const settingsNavItem = navItems.find(item => item.href === '/dashboard/settings');
+
+  const allFilteredNavItems = [
+    ...primaryNavItems,
+    ...(settingsNavItem ? [settingsNavItem] : []),
+  ];
+
+  const filteredNavItems = allFilteredNavItems.filter(item => {
     if (!item.roles) {
       return true; // if no roles are specified, show it to everyone
     }
@@ -106,10 +114,6 @@ export function DashboardNav() {
         return item.href !== '/dashboard/submit-leave' && item.href !== '/dashboard/my-profile';
     }
     return item.roles.includes(currentRole);
-  }).sort((a, b) => {
-    if (a.href === '/dashboard/settings') return 1;
-    if (b.href === '/dashboard/settings') return -1;
-    return 0;
   });
 
   return (
