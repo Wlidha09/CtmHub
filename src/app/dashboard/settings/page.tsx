@@ -23,14 +23,17 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
 
     const canManageSettings = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
-    const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type } = e.target;
-        setSettings(prev => ({
-            ...prev,
-            [name]: type === 'number' ? parseFloat(value) || 0 : value
-        }));
-    };
-    
+    const hslToHex = (h: number, s: number, l: number): string => {
+        l /= 100;
+        const a = s * Math.min(l, 1 - l) / 100;
+        const f = (n: number) => {
+            const k = (n + h / 30) % 12;
+            const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color).toString(16).padStart(2, '0');
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
+    }
+
     const hexToHsl = (hex: string): string | null => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         if (!result) return null;
@@ -59,8 +62,22 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
 
         return `${h} ${s}% ${l}%`;
     }
+    
+    const getHexFromHslString = (hslString?: string): string => {
+        if (!hslString) return '#000000';
+        const [h, s, l] = hslString.replace(/%/g, '').split(' ').map(Number);
+        return hslToHex(h, s, l);
+    }
 
-    const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'logoSvgColor' | 'logoTextColor') => {
+    const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value, type } = e.target;
+        setSettings(prev => ({
+            ...prev,
+            [name]: type === 'number' ? parseFloat(value) || 0 : value
+        }));
+    };
+    
+    const handleColorInputChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'logoSvgColor' | 'logoTextColor') => {
         const hex = e.target.value;
         const hsl = hexToHsl(hex);
         if (hsl) {
@@ -146,44 +163,46 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="logo-svg-color">Logo SVG Color (HSL)</Label>
+                        <Label htmlFor="logo-svg-color">Logo SVG Color</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="logo-svg-color"
                                 name="logoSvgColor"
-                                value={settings.logoSvgColor || ''}
-                                onChange={(e) => setSettings(prev => ({ ...prev, logoSvgColor: e.target.value}))}
+                                value={getHexFromHslString(settings.logoSvgColor)}
+                                onChange={(e) => handleColorInputChange(e, 'logoSvgColor')}
                                 disabled={!canManageSettings}
                                 className="font-mono"
                             />
                             <Input 
                                 type="color"
-                                onChange={(e) => handleColorChange(e, 'logoSvgColor')}
+                                value={getHexFromHslString(settings.logoSvgColor)}
+                                onChange={(e) => handleColorInputChange(e, 'logoSvgColor')}
                                 className="w-12 h-10 p-1"
                                 disabled={!canManageSettings}
                             />
                         </div>
-                        <p className="text-xs text-muted-foreground">This color is used for the sidebar logo SVG. Use HSL format.</p>
+                        <p className="text-xs text-muted-foreground">This color is used for the sidebar logo SVG.</p>
                     </div>
                      <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="logo-text-color">Logo Text Color (HSL)</Label>
+                        <Label htmlFor="logo-text-color">Logo Text Color</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="logo-text-color"
                                 name="logoTextColor"
-                                value={settings.logoTextColor || ''}
-                                onChange={(e) => setSettings(prev => ({ ...prev, logoTextColor: e.target.value}))}
+                                value={getHexFromHslString(settings.logoTextColor)}
+                                onChange={(e) => handleColorInputChange(e, 'logoTextColor')}
                                 disabled={!canManageSettings}
                                 className="font-mono"
                             />
                             <Input 
                                 type="color"
-                                onChange={(e) => handleColorChange(e, 'logoTextColor')}
+                                value={getHexFromHslString(settings.logoTextColor)}
+                                onChange={(e) => handleColorInputChange(e, 'logoTextColor')}
                                 className="w-12 h-10 p-1"
                                 disabled={!canManageSettings}
                             />
                         </div>
-                        <p className="text-xs text-muted-foreground">This color is used for the project name in the logo. Use HSL format.</p>
+                        <p className="text-xs text-muted-foreground">This color is used for the project name in the logo.</p>
                     </div>
                 </CardContent>
             </Card>
