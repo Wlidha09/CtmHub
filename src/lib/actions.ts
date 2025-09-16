@@ -404,6 +404,7 @@ export async function accumulateLeave(accumulationAmount: number) {
 const settingsSchema = z.object({
     projectName: z.string().min(1, "Project name cannot be empty."),
     leaveAccumulationAmount: z.number().min(0, "Leave accumulation amount cannot be negative."),
+    sidebarPrimaryColor: z.string().optional(),
 });
 
 export async function updateSettings(data: AppSettings) {

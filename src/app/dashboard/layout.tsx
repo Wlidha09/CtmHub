@@ -40,6 +40,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RoleProvider, useCurrentRole } from "@/hooks/use-current-role";
 import { getSettings } from "@/lib/firebase/settings";
+import type { AppSettings } from "@/lib/types";
 
 function RoleSwitcher() {
   const { currentRole, setCurrentRole } = useCurrentRole();
@@ -79,16 +80,18 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [projectName, setProjectName] = React.useState('LoopHub');
+  const [settings, setSettings] = React.useState<AppSettings>({
+    projectName: "LoopHub",
+    leaveAccumulationAmount: 1.5,
+  });
 
   React.useEffect(() => {
     const fetchProjectName = async () => {
         try {
-            const settings = await getSettings();
-            setProjectName(settings.projectName);
+            const fetchedSettings = await getSettings();
+            setSettings(fetchedSettings);
         } catch (error) {
-            console.error("Failed to fetch project name", error);
-            // Keep the default name 'LoopHub'
+            console.error("Failed to fetch settings", error);
         }
     };
     fetchProjectName();
@@ -96,6 +99,11 @@ export default function DashboardLayout({
 
   return (
     <RoleProvider>
+       <style>{`
+        :root {
+          --sidebar-primary: ${settings.sidebarPrimaryColor};
+        }
+      `}</style>
       <SidebarProvider>
         <Sidebar side="left" variant="sidebar" collapsible="icon">
           <SidebarRail />
@@ -117,7 +125,7 @@ export default function DashboardLayout({
                 <path d="M12 2 L14.5 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L9.5 9 Z"></path>
               </svg>
               <span className="duration-200 group-data-[collapsible=icon]:opacity-0">
-                {projectName}
+                {settings.projectName}
               </span>
             </Link>
           </SidebarHeader>
@@ -127,44 +135,46 @@ export default function DashboardLayout({
           <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col">
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
-            <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
-                  >
-                    <React.Fragment>
-                      <Avatar>
-                        <AvatarImage
-                          src="https://picsum.photos/seed/user-avatar/40/40"
-                          data-ai-hint="person portrait"
-                        />
-                        <AvatarFallback>AD</AvatarFallback>
-                      </Avatar>
-                      <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                        <p className="text-sm font-medium">Admin User</p>
-                        <p className="text-xs text-muted-foreground">
-                          admin@loophub.com
-                        </p>
-                      </div>
-                    </React.Fragment>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 mb-2"
-                  side="right"
-                  align="start"
-                >
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <SidebarCollapse className="ml-auto group-data-[collapsible=icon]:ml-0" />
+            <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:items-center">
+               <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
+                        >
+                            <React.Fragment>
+                            <Avatar>
+                                <AvatarImage
+                                src="https://picsum.photos/seed/user-avatar/40/40"
+                                data-ai-hint="person portrait"
+                                />
+                                <AvatarFallback>AD</AvatarFallback>
+                            </Avatar>
+                            <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
+                                <p className="text-sm font-medium">Admin User</p>
+                                <p className="text-xs text-muted-foreground">
+                                admin@loophub.com
+                                </p>
+                            </div>
+                            </React.Fragment>
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                        className="w-56 mb-2"
+                        side="right"
+                        align="start"
+                        >
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <SidebarCollapse className="ml-auto group-data-[collapsible=icon]:ml-0" />
+                </div>
             </div>
           </SidebarFooter>
         </Sidebar>

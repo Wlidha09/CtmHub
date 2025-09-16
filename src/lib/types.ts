@@ -3,6 +3,7 @@
 export type AppSettings = {
     projectName: string;
     leaveAccumulationAmount: number;
+    sidebarPrimaryColor?: string;
 };
 
 export type Employee = {
@@ -111,6 +112,4 @@ export type Booking = {
   endTime: string; // ISO string
   date: string; // YYYY-MM-DD
 };
-
-
 

@@ -1,4 +1,5 @@
 
+
 import { db } from './config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { AppSettings } from '@/lib/types';
@@ -14,9 +15,11 @@ export async function getSettings(): Promise<AppSettings> {
     return {
         projectName: 'LoopHub',
         leaveAccumulationAmount: 1.5,
+        sidebarPrimaryColor: '208 44% 49%',
     };
 }
 
 export async function updateSettings(settings: AppSettings): Promise<void> {
     await setDoc(settingsDocRef, settings, { merge: true });
 }
+
