@@ -107,9 +107,8 @@ export function DashboardNav() {
     }
     return item.roles.includes(currentRole);
   }).sort((a, b) => {
-    // Custom sort to move Availability to the end
-    if (a.href === '/dashboard/availability') return 1;
-    if (b.href === '/dashboard/availability') return -1;
+    if (a.href === '/dashboard/settings') return 1;
+    if (b.href === '/dashboard/settings') return -1;
     return 0;
   });
 
