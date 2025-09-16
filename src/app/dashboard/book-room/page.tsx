@@ -33,6 +33,7 @@ export default function BookRoomPage() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
   const [bookings, setBookings] = React.useState<Booking[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [editingBooking, setEditingBooking] = React.useState<Booking | null>(null);
   const { toast } = useToast();
 
   const fetchInitialData = React.useCallback(async () => {
@@ -49,7 +50,7 @@ export default function BookRoomPage() {
       setDepartments(departmentList);
       setCurrentUser(user);
 
-      if (roomList.length > 0) {
+      if (roomList.length > 0 && !selectedRoomId) {
         setSelectedRoomId(roomList[0].id);
       }
     } catch (error) {
@@ -61,7 +62,7 @@ export default function BookRoomPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, selectedRoomId]);
 
   React.useEffect(() => {
     fetchInitialData();
@@ -72,19 +73,7 @@ export default function BookRoomPage() {
     try {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
       const roomBookings = await getBookingsForRoomByDate(selectedRoomId, dateStr);
-      
-      const employeeMap = new Map(employees.map(e => [e.id, e]));
-      const departmentMap = new Map(departments.map(d => [d.id, d.name]));
-
-      const populatedBookings = roomBookings.map(b => {
-          const employee = employeeMap.get(b.userId);
-          return {
-              ...b,
-              employeeName: employee?.name || 'Unknown User',
-              departmentName: departmentMap.get(employee?.departmentId || '') || 'Unknown Dept.'
-          }
-      })
-      setBookings(populatedBookings);
+      setBookings(roomBookings);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -92,15 +81,23 @@ export default function BookRoomPage() {
         description: "Failed to fetch bookings for the selected room and date.",
       });
     }
-  }, [selectedRoomId, selectedDate, employees, departments, toast]);
+  }, [selectedRoomId, selectedDate, toast]);
 
   React.useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
+
+  const handleEditBooking = (booking: Booking) => {
+    setEditingBooking(booking);
+  };
   
   if (isLoading) {
       return <div>Loading booking system...</div>;
   }
+
+  const timelineBookings = selectedRoomId && selectedDate 
+    ? bookings.filter(b => b.roomId === selectedRoomId && b.date === format(selectedDate, 'yyyy-MM-dd'))
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -144,7 +141,11 @@ export default function BookRoomPage() {
             </CardContent>
           </Card>
 
-          <BookingTimeline bookings={bookings} onBookingDeleted={fetchBookings}/>
+          <BookingTimeline 
+            bookings={timelineBookings} 
+            onBookingDeleted={fetchBookings}
+            onEditBooking={handleEditBooking}
+          />
         </div>
         
         <div className="lg:col-span-1">
@@ -153,7 +154,9 @@ export default function BookRoomPage() {
             date={selectedDate}
             currentUser={currentUser}
             bookings={bookings}
-            onBookingCreated={fetchBookings}
+            onBookingAction={fetchBookings}
+            editingBooking={editingBooking}
+            setEditingBooking={setEditingBooking}
           />
         </div>
       </div>

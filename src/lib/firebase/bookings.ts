@@ -1,6 +1,6 @@
 
 import { db } from './config';
-import { collection, getDocs, query, where, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 
 export async function getBookingsForRoomByDate(roomId: string, date: string): Promise<Booking[]> {
@@ -19,6 +19,11 @@ export async function addBooking(booking: Omit<Booking, 'id'>): Promise<string> 
   };
   await setDoc(newDocRef, newBooking);
   return newDocRef.id;
+}
+
+export async function updateBooking(id: string, booking: Partial<Omit<Booking, 'id'>>): Promise<void> {
+    const bookingDoc = doc(db, 'bookings', id);
+    await updateDoc(bookingDoc, booking);
 }
 
 export async function deleteBooking(id: string): Promise<void> {

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -32,9 +32,10 @@ import { useCurrentRole } from "@/hooks/use-current-role";
 interface BookingTimelineProps {
   bookings: Booking[];
   onBookingDeleted: () => void;
+  onEditBooking: (booking: Booking) => void;
 }
 
-export function BookingTimeline({ bookings, onBookingDeleted }: BookingTimelineProps) {
+export function BookingTimeline({ bookings, onBookingDeleted, onEditBooking }: BookingTimelineProps) {
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
 
@@ -63,7 +64,7 @@ export function BookingTimeline({ bookings, onBookingDeleted }: BookingTimelineP
         {bookings.length > 0 ? (
           <ul className="space-y-4">
             {bookings.map((booking) => {
-              const canDelete = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH' || booking.userId === FAKE_CURRENT_USER_ID;
+              const canManage = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH' || booking.userId === FAKE_CURRENT_USER_ID;
               return (
               <li key={booking.id} className="p-4 rounded-lg bg-muted/50 flex items-center justify-between gap-4">
                 <div>
@@ -72,26 +73,31 @@ export function BookingTimeline({ bookings, onBookingDeleted }: BookingTimelineP
                     </p>
                     <p className="text-muted-foreground font-medium">{booking.title}</p>
                 </div>
-                {canDelete && (
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive">
-                                <Trash2 className="w-5 h-5"/>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently cancel this booking.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(booking.id)}>Delete Booking</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                {canManage && (
+                    <div className="flex items-center">
+                        <Button variant="ghost" size="icon" onClick={() => onEditBooking(booking)}>
+                            <Edit className="w-5 h-5"/>
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive">
+                                    <Trash2 className="w-5 h-5"/>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently cancel this booking.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(booking.id)}>Delete Booking</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 )}
               </li>
             )})}

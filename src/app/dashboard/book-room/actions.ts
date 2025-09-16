@@ -3,7 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { addBooking as addBookingFB, deleteBooking as deleteBookingFB } from "@/lib/firebase/bookings";
+import { addBooking as addBookingFB, deleteBooking as deleteBookingFB, updateBooking as updateBookingFB } from "@/lib/firebase/bookings";
 import type { Booking } from "@/lib/types";
 
 const bookingSchema = z.object({
@@ -11,7 +11,7 @@ const bookingSchema = z.object({
     userId: z.string(),
     employeeName: z.string(),
     departmentName: z.string(),
-    title: z.string().min(3, "Title must be at least 3 characters."),
+    title: z.string().min(3, "Title must be at least 3 characters.").optional().or(z.literal("")),
     date: z.string(),
     startTime: z.string(),
     endTime: z.string(),
@@ -40,6 +40,26 @@ export async function addBooking(bookingData: Omit<Booking, 'id'>): Promise<Acti
         return { success: true, message: "Room booked successfully." };
     } catch (error) {
         return { success: false, message: "Failed to book room." };
+    }
+}
+
+export async function updateBooking(id: string, bookingData: Partial<Omit<Booking, 'id'>>): Promise<ActionResponse> {
+    const validatedFields = bookingSchema.partial().safeParse(bookingData);
+
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            message: "Invalid input.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    try {
+        await updateBookingFB(id, validatedFields.data);
+        revalidatePath("/dashboard/book-room");
+        return { success: true, message: "Booking updated successfully." };
+    } catch (error) {
+        return { success: false, message: "Failed to update booking." };
     }
 }
 
