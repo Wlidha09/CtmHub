@@ -107,7 +107,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <Sidebar side="left" variant="sidebar" collapsible="icon">
           <SidebarRail />
-          <SidebarHeader className="h-16 items-center justify-center gap-2 border-b border-sidebar-border group-data-[collapsible=icon]:-ml-2">
+          <SidebarHeader className="border-b border-sidebar-border group-data-[collapsible=icon]:-ml-2">
             <Link
               href="/dashboard"
               className="flex items-center gap-2 font-bold text-sidebar-foreground"
@@ -135,8 +135,8 @@ export default function DashboardLayout({
           <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col">
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
-            <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:items-center">
-               <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
+            <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
+              <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:items-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                         <Button

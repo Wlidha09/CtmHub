@@ -386,11 +386,14 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-2 relative", className)}
+      className={cn(
+        "relative flex h-16 shrink-0 items-center justify-center gap-2 p-2",
+        className
+      )}
       {...props}
     />
-  )
-})
+  );
+});
 SidebarHeader.displayName = "SidebarHeader"
 
 const SidebarFooter = React.forwardRef<
