@@ -252,7 +252,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     value={formData.leaveBalance ?? ''}
                     onChange={handleChange}
                     placeholder="e.g., 10"
-                    disabled={!canEditSensitiveFields}
+                    disabled
                 />
             </div>
            </div>
