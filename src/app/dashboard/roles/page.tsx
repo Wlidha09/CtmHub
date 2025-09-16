@@ -83,7 +83,7 @@ function PermissionsTable({
                 >
                     <div className="flex justify-center space-x-4">
                     {permissionsKeys.map((p) => {
-                      const isChecked = role.permissions[page]?.[p] || false;
+                      const isChecked = role.permissions?.[page]?.[p] || false;
                       return (
                         <div key={p} className="flex items-center space-x-1">
                             <Checkbox
@@ -243,7 +243,7 @@ export default function RolesPage() {
     const originalRoles = [...roles];
     let updatedRoles = roles.map((role) => {
       if (role.name === roleName) {
-        const newPermissions = { ...role.permissions };
+        const newPermissions = { ...(role.permissions || {}) };
         
         if (!newPermissions[page]) {
           newPermissions[page] = { view: false, create: false, edit: false, delete: false };
