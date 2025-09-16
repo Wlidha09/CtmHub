@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 function LeaveAccumulationCard() {
     const [isAccumulating, setIsAccumulating] = React.useState(false);
-    const [amount, setAmount] = React.useState<number>(1.7);
+    const [amount, setAmount] = React.useState<number>(1.5);
     const { toast } = useToast();
     const { currentRole } = useCurrentRole();
 
