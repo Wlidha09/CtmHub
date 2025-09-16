@@ -124,10 +124,10 @@ export default function DashboardLayout({
           <SidebarContent>
             <DashboardNav />
           </SidebarContent>
-          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col group-data-[collapsible=icon]:gap-2">
+          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col">
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
-            <div className="flex flex-col group-data-[collapsible=icon]:flex-col-reverse gap-2">
+            <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -164,7 +164,7 @@ export default function DashboardLayout({
                   <DropdownMenuItem>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <SidebarCollapse />
+              <SidebarCollapse className="ml-auto group-data-[collapsible=icon]:ml-0" />
             </div>
           </SidebarFooter>
         </Sidebar>
