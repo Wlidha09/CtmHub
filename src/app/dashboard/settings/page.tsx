@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { accumulateLeave } from "@/lib/actions";
 import { useCurrentRole } from "@/hooks/use-current-role";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function LeaveAccumulationCard() {
     const [isAccumulating, setIsAccumulating] = React.useState(false);
+    const [amount, setAmount] = React.useState<number>(1.7);
     const { toast } = useToast();
     const { currentRole } = useCurrentRole();
 
@@ -24,9 +27,17 @@ function LeaveAccumulationCard() {
             });
             return;
         }
+        if (amount <= 0) {
+            toast({
+                variant: "destructive",
+                title: "Invalid Amount",
+                description: "Accumulation amount must be greater than zero.",
+            });
+            return;
+        }
 
         setIsAccumulating(true);
-        const result = await accumulateLeave();
+        const result = await accumulateLeave(amount);
         if (result.success) {
             toast({
                 title: "Success",
@@ -47,10 +58,22 @@ function LeaveAccumulationCard() {
             <CardHeader>
                 <CardTitle>Leave Accumulation</CardTitle>
                 <CardDescription>
-                    Manually add 1.7 days to the leave balance for all active employees. This should typically be run once per month.
+                    Manually add a specified number of days to the leave balance for all active employees. This should typically be run once per month.
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+                <div className="space-y-2 max-w-xs">
+                    <Label htmlFor="leave-amount">Days to Accumulate</Label>
+                    <Input 
+                        id="leave-amount"
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                        step="0.1"
+                        min="0"
+                        disabled={!canManageSettings}
+                    />
+                </div>
                 <Button onClick={handleAccumulate} disabled={isAccumulating || !canManageSettings}>
                     {isAccumulating ? "Processing..." : "Run Monthly Leave Accumulation"}
                 </Button>

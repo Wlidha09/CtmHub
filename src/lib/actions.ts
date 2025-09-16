@@ -368,7 +368,11 @@ export async function updateHoliday(id: string, data: Partial<Holiday>) {
     }
 }
 
-export async function accumulateLeave() {
+export async function accumulateLeave(accumulationAmount: number) {
+    if (typeof accumulationAmount !== 'number' || accumulationAmount <= 0) {
+        return { success: false, message: 'Invalid accumulation amount provided.' };
+    }
+
     try {
         const q = query(collection(db, 'employees'), where('status', '==', 'active'));
         const employeeSnapshot = await getDocs(q);
@@ -379,7 +383,6 @@ export async function accumulateLeave() {
         }
 
         const batch = writeBatch(db);
-        const accumulationAmount = 1.7;
 
         activeEmployees.forEach(employee => {
             const employeeRef = doc(db, 'employees', employee.id);
