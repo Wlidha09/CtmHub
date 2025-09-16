@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { accumulateLeave } from "@/lib/actions";
@@ -87,6 +87,51 @@ function LeaveAccumulationCard() {
     );
 }
 
+function ProjectSettingsCard() {
+    const [projectName, setProjectName] = React.useState("LoopHub");
+    const [isSaving, setIsSaving] = React.useState(false);
+    const { toast } = useToast();
+
+    const handleSave = () => {
+        setIsSaving(true);
+        // In a real app, you would save this to a database
+        // and update a global state.
+        setTimeout(() => {
+            toast({
+                title: "Project Name Updated",
+                description: `The project name has been set to "${projectName}".`,
+            });
+            setIsSaving(false);
+        }, 1000);
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Project Settings</CardTitle>
+                <CardDescription>
+                    Configure general settings for the project.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <div className="space-y-2 max-w-xs">
+                    <Label htmlFor="project-name">Project Name</Label>
+                    <Input 
+                        id="project-name"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                    />
+                </div>
+            </CardContent>
+            <CardFooter>
+                 <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save Project Name"}
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+}
+
 
 export default function SettingsPage() {
   return (
@@ -99,6 +144,7 @@ export default function SettingsPage() {
           Manage your application settings and configurations.
         </p>
       </header>
+      <ProjectSettingsCard />
       <LeaveAccumulationCard />
     </div>
   );
