@@ -1,5 +1,4 @@
 
-
 import type { Employee, Department, Role, PagePermissions } from '@/lib/types';
 
 export const departments: Omit<Department, 'leadId'>[] = [
@@ -54,7 +53,7 @@ export const initialRoles: Role[] = [
     permissions: appPages.reduce((acc, page) => {
       acc[page] = { view: true, create: true, edit: true, delete: true };
       return acc;
-    }, {} as { [key: string]: any }),
+    }, {} as PagePermissions),
   },
   {
     name: 'Owner',
@@ -62,58 +61,58 @@ export const initialRoles: Role[] = [
     permissions: appPages.reduce((acc, page) => {
       acc[page] = { view: true, create: true, edit: true, delete: true };
       return acc;
-    }, {} as { [key: string]: any }),
+    }, {} as PagePermissions),
   },
   {
     name: 'RH',
     isCore: true,
     permissions: appPages.reduce((acc, page) => {
-      acc[page] = { view: true, create: true, edit: true, delete: true };
+      const allPermissions = { view: true, create: true, edit: true, delete: true };
       if (page === 'Roles') {
         acc[page] = { view: true, create: false, edit: false, delete: false };
+      } else {
+        acc[page] = allPermissions;
       }
       return acc;
-    }, {} as { [key: string]: any }),
+    }, {} as PagePermissions),
   },
   {
     name: 'Manager',
     isCore: true,
     permissions: appPages.reduce((acc, page) => {
-      acc[page] = { view: false, create: false, edit: false, delete: false };
+      const noPermissions = { view: false, create: false, edit: false, delete: false };
+      acc[page] = noPermissions;
+
       if (['Dashboard', 'Employees', 'Availability', 'Leave Request', 'Holidays', 'Candidates', 'Tickets'].includes(page)) {
         acc[page] = { view: true, create: true, edit: true, delete: false };
       }
        if (page === 'Dashboard') {
         acc[page] = { view: true, create: false, edit: false, delete: false };
       }
-      if (page === 'Book a Room') {
-        acc[page] = { view: true, create: true, edit: true, delete: true };
-      }
-       if (page === 'Manage Rooms') {
+      if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
       }
       return acc;
-    }, {} as { [key:string]: any }),
+    }, {} as PagePermissions),
   },
   {
     name: 'Employee',
     isCore: true,
     permissions: appPages.reduce((acc, page) => {
-      acc[page] = { view: false, create: false, edit: false, delete: false };
+      const noPermissions = { view: false, create: false, edit: false, delete: false };
+      acc[page] = noPermissions;
+
       if (['Dashboard', 'Availability', 'Leave Request'].includes(page)) {
         acc[page] = { view: true, create: true, edit: false, delete: false };
       }
       if (page === 'Dashboard') {
         acc[page] = { view: true, create: false, edit: false, delete: false };
       }
-      if (page === 'Book a Room') {
-        acc[page] = { view: true, create: true, edit: true, delete: true };
-      }
-      if (page === 'Manage Rooms') {
+      if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
       }
       return acc;
-    }, {} as { [key: string]: any }),
+    }, {} as PagePermissions),
   },
 ];
 
@@ -123,3 +122,4 @@ export async function getEmployeeById(id: string): Promise<Employee | undefined>
 };
 export const getDepartmentById = (id: string) => departmentData.find(d => d.id === id);
 export const getDepartmentName = (id: string) => departments.find(d => d.id === id)?.name || 'Unknown';
+
