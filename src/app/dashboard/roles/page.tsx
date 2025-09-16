@@ -31,8 +31,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { getRoles, addRole as addRoleFB, updateRole, deleteRole as deleteRoleFB } from "@/lib/firebase/roles";
+import { useRouter } from "next/navigation";
 
-const LOCAL_STORAGE_KEY = "loophub-roles";
 
 // Component for the permissions table
 function PermissionsTable({
@@ -201,49 +202,48 @@ export default function RolesPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const { currentRole } = useCurrentRole();
   const { toast } = useToast();
+  const router = useRouter();
 
   const canManage = currentRole === "Dev" || currentRole === "Owner";
 
-  React.useEffect(() => {
+  const fetchRoles = React.useCallback(async () => {
+    setIsLoading(true);
     try {
-      const savedRoles = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedRoles) {
-        setRoles(JSON.parse(savedRoles));
+      const fetchedRoles = await getRoles();
+      if (fetchedRoles.length > 0) {
+        setRoles(fetchedRoles);
       } else {
+        // If no roles in DB, seed with initial roles
+        await Promise.all(initialRoles.map(role => addRoleFB(role)));
         setRoles(initialRoles);
       }
     } catch (error) {
-      console.error("Failed to load roles from localStorage", error);
-      setRoles(initialRoles);
-    }
-    setIsLoading(false);
-  }, []);
-
-  const saveRoles = (updatedRoles: Role[]) => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedRoles));
-      setRoles(updatedRoles);
-    } catch (error) {
-      console.error("Failed to save roles to localStorage", error);
+      console.error("Failed to load roles from Firestore", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not save role changes.",
+        description: "Could not load roles from database.",
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const handlePermissionChange = (
+  React.useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  const handlePermissionChange = async (
     roleName: string,
     page: string,
     permission: keyof Permission,
     checked: boolean
   ) => {
-    const updatedRoles = roles.map((role) => {
+    const originalRoles = [...roles];
+    let updatedRoles = roles.map((role) => {
       if (role.name === roleName) {
         const newPermissions = { ...role.permissions };
         
-        // Ensure the page permission object exists
         if (!newPermissions[page]) {
           newPermissions[page] = { view: false, create: false, edit: false, delete: false };
         }
@@ -251,13 +251,11 @@ export default function RolesPage() {
         const pagePermission = { ...newPermissions[page] };
         pagePermission[permission] = checked;
 
-        // Smart logic: if view is disabled, disable all others
         if (permission === 'view' && !checked) {
             pagePermission.create = false;
             pagePermission.edit = false;
             pagePermission.delete = false;
         }
-        // If any other is enabled, enable view
         if (permission !== 'view' && checked) {
             pagePermission.view = true;
         }
@@ -267,10 +265,26 @@ export default function RolesPage() {
       }
       return role;
     });
-    saveRoles(updatedRoles);
+
+    setRoles(updatedRoles); // Optimistic update
+
+    try {
+      const roleToUpdate = updatedRoles.find(r => r.name === roleName);
+      if (roleToUpdate) {
+        await updateRole(roleName, { permissions: roleToUpdate.permissions });
+      }
+    } catch (error) {
+        console.error("Failed to save role changes to Firestore", error);
+        setRoles(originalRoles); // Revert on error
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not save role changes.",
+        });
+    }
   };
 
-  const addRole = (roleName: string) => {
+  const addRole = async (roleName: string) => {
     if (roles.some(r => r.name.toLowerCase() === roleName.toLowerCase())) {
         toast({ variant: "destructive", title: "Error", description: "Role already exists." });
         return;
@@ -283,18 +297,33 @@ export default function RolesPage() {
             return acc;
         }, {} as PagePermissions)
     };
-    saveRoles([...roles, newRole]);
-    toast({ title: "Success", description: `Role "${roleName}" created.` });
+
+    try {
+        await addRoleFB(newRole);
+        setRoles([...roles, newRole]);
+        toast({ title: "Success", description: `Role "${roleName}" created.` });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to create role." });
+    }
   };
 
-  const deleteRole = (roleName: string) => {
+  const deleteRole = async (roleName: string) => {
     const roleToDelete = roles.find(r => r.name === roleName);
     if (!roleToDelete || roleToDelete.isCore) {
         toast({ variant: "destructive", title: "Error", description: "Core roles cannot be deleted." });
         return;
     }
-    saveRoles(roles.filter(r => r.name !== roleName));
-    toast({ title: "Success", description: `Role "${roleName}" deleted.` });
+    
+    const originalRoles = [...roles];
+    setRoles(roles.filter(r => r.name !== roleName)); // Optimistic delete
+
+    try {
+        await deleteRoleFB(roleName);
+        toast({ title: "Success", description: `Role "${roleName}" deleted.` });
+    } catch (error) {
+        setRoles(originalRoles); // Revert on error
+        toast({ variant: "destructive", title: "Error", description: `Failed to delete role "${roleName}".` });
+    }
   }
 
   if (isLoading) {
