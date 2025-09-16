@@ -9,6 +9,7 @@ import { accumulateLeave } from "@/lib/actions";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 function LeaveAccumulationCard() {
     const [isAccumulating, setIsAccumulating] = React.useState(false);
@@ -91,6 +92,7 @@ function ProjectSettingsCard() {
     const [projectName, setProjectName] = React.useState("LoopHub");
     const [isSaving, setIsSaving] = React.useState(false);
     const { toast } = useToast();
+    const router = useRouter();
 
     const handleSave = () => {
         setIsSaving(true);
@@ -102,6 +104,7 @@ function ProjectSettingsCard() {
                 description: `The project name has been set to "${projectName}".`,
             });
             setIsSaving(false);
+            router.refresh();
         }, 1000);
     };
 
