@@ -15,11 +15,11 @@ export async function getSettings(): Promise<AppSettings> {
     return {
         projectName: 'LoopHub',
         leaveAccumulationAmount: 1.5,
-        sidebarPrimaryColor: '208 44% 49%',
+        logoSvgColor: '208 44% 49%',
+        logoTextColor: '220 13% 90%',
     };
 }
 
 export async function updateSettings(settings: AppSettings): Promise<void> {
     await setDoc(settingsDocRef, settings, { merge: true });
 }
-

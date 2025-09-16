@@ -101,7 +101,8 @@ export default function DashboardLayout({
     <RoleProvider>
        <style>{`
         :root {
-          --sidebar-primary: ${settings.sidebarPrimaryColor};
+          --sidebar-primary: ${settings.logoSvgColor};
+          --logo-text-color: ${settings.logoTextColor};
         }
       `}</style>
       <SidebarProvider>
@@ -110,7 +111,7 @@ export default function DashboardLayout({
           <SidebarHeader className="border-b border-sidebar-border group-data-[collapsible=icon]:-ml-2">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 font-bold text-sidebar-foreground"
+              className="flex items-center gap-2 font-bold"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -124,7 +125,7 @@ export default function DashboardLayout({
               >
                 <path d="M12 2 L14.5 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L9.5 9 Z"></path>
               </svg>
-              <span className="duration-200 group-data-[collapsible=icon]:opacity-0">
+              <span className="duration-200 group-data-[collapsible=icon]:opacity-0" style={{ color: 'hsl(var(--logo-text-color))' }}>
                 {settings.projectName}
               </span>
             </Link>

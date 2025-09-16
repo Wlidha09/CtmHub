@@ -3,7 +3,8 @@
 export type AppSettings = {
     projectName: string;
     leaveAccumulationAmount: number;
-    sidebarPrimaryColor?: string;
+    logoSvgColor?: string;
+    logoTextColor?: string;
 };
 
 export type Employee = {

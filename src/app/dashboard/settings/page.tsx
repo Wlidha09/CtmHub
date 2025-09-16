@@ -60,11 +60,11 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
         return `${h} ${s}% ${l}%`;
     }
 
-    const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'logoSvgColor' | 'logoTextColor') => {
         const hex = e.target.value;
         const hsl = hexToHsl(hex);
         if (hsl) {
-            setSettings(prev => ({ ...prev, sidebarPrimaryColor: hsl }));
+            setSettings(prev => ({ ...prev, [fieldName]: hsl }));
         }
     };
 
@@ -142,28 +142,48 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
             <Card>
                 <CardHeader>
                     <CardTitle>Theme Settings</CardTitle>
-                    <CardDescription>Customize the look and feel of your application.</CardDescription>
+                    <CardDescription>Customize the look and feel of your application logo.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="logo-color">Logo & Primary Color (HSL)</Label>
+                        <Label htmlFor="logo-svg-color">Logo SVG Color (HSL)</Label>
                         <div className="flex items-center gap-2">
                              <Input
-                                id="logo-color"
-                                name="sidebarPrimaryColor"
-                                value={settings.sidebarPrimaryColor || ''}
-                                onChange={(e) => setSettings(prev => ({ ...prev, sidebarPrimaryColor: e.target.value}))}
+                                id="logo-svg-color"
+                                name="logoSvgColor"
+                                value={settings.logoSvgColor || ''}
+                                onChange={(e) => setSettings(prev => ({ ...prev, logoSvgColor: e.target.value}))}
                                 disabled={!canManageSettings}
                                 className="font-mono"
                             />
                             <Input 
                                 type="color"
-                                onChange={handleColorChange}
+                                onChange={(e) => handleColorChange(e, 'logoSvgColor')}
                                 className="w-12 h-10 p-1"
                                 disabled={!canManageSettings}
                             />
                         </div>
-                        <p className="text-xs text-muted-foreground">This color is used for the sidebar logo and primary UI elements. Use HSL format (e.g. "208 44% 49%")</p>
+                        <p className="text-xs text-muted-foreground">This color is used for the sidebar logo SVG. Use HSL format.</p>
+                    </div>
+                     <div className="space-y-2 max-w-xs">
+                        <Label htmlFor="logo-text-color">Logo Text Color (HSL)</Label>
+                        <div className="flex items-center gap-2">
+                             <Input
+                                id="logo-text-color"
+                                name="logoTextColor"
+                                value={settings.logoTextColor || ''}
+                                onChange={(e) => setSettings(prev => ({ ...prev, logoTextColor: e.target.value}))}
+                                disabled={!canManageSettings}
+                                className="font-mono"
+                            />
+                            <Input 
+                                type="color"
+                                onChange={(e) => handleColorChange(e, 'logoTextColor')}
+                                className="w-12 h-10 p-1"
+                                disabled={!canManageSettings}
+                            />
+                        </div>
+                        <p className="text-xs text-muted-foreground">This color is used for the project name in the logo. Use HSL format.</p>
                     </div>
                 </CardContent>
             </Card>

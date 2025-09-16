@@ -41,6 +41,7 @@ body {
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 30%;
     --sidebar-ring: 208 44% 49%;
+    --logo-text-color: 220 13% 90%;
   }
 
   .dark {
@@ -71,6 +72,7 @@ body {
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 25%;
     --sidebar-ring: 208 44% 59%;
+    --logo-text-color: 220 13% 90%;
   }
 }
 
