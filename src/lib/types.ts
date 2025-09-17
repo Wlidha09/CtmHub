@@ -12,6 +12,10 @@ export type AppSettings = {
 
 export type Language = "en" | "fr";
 
+export type UserSettings = {
+    language?: Language;
+}
+
 export type Employee = {
   id: string;
   name: string;
@@ -24,7 +28,7 @@ export type Employee = {
   startDate: string;
   birthDate?: string;
   leaveBalance?: number;
-  defaultLanguage?: Language;
+  userSettings?: UserSettings;
 };
 
 export type Department = {

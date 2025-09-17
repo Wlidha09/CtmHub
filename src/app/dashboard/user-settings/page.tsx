@@ -40,7 +40,7 @@ export default function UserSettingsPage() {
       try {
         const user = await getEmployee(FAKE_CURRENT_USER_ID);
         setCurrentUser(user);
-        setDefaultLanguage(user?.defaultLanguage || language);
+        setDefaultLanguage(user?.userSettings?.language || language);
       } catch (error) {
         toast({
           variant: "destructive",
@@ -52,14 +52,15 @@ export default function UserSettingsPage() {
       }
     }
     fetchUser();
-  }, [language, t.toast_load_error, commonT.error, toast]);
+  }, [language, commonT.error, t.toast_load_error, toast]);
   
   const handleSave = async () => {
     if (!currentUser || !defaultLanguage) return;
 
     setIsSaving(true);
     try {
-        await updateEmployee(currentUser.id, { defaultLanguage });
+        const newSettings = { ...currentUser.userSettings, language: defaultLanguage };
+        await updateEmployee(currentUser.id, { userSettings: newSettings });
         setAppLanguage(defaultLanguage); // Update language in the app immediately
         toast({
             title: commonT.success,
@@ -118,4 +119,3 @@ export default function UserSettingsPage() {
     </div>
   );
 }
-

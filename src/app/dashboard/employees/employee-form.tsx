@@ -59,6 +59,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         startDate: new Date().toISOString().split('T')[0],
         birthDate: new Date().toISOString().split('T')[0],
         leaveBalance: 0,
+        userSettings: { language: 'en' },
       });
     }
   }, [employee, isOpen]);

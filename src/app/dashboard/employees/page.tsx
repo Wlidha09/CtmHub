@@ -135,6 +135,7 @@ export default function EmployeesPage() {
             startDate: employeeData.startDate || new Date().toISOString(),
             birthDate: employeeData.birthDate || new Date().toISOString(),
             leaveBalance: employeeData.leaveBalance ?? 0,
+            userSettings: employeeData.userSettings || { language: 'en' }
         };
         await addEmployee(newEmployeeData);
         toast({ title: "Success", description: t.toast_add_success });
