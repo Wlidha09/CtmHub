@@ -19,6 +19,7 @@ import {
 import { SeedButton } from "./seed-button";
 import * as React from "react";
 import { useCurrentRole } from "@/hooks/use-current-role";
+import { useLanguage } from "@/hooks/use-language";
 import { Badge } from "@/components/ui/badge";
 import { getEmployees } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
@@ -56,12 +57,12 @@ const totalRoles = 5; // This is static based on our defined roles
 
 export default function DashboardPage() {
   const { currentRole } = useCurrentRole();
+  const { language } = useLanguage();
   const [totalEmployees, setTotalEmployees] = React.useState(0);
   const [totalDepartments, setTotalDepartments] = React.useState(0);
   const [leaveRequests, setLeaveRequests] = React.useState<LeaveRequest[]>([]);
   const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [language, setLanguage] = React.useState<"en" | "fr">("en");
 
   const t = translations[language].dashboard;
 
@@ -123,10 +124,6 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-            <div className="flex gap-1 p-1 bg-muted rounded-md">
-                <Button size="sm" variant={language === 'en' ? 'default' : 'ghost'} onClick={() => setLanguage('en')}>EN</Button>
-                <Button size="sm" variant={language === 'fr' ? 'default' : 'ghost'} onClick={() => setLanguage('fr')}>FR</Button>
-            </div>
             <SeedButton />
         </div>
       </header>
