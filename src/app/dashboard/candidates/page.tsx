@@ -10,6 +10,7 @@ import fr from "@/locales/fr.json";
 import type { Candidate } from "@/lib/types";
 import { CvUploadForm } from "./components/cv-upload-form";
 import { CandidateList } from "./components/candidate-list";
+import { summarizeCvAction } from "@/lib/actions";
 
 const translations = { en, fr };
 
@@ -31,23 +32,40 @@ export default function CandidatesPage() {
     }
     setIsUploading(true);
 
-    // In a real app, you would upload the file to Firebase Storage
-    // and get a download URL. For now, we'll simulate this.
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const newCandidate: Candidate = {
-        id: `cand-${Date.now()}`,
-        name: file.name.replace(/\.pdf$/i, ''),
-        cvUrl: URL.createObjectURL(file),
-        uploadedAt: new Date().toISOString(),
-    };
+    const result = await summarizeCvAction(file);
 
-    setCandidates(prev => [...prev, newCandidate]);
+    if (result.success && result.data) {
+        const newCandidate: Candidate = {
+            id: `cand-${Date.now()}`,
+            name: result.data.fullName,
+            summary: result.data.summary,
+            cvUrl: URL.createObjectURL(file), // Create a temporary URL to view the file
+            uploadedAt: new Date().toISOString(),
+        };
+
+        setCandidates(prev => [...prev, newCandidate]);
+        toast({
+            title: t.toast_upload_success_title,
+            description: t.toast_upload_success_desc.replace('{fileName}', file.name),
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: t.toast_ai_error_title,
+            description: result.message || t.toast_ai_error_desc,
+        });
+        // Even if AI fails, we can add the candidate with the filename as name
+         const newCandidate: Candidate = {
+            id: `cand-${Date.now()}`,
+            name: file.name.replace(/\.pdf$/i, ''),
+            cvUrl: URL.createObjectURL(file),
+            uploadedAt: new Date().toISOString(),
+            summary: "AI summary failed."
+        };
+        setCandidates(prev => [...prev, newCandidate]);
+    }
+
     setIsUploading(false);
-    toast({
-        title: t.toast_upload_success_title,
-        description: t.toast_upload_success_desc.replace('{fileName}', file.name),
-    });
   };
 
   const handleDelete = (id: string) => {

@@ -23,7 +23,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Eye, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Eye, Trash2, FileText } from "lucide-react";
 import type { Candidate } from "@/lib/types";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
@@ -58,8 +59,25 @@ export function CandidateList({ candidates, onDelete }: CandidateListProps) {
                 <TableCell>
                   {format(new Date(candidate.uploadedAt), "PPP p")}
                 </TableCell>
-                <TableCell className="text-right">
-                  <Button asChild variant="outline" size="sm" className="mr-2">
+                <TableCell className="text-right space-x-2">
+                   {candidate.summary && (
+                     <Dialog>
+                        <DialogTrigger asChild>
+                           <Button variant="outline" size="sm">
+                            <FileText className="mr-2 h-4 w-4" /> {t.list_action_summary}
+                           </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>{t.summary_title.replace('{candidateName}', candidate.name)}</DialogTitle>
+                                <DialogDescription>
+                                    {candidate.summary}
+                                </DialogDescription>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
+                   )}
+                  <Button asChild variant="outline" size="sm">
                     <a href={candidate.cvUrl} target="_blank" rel="noopener noreferrer">
                       <Eye className="mr-2 h-4 w-4" /> {t.list_action_view}
                     </a>

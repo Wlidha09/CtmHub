@@ -97,6 +97,7 @@ export type Candidate = {
   name: string;
   cvUrl: string;
   uploadedAt: string; // ISO string
+  summary?: string;
 };
 
 export type Availability = {
@@ -130,4 +131,3 @@ export type Booking = {
   endTime: string; // ISO string
   date: string; // YYYY-MM-DD
 };
-

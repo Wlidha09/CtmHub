@@ -3,11 +3,12 @@
 "use server";
 
 import { syncHolidays as syncHolidaysFlow } from "@/ai/flows/sync-holidays-flow";
+import { summarizeCv } from "@/ai/flows/summarize-cv-flow";
 import { z } from "zod";
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, setDoc, deleteDoc, getDocs, where, query } from 'firebase/firestore';
 import { initialRoles as roles } from '@/lib/data';
-import type { Employee, Department, LeaveRequest, Ticket, Holiday, AppSettings } from "@/lib/types";
+import type { Employee, Department, LeaveRequest, Ticket, Holiday, AppSettings, Candidate } from "@/lib/types";
 import { addLeaveRequest as addLeaveRequestFB, updateLeaveRequestStatus as updateStatus } from "./firebase/leave-requests";
 import { getEmployees, getEmployee } from "./firebase/employees";
 import { getHolidaysByYear, addHoliday as addHolidayFB, updateHoliday as updateHolidayFB } from "./firebase/holidays";
@@ -24,6 +25,25 @@ import {
   format,
   parseISO,
 } from 'date-fns';
+import pdf from 'pdf-parse';
+
+export async function summarizeCvAction(file: File) {
+    try {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const data = await pdf(buffer);
+
+        const cvDataUri = `data:application/pdf;base64,${buffer.toString('base64')}`;
+        
+        const result = await summarizeCv({ cvDataUri });
+
+        return { success: true, data: result };
+
+    } catch (error) {
+        console.error('Error summarizing CV:', error);
+        return { success: false, message: 'Failed to process the CV with AI.' };
+    }
+}
+
 
 export async function saveWeeklyAvailability(userId: string, weekStartDate: string, selectedDays: string[]) {
     try {
