@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -16,11 +17,18 @@ import type { LeaveRequest } from "@/lib/types";
 import { getLeaveRequests } from "@/lib/firebase/leave-requests";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 export default function LeaveRequestPage() {
   const [requests, setRequests] = React.useState<LeaveRequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = translations[language].submit_leave_page;
 
   const fetchRequests = React.useCallback(async () => {
     setIsLoading(true);
@@ -33,12 +41,12 @@ export default function LeaveRequestPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch leave requests.",
+        description: t.toast_fetch_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     fetchRequests();
@@ -68,32 +76,32 @@ export default function LeaveRequestPage() {
       <div className="flex items-center justify-between">
         <header>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Leave Requests
+            {t.title}
           </h1>
           <p className="text-muted-foreground">
-            View your leave requests and submit new ones.
+            {t.description}
           </p>
         </header>
         <NewLeaveRequestForm onFormSubmit={fetchRequests} />
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>My Requests</CardTitle>
+          <CardTitle>{t.my_requests}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Leave Type</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead className="text-right">Status</TableHead>
+                <TableHead>{t.table_header_type}</TableHead>
+                <TableHead>{t.table_header_start}</TableHead>
+                <TableHead>{t.table_header_end}</TableHead>
+                <TableHead className="text-right">{t.table_header_status}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">Loading...</TableCell>
+                  <TableCell colSpan={4} className="text-center">{t.loading}</TableCell>
                 </TableRow>
               ) : requests.length > 0 ? (
                 requests.map((request) => (
@@ -110,7 +118,7 @@ export default function LeaveRequestPage() {
                 ))
               ) : (
                  <TableRow>
-                  <TableCell colSpan={4} className="text-center">No leave requests found.</TableCell>
+                  <TableCell colSpan={4} className="text-center">{t.no_requests}</TableCell>
                 </TableRow>
               )}
             </TableBody>

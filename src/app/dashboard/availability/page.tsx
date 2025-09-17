@@ -9,6 +9,11 @@ import type { Availability, Employee, WeeklySchedule } from "@/lib/types";
 import { getUserAvailabilityForWeek, getWeeklySchedule } from "@/lib/firebase/availability";
 import { useToast } from "@/hooks/use-toast";
 import { startOfWeek, format } from "date-fns";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 // In a real app, this would come from the authenticated user
 const FAKE_CURRENT_USER_ID = "e2";
@@ -19,6 +24,8 @@ export default function AvailabilityPage() {
   const [weeklySchedule, setWeeklySchedule] = React.useState<WeeklySchedule[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = translations[language].availability_page;
 
   const isManagerView = currentRole === 'Manager' || currentRole === 'RH' || currentRole === 'Owner' || currentRole === 'Dev';
   
@@ -39,19 +46,19 @@ export default function AvailabilityPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load availability data.",
+        description: t.toast_load_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [isManagerView, weekStartDate, toast]);
+  }, [isManagerView, weekStartDate, toast, t]);
 
   React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   if (isLoading) {
-    return <div>Loading availability...</div>;
+    return <div>{t.loading}</div>;
   }
 
   const hasSubmitted = !!userAvailability;
@@ -60,12 +67,12 @@ export default function AvailabilityPage() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Weekly Availability
+          {t.title}
         </h1>
         <p className="text-muted-foreground">
           {isManagerView 
-            ? "View your team's weekly in-office schedule."
-            : "Submit your preferred in-office days for the week."
+            ? t.manager_description
+            : t.employee_description
           }
         </p>
       </header>

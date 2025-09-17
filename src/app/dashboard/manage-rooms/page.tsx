@@ -9,12 +9,19 @@ import { getRooms } from "@/lib/firebase/rooms";
 import { RoomList } from "./components/room-list";
 import { AddRoomButton } from "./components/room-actions";
 import { addRoom, updateRoom, deleteRoom as deleteRoomAction } from "./actions";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 export default function ManageRoomsPage() {
   const [rooms, setRooms] = React.useState<MeetingRoom[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
+  const { language } = useLanguage();
+  const t = translations[language].manage_rooms_page;
 
   const canManage = ['Owner', 'RH', 'Manager', 'Dev'].includes(currentRole);
 
@@ -27,12 +34,12 @@ export default function ManageRoomsPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch meeting rooms.",
+        description: t.toast_fetch_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     fetchRooms();
@@ -41,7 +48,7 @@ export default function ManageRoomsPage() {
   const handleAddRoom = async (roomData: Omit<MeetingRoom, 'id'>) => {
     const result = await addRoom(roomData);
     if (result.success) {
-      toast({ title: "Success", description: "Meeting room added successfully." });
+      toast({ title: "Success", description: t.toast_add_success });
       fetchRooms();
     } else {
       toast({ variant: "destructive", title: "Error", description: result.message });
@@ -52,7 +59,7 @@ export default function ManageRoomsPage() {
   const handleUpdateRoom = async (id: string, roomData: Partial<MeetingRoom>) => {
     const result = await updateRoom(id, roomData);
     if (result.success) {
-      toast({ title: "Success", description: "Meeting room updated successfully." });
+      toast({ title: "Success", description: t.toast_update_success });
       fetchRooms();
     } else {
       toast({ variant: "destructive", title: "Error", description: result.message });
@@ -63,7 +70,7 @@ export default function ManageRoomsPage() {
   const handleDeleteRoom = async (id: string) => {
     const result = await deleteRoomAction(id);
     if (result.success) {
-      toast({ title: "Success", description: "Meeting room deleted." });
+      toast({ title: "Success", description: t.toast_delete_success });
       setRooms(prev => prev.filter(room => room.id !== id));
     } else {
       toast({ variant: "destructive", title: "Error", description: result.message });
@@ -75,10 +82,10 @@ export default function ManageRoomsPage() {
       <div className="flex items-center justify-between">
         <header>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Manage Meeting Rooms
+            {t.title}
           </h1>
           <p className="text-muted-foreground">
-            Add, edit, or remove meeting rooms available for booking.
+            {t.description}
           </p>
         </header>
         {canManage && <AddRoomButton onSave={handleAddRoom} />}
@@ -93,4 +100,3 @@ export default function ManageRoomsPage() {
     </div>
   );
 }
-

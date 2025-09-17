@@ -20,6 +20,11 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 // In a real app, this would come from the authenticated user
 const FAKE_CURRENT_USER_ID = "e2";
@@ -35,6 +40,8 @@ export default function BookRoomPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [editingBooking, setEditingBooking] = React.useState<Booking | null>(null);
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = translations[language].book_room_page;
 
   const fetchInitialData = React.useCallback(async () => {
     setIsLoading(true);
@@ -57,12 +64,12 @@ export default function BookRoomPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load initial data.",
+        description: t.toast_load_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast, selectedRoomId]);
+  }, [toast, selectedRoomId, t]);
 
   React.useEffect(() => {
     fetchInitialData();
@@ -78,10 +85,10 @@ export default function BookRoomPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch bookings for the selected room and date.",
+        description: t.toast_fetch_bookings_error,
       });
     }
-  }, [selectedRoomId, selectedDate, toast]);
+  }, [selectedRoomId, selectedDate, toast, t]);
 
   React.useEffect(() => {
     fetchBookings();
@@ -92,7 +99,7 @@ export default function BookRoomPage() {
   };
   
   if (isLoading) {
-      return <div>Loading booking system...</div>;
+      return <div>{t.loading}</div>;
   }
 
   const timelineBookings = selectedRoomId && selectedDate 
@@ -103,10 +110,10 @@ export default function BookRoomPage() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Book a Meeting Room
+          {t.title}
         </h1>
         <p className="text-muted-foreground">
-          Check availability and book a room for your meetings.
+          {t.description}
         </p>
       </header>
       
@@ -114,14 +121,14 @@ export default function BookRoomPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Select Room and Date</CardTitle>
+              <CardTitle>{t.select_room_date}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-2">
-                <label className="text-sm font-medium">Meeting Room</label>
+                <label className="text-sm font-medium">{t.meeting_room}</label>
                 <Select value={selectedRoomId} onValueChange={setSelectedRoomId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a room" />
+                    <SelectValue placeholder={t.select_a_room} />
                   </SelectTrigger>
                   <SelectContent>
                     {rooms.map(room => (

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -24,6 +25,11 @@ import { Button } from "@/components/ui/button";
 import { updateLeaveRequestStatus } from "@/lib/actions";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 type FormattedLeaveRequest = LeaveRequest & {
   employeeName: string;
@@ -44,6 +50,8 @@ export default function ManageLeavePage() {
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language].manage_leave_page;
 
   const canManage = currentRole === 'Owner' || currentRole === 'RH';
 
@@ -74,12 +82,12 @@ export default function ManageLeavePage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch data.",
+        description: t.toast_fetch_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     if (!canManage) {
@@ -92,7 +100,7 @@ export default function ManageLeavePage() {
   const handleStatusUpdate = async (id: string, status: LeaveRequest['status']) => {
     const result = await updateLeaveRequestStatus(id, status);
     if (result.success) {
-        toast({ title: 'Success', description: result.message });
+        toast({ title: 'Success', description: t.toast_update_success.replace('{status}', status) });
         fetchRequests(); // Refresh data
     } else {
         toast({ variant: 'destructive', title: 'Error', description: result.message });
@@ -126,18 +134,18 @@ export default function ManageLeavePage() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Employee</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Leave Type</TableHead>
-            <TableHead>Dates</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t.table_header_employee}</TableHead>
+            <TableHead>{t.table_header_department}</TableHead>
+            <TableHead>{t.table_header_type}</TableHead>
+            <TableHead>{t.table_header_dates}</TableHead>
+            <TableHead className="text-right">{t.table_header_actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
               <TableCell colSpan={5} className="text-center">
-                Loading...
+                {t.loading}
               </TableCell>
             </TableRow>
           ) : filteredRequests.length > 0 ? (
@@ -152,12 +160,12 @@ export default function ManageLeavePage() {
                 </TableCell>
                 <TableCell className="text-right">
                   {status === "Pending" && (
-                     <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Pending RH Approval')}>Approve</Button>
+                     <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Pending RH Approval')}>{t.approve}</Button>
                   )}
                   {status === "Pending RH Approval" && (
                     <div className="flex gap-2 justify-end">
-                      <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Approved')}>Approve</Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(request.id, 'Rejected')}>Reject</Button>
+                      <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Approved')}>{t.approve}</Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(request.id, 'Rejected')}>{t.reject}</Button>
                     </div>
                   )}
                 </TableCell>
@@ -166,7 +174,7 @@ export default function ManageLeavePage() {
           ) : (
             <TableRow>
               <TableCell colSpan={5} className="h-24 text-center">
-                No requests found.
+                {t.no_requests}
               </TableCell>
             </TableRow>
           )}
@@ -184,10 +192,10 @@ export default function ManageLeavePage() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Manage Leave Requests
+          {t.title}
         </h1>
         <p className="text-muted-foreground">
-          Approve or reject employee leave requests.
+          {t.description}
         </p>
       </header>
       <Card>

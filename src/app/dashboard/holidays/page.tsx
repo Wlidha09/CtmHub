@@ -9,12 +9,19 @@ import { useToast } from "@/hooks/use-toast";
 import type { Holiday } from "@/lib/types";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { updateHoliday } from "@/lib/actions";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 export default function HolidaysPage() {
   const [holidays, setHolidays] = React.useState<Holiday[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
+  const { language } = useLanguage();
+  const t = translations[language].holidays_page;
   const canManage = currentRole === 'Owner' || currentRole === 'RH' || currentRole === 'Dev';
   const currentYear = new Date().getFullYear().toString();
 
@@ -27,12 +34,12 @@ export default function HolidaysPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch holidays.",
+        description: t.toast_fetch_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [currentYear, toast]);
+  }, [currentYear, toast, t]);
 
   React.useEffect(() => {
     fetchData();
@@ -48,7 +55,7 @@ export default function HolidaysPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update paid status.",
+        description: t.toast_paid_update_error,
       });
     }
   };
@@ -59,7 +66,7 @@ export default function HolidaysPage() {
     
     const result = await updateHoliday(id, { name, date });
     if (result.success) {
-        toast({ title: "Success", description: "Holiday updated." });
+        toast({ title: "Success", description: t.toast_update_success });
         fetchData();
     } else {
       setHolidays(originalHolidays);
@@ -77,13 +84,13 @@ export default function HolidaysPage() {
     
     try {
         await deleteHoliday(id);
-        toast({ title: "Success", description: "Holiday deleted." });
+        toast({ title: "Success", description: t.toast_delete_success });
     } catch {
         setHolidays(originalHolidays);
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to delete holiday.",
+            description: t.toast_delete_error,
         });
     }
   };
@@ -93,10 +100,10 @@ export default function HolidaysPage() {
       <div className="flex items-center justify-between">
         <header>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Public Holidays {currentYear}
+            {t.title.replace('{year}', currentYear)}
           </h1>
           <p className="text-muted-foreground">
-            Manage your company's official holidays for the year.
+            {t.description}
           </p>
         </header>
         {canManage && <HolidayActions onDataSynced={fetchData} />}

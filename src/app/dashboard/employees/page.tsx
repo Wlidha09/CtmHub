@@ -14,6 +14,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { writeBatch, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 type FormattedEmployee = Employee & { departmentName: string };
 
@@ -22,6 +27,8 @@ export default function EmployeesPage() {
   const canManageEmployees = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
   const { toast } = useToast();
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language].employees_page;
 
   const [employees, setEmployees] = React.useState<FormattedEmployee[]>([]);
   const [departments, setDepartments] = React.useState<Department[]>([]);
@@ -49,13 +56,13 @@ export default function EmployeesPage() {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error fetching data",
-        description: "Could not load employees and departments.",
+        title: t.toast_fetch_error,
+        description: t.toast_fetch_error_desc,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     fetchData();
@@ -89,8 +96,8 @@ export default function EmployeesPage() {
         if (emailExists) {
           toast({
             variant: "destructive",
-            title: "Email already exists",
-            description: "Please use a unique email address.",
+            title: t.toast_email_exists,
+            description: t.toast_email_exists_desc,
           });
           return;
         }
@@ -104,8 +111,8 @@ export default function EmployeesPage() {
         if (phoneExists) {
           toast({
             variant: "destructive",
-            title: "Phone number already exists",
-            description: "Please use a unique phone number.",
+            title: t.toast_phone_exists,
+            description: t.toast_phone_exists_desc,
           });
           return;
         }
@@ -114,7 +121,7 @@ export default function EmployeesPage() {
       if (isEditing) {
         // Update existing employee
         await updateEmployee(employeeId!, employeeData);
-        toast({ title: "Success", description: "Employee updated successfully." });
+        toast({ title: "Success", description: t.toast_update_success });
       } else {
         // Add new employee
         const newEmployeeData: Omit<Employee, 'id'> = {
@@ -130,14 +137,14 @@ export default function EmployeesPage() {
             leaveBalance: employeeData.leaveBalance ?? 0,
         };
         await addEmployee(newEmployeeData);
-        toast({ title: "Success", description: "Employee added successfully." });
+        toast({ title: "Success", description: t.toast_add_success });
       }
       await fetchData();
     } catch (error) {
        toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save employee information.",
+        description: t.toast_save_error,
       });
     } finally {
       handleFormClose();
@@ -149,15 +156,15 @@ export default function EmployeesPage() {
     try {
       await updateEmployee(employee.id, { status: newStatus });
       toast({
-        title: "Status Updated",
-        description: `${employee.name}'s status has been updated to ${newStatus}.`,
+        title: t.toast_status_updated,
+        description: t.toast_status_updated_desc.replace('{employeeName}', employee.name).replace('{newStatus}', newStatus),
       });
       await fetchData(); // Refresh data
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update employee status.",
+        description: t.toast_status_update_error,
       });
     }
   };
@@ -172,15 +179,15 @@ export default function EmployeesPage() {
         });
         await batch.commit();
         toast({
-            title: 'Bulk Update Successful',
-            description: `${employeeIds.length} employee(s) have been set to ${status}.`
+            title: t.toast_bulk_update_success,
+            description: t.toast_bulk_update_success_desc.replace('{count}', employeeIds.length.toString()).replace('{status}', status),
         });
         await fetchData();
     } catch (error) {
         toast({
             variant: "destructive",
             title: "Bulk Update Failed",
-            description: "An error occurred while updating employee statuses.",
+            description: t.toast_bulk_update_error,
         });
     }
   };
@@ -191,20 +198,20 @@ export default function EmployeesPage() {
         <div className="flex items-center justify-between">
             <header>
                 <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                    Employee Directory
+                    {t.title}
                 </h1>
                 <p className="text-muted-foreground">
-                    Browse and manage all employees in your organization.
+                    {t.description}
                 </p>
             </header>
             {canManageEmployees && (
                 <Button onClick={handleAddEmployee}>
                     <PlusCircle className="w-4 h-4 mr-2" />
-                    Add Employee
+                    {t.add_employee}
                 </Button>
             )}
         </div>
-        <div>Loading...</div>
+        <div>{t.loading}</div>
       </div>
     )
   }
@@ -214,16 +221,16 @@ export default function EmployeesPage() {
       <div className="flex items-center justify-between">
         <header>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Employee Directory
+            {t.title}
           </h1>
           <p className="text-muted-foreground">
-            Browse and manage all employees in your organization.
+            {t.description}
           </p>
         </header>
         {canManageEmployees && (
           <Button onClick={handleAddEmployee}>
             <PlusCircle className="w-4 h-4 mr-2" />
-            Add Employee
+            {t.add_employee}
           </Button>
         )}
       </div>

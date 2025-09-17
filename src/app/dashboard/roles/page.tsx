@@ -33,6 +33,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getRoles, addRole as addRoleFB, updateRole, deleteRole as deleteRoleFB } from "@/lib/firebase/roles";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 
 // Component for the permissions table
@@ -50,6 +55,8 @@ function PermissionsTable({
   ) => void;
   canManage: boolean;
 }) {
+  const { language } = useLanguage();
+  const t = translations[language].roles_page;
   const permissionsKeys: (keyof Permission)[] = ["view", "create", "edit", "delete"];
   
   return (
@@ -58,7 +65,7 @@ function PermissionsTable({
         <TableHeader>
             <TableRow>
             <TableHead className="w-1/4 px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Page
+                {t.page}
             </TableHead>
             {roles.map((role) => (
                 <TableHead
@@ -103,7 +110,7 @@ function PermissionsTable({
                             htmlFor={`${role.name}-${page}-${p}`}
                             className="text-xs text-muted-foreground uppercase"
                             >
-                            {p.charAt(0)}
+                            {t[`permission_${p.charAt(0)}` as keyof typeof t]}
                             </label>
                         </div>
                       )
@@ -132,6 +139,8 @@ function RoleManager({
     canManage: boolean;
   }) {
     const [newRoleName, setNewRoleName] = React.useState("");
+    const { language } = useLanguage();
+    const t = translations[language].roles_page;
   
     const handleAddRole = () => {
       if (newRoleName.trim() && canManage) {
@@ -143,29 +152,29 @@ function RoleManager({
     return (
       <Card>
         <CardHeader>
-            <CardTitle>Role Management</CardTitle>
-            <CardDescription>Add or remove custom roles.</CardDescription>
+            <CardTitle>{t.role_management}</CardTitle>
+            <CardDescription>{t.role_management_desc}</CardDescription>
         </CardHeader>
         <CardContent>
             <div className="flex flex-col gap-4">
                  {canManage && (
                     <div className="flex gap-2">
                         <Input
-                        placeholder="Enter new role name"
+                        placeholder={t.new_role_placeholder}
                         value={newRoleName}
                         onChange={(e) => setNewRoleName(e.target.value)}
                         />
                         <Button onClick={handleAddRole}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add Role
+                        <PlusCircle className="mr-2 h-4 w-4" /> {t.add_role}
                         </Button>
                     </div>
                 )}
                 <div className="space-y-2">
-                    <h4 className="font-medium">Existing Roles</h4>
+                    <h4 className="font-medium">{t.existing_roles}</h4>
                     <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
                     {roles.map((role) => (
                         <li key={role.name} className="flex items-center justify-between p-2 bg-muted rounded-md text-sm">
-                        <span>{role.name} {role.isCore && <span className="text-xs text-muted-foreground">(Core)</span>}</span>
+                        <span>{role.name} {role.isCore && <span className="text-xs text-muted-foreground">({t.core_role})</span>}</span>
                         {!role.isCore && canManage && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -175,14 +184,14 @@ function RoleManager({
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogTitle>{t.confirm_delete_title}</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the <strong>{role.name}</strong> role.
+                                            {t.confirm_delete_description.replace('{roleName}', role.name)}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => deleteRole(role.name)}>Delete</AlertDialogAction>
+                                        <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteRole(role.name)}>{t.delete}</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -204,6 +213,8 @@ export default function RolesPage() {
   const { currentRole } = useCurrentRole();
   const { toast } = useToast();
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language].roles_page;
 
   const canManage = currentRole === "Dev" || currentRole === "Owner";
 
@@ -223,12 +234,12 @@ export default function RolesPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not load roles from database.",
+        description: t.toast_load_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     fetchRoles();
@@ -280,14 +291,14 @@ export default function RolesPage() {
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Could not save role changes.",
+            description: t.toast_save_error,
         });
     }
   };
 
   const addRole = async (roleName: string) => {
     if (roles.some(r => r.name.toLowerCase() === roleName.toLowerCase())) {
-        toast({ variant: "destructive", title: "Error", description: "Role already exists." });
+        toast({ variant: "destructive", title: "Error", description: t.toast_role_exists });
         return;
     }
     const newRole: Role = {
@@ -302,16 +313,16 @@ export default function RolesPage() {
     try {
         await addRoleFB(newRole);
         setRoles([...roles, newRole]);
-        toast({ title: "Success", description: `Role "${roleName}" created.` });
+        toast({ title: "Success", description: t.toast_create_success.replace('{roleName}', roleName) });
     } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: "Failed to create role." });
+        toast({ variant: "destructive", title: "Error", description: t.toast_create_error });
     }
   };
 
   const deleteRole = async (roleName: string) => {
     const roleToDelete = roles.find(r => r.name === roleName);
     if (!roleToDelete || roleToDelete.isCore) {
-        toast({ variant: "destructive", title: "Error", description: "Core roles cannot be deleted." });
+        toast({ variant: "destructive", title: "Error", description: t.toast_delete_core_error });
         return;
     }
     
@@ -320,25 +331,25 @@ export default function RolesPage() {
 
     try {
         await deleteRoleFB(roleName);
-        toast({ title: "Success", description: `Role "${roleName}" deleted.` });
+        toast({ title: "Success", description: t.toast_delete_success.replace('{roleName}', roleName) });
     } catch (error) {
         setRoles(originalRoles); // Revert on error
-        toast({ variant: "destructive", title: "Error", description: `Failed to delete role "${roleName}".` });
+        toast({ variant: "destructive", title: "Error", description: t.toast_delete_error.replace('{roleName}', roleName) });
     }
   }
 
   if (isLoading) {
-    return <div>Loading roles...</div>;
+    return <div>{t.loading}</div>;
   }
 
   return (
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Roles & Permissions
+          {t.title}
         </h1>
         <p className="text-muted-foreground">
-          Manage access control for all user roles across the application.
+          {t.description}
         </p>
       </header>
       
@@ -346,8 +357,8 @@ export default function RolesPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle>Permissions Matrix</CardTitle>
-            <CardDescription>Check the boxes to grant permissions. V: View, C: Create, E: Edit, D: Delete.</CardDescription>
+            <CardTitle>{t.permissions_matrix}</CardTitle>
+            <CardDescription>{t.permissions_matrix_desc}</CardDescription>
         </CardHeader>
         <CardContent>
             <PermissionsTable

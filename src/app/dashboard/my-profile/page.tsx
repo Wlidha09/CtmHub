@@ -12,6 +12,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 // In a real app, this would come from the authenticated user
 const FAKE_CURRENT_USER_ID = "e2";
@@ -23,6 +28,8 @@ export default function MyProfilePage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isEditing, setIsEditing] = React.useState(false);
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = translations[language].my_profile_page;
 
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
@@ -42,12 +49,12 @@ export default function MyProfilePage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load your profile data.",
+        description: t.toast_load_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     fetchData();
@@ -62,13 +69,14 @@ export default function MyProfilePage() {
       delete dataToSave.departmentId;
 
       await updateEmployee(currentUser.id, dataToSave);
-      toast({ title: "Success", description: "Your profile has been updated." });
+      toast({ title: "Success", description: t.toast_save_success });
       setIsEditing(false);
       fetchData(); // Refresh data
-    } catch (error)      toast({
+    } catch (error) {
+      toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save profile information.",
+        description: t.toast_save_error,
       });
     }
   };
@@ -83,21 +91,21 @@ export default function MyProfilePage() {
 
 
   if (isLoading) {
-    return <div>Loading your profile...</div>;
+    return <div>{t.loading}</div>;
   }
 
   if (!currentUser) {
-    return <div>Could not load your profile.</div>;
+    return <div>{t.load_error}</div>;
   }
 
   return (
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          My Profile
+          {t.title}
         </h1>
         <p className="text-muted-foreground">
-          View and manage your personal information.
+          {t.description}
         </p>
       </header>
 
@@ -124,34 +132,34 @@ export default function MyProfilePage() {
             </div>
              <Button variant="outline" onClick={() => setIsEditing(true)}>
                 <Edit className="mr-2 h-4 w-4"/>
-                Edit Profile
+                {t.edit_profile}
             </Button>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm mt-4">
               <div className="space-y-1">
-                <p className="font-medium text-muted-foreground">Email</p>
+                <p className="font-medium text-muted-foreground">{t.email}</p>
                 <p>{currentUser.email}</p>
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-muted-foreground">Phone Number</p>
-                <p>{currentUser.phoneNumber || "Not provided"}</p>
+                <p className="font-medium text-muted-foreground">{t.phone}</p>
+                <p>{currentUser.phoneNumber || t.not_provided}</p>
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-muted-foreground">Start Date</p>
+                <p className="font-medium text-muted-foreground">{t.start_date}</p>
                 <p>{format(new Date(currentUser.startDate), "MMMM d, yyyy")}</p>
               </div>
                <div className="space-y-1">
-                <p className="font-medium text-muted-foreground">Birth Date</p>
-                <p>{currentUser.birthDate ? format(new Date(currentUser.birthDate), "MMMM d, yyyy") : "Not provided"}</p>
+                <p className="font-medium text-muted-foreground">{t.birth_date}</p>
+                <p>{currentUser.birthDate ? format(new Date(currentUser.birthDate), "MMMM d, yyyy") : t.not_provided}</p>
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-muted-foreground">Status</p>
+                <p className="font-medium text-muted-foreground">{t.status}</p>
                 <p className="capitalize">{currentUser.status}</p>
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-muted-foreground">Leave Balance</p>
-                <p>{currentUser.leaveBalance ?? 0} days</p>
+                <p className="font-medium text-muted-foreground">{t.leave_balance}</p>
+                <p>{currentUser.leaveBalance ?? 0} {t.days}</p>
               </div>
             </div>
           </CardContent>

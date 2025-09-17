@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -9,6 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { AddDepartmentForm } from "./add-department-form";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 type DepartmentWithLead = Department & { lead: Employee | undefined };
 
@@ -19,6 +25,9 @@ export default function DepartmentsPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { currentRole } = useCurrentRole();
+  const { language } = useLanguage();
+  const t = translations[language].departments_page;
+
   const canManageDepartments = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
   const fetchData = React.useCallback(async () => {
@@ -42,12 +51,12 @@ export default function DepartmentsPage() {
       toast({
         variant: "destructive",
         title: "Error fetching data",
-        description: "Could not load departments.",
+        description: t.toast_fetch_error,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   React.useEffect(() => {
     fetchData();
@@ -55,7 +64,7 @@ export default function DepartmentsPage() {
 
   if (isLoading) {
     // You can replace this with a proper skeleton loader component
-    return <div>Loading...</div>;
+    return <div>{t.loading}</div>;
   }
 
   return (
@@ -63,10 +72,10 @@ export default function DepartmentsPage() {
       <div className="flex items-center justify-between">
         <header>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Departments
+            {t.title}
           </h1>
           <p className="text-muted-foreground">
-            View and manage departments and their team leads.
+            {t.description}
           </p>
         </header>
         {canManageDepartments && (

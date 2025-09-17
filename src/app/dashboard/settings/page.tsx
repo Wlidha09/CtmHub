@@ -12,6 +12,11 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import type { AppSettings } from "@/lib/types";
 import { getSettings } from "@/lib/firebase/settings";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) {
     const [settings, setSettings] = React.useState(initialSettings);
@@ -20,6 +25,8 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
     const { toast } = useToast();
     const router = useRouter();
     const { currentRole } = useCurrentRole();
+    const { language } = useLanguage();
+    const t = translations[language].settings_page;
 
     const canManageSettings = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
@@ -90,7 +97,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
         setIsSaving(true);
         const result = await updateSettings(settings);
         if (result.success) {
-            toast({ title: "Success", description: result.message });
+            toast({ title: "Success", description: t.toast_save_success });
             router.refresh();
         } else {
             toast({ variant: "destructive", title: "Error", description: result.message });
@@ -103,7 +110,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
              toast({
                 variant: "destructive",
                 title: "Permission Denied",
-                description: "You do not have permission to perform this action.",
+                description: t.permission_denied,
             });
             return;
         }
@@ -111,7 +118,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
             toast({
                 variant: "destructive",
                 title: "Invalid Amount",
-                description: "Accumulation amount must be greater than zero.",
+                description: t.invalid_amount,
             });
             return;
         }
@@ -137,14 +144,14 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Project Settings</CardTitle>
+                    <CardTitle>{t.project_settings}</CardTitle>
                     <CardDescription>
-                        Configure general settings for the project.
+                        {t.project_settings_desc}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="project-name">Project Name</Label>
+                        <Label htmlFor="project-name">{t.project_name}</Label>
                         <Input
                             id="project-name"
                             name="projectName"
@@ -158,12 +165,12 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
             
             <Card>
                 <CardHeader>
-                    <CardTitle>Theme Settings</CardTitle>
-                    <CardDescription>Customize the main colors of your application.</CardDescription>
+                    <CardTitle>{t.theme_settings}</CardTitle>
+                    <CardDescription>{t.theme_settings_desc}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
                      <div className="space-y-2">
-                        <Label htmlFor="primary-color">Primary Color</Label>
+                        <Label htmlFor="primary-color">{t.primary_color}</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="primary-color"
@@ -182,7 +189,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
                         </div>
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="background-color">Background Color</Label>
+                        <Label htmlFor="background-color">{t.background_color}</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="background-color"
@@ -201,7 +208,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="accent-color">Accent Color</Label>
+                        <Label htmlFor="accent-color">{t.accent_color}</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="accent-color"
@@ -224,12 +231,12 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Logo Settings</CardTitle>
-                    <CardDescription>Customize the look and feel of your application logo.</CardDescription>
+                    <CardTitle>{t.logo_settings}</CardTitle>
+                    <CardDescription>{t.logo_settings_desc}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="logo-svg-color">Logo SVG Color</Label>
+                        <Label htmlFor="logo-svg-color">{t.logo_svg_color}</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="logo-svg-color"
@@ -247,10 +254,10 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
                                 disabled={!canManageSettings}
                             />
                         </div>
-                        <p className="text-xs text-muted-foreground">This color is used for the sidebar logo SVG.</p>
+                        <p className="text-xs text-muted-foreground">{t.logo_svg_color_desc}</p>
                     </div>
                      <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="logo-text-color">Logo Text Color</Label>
+                        <Label htmlFor="logo-text-color">{t.logo_text_color}</Label>
                         <div className="flex items-center gap-2">
                              <Input
                                 id="logo-text-color"
@@ -268,7 +275,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
                                 disabled={!canManageSettings}
                             />
                         </div>
-                        <p className="text-xs text-muted-foreground">This color is used for the project name in the logo.</p>
+                        <p className="text-xs text-muted-foreground">{t.logo_text_color_desc}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -276,14 +283,14 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Leave Accumulation</CardTitle>
+                    <CardTitle>{t.leave_accumulation}</CardTitle>
                     <CardDescription>
-                        Manually add a specified number of days to the leave balance for all active employees. This should typically be run once per month.
+                        {t.leave_accumulation_desc}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2 max-w-xs">
-                        <Label htmlFor="leaveAccumulationAmount">Days to Accumulate</Label>
+                        <Label htmlFor="leaveAccumulationAmount">{t.days_to_accumulate}</Label>
                         <Input
                             id="leaveAccumulationAmount"
                             name="leaveAccumulationAmount"
@@ -301,16 +308,16 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
             {canManageSettings && (
                  <div className="flex justify-end gap-2">
                     <Button onClick={handleAccumulate} disabled={isAccumulating}>
-                        {isAccumulating ? "Processing..." : "Run Monthly Leave Accumulation"}
+                        {isAccumulating ? t.processing : t.run_accumulation}
                     </Button>
                     <Button onClick={handleSaveSettings} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Settings"}
+                        {isSaving ? t.saving : t.save_settings}
                     </Button>
                 </div>
             )}
              {!canManageSettings && (
                     <p className="text-sm text-muted-foreground mt-2">
-                        Only Dev, Owner, or RH roles can manage these settings.
+                        {t.manage_settings_permission}
                     </p>
                 )}
         </div>
@@ -321,6 +328,8 @@ export default function SettingsPage() {
     const [settings, setSettings] = React.useState<AppSettings | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const { toast } = useToast();
+    const { language } = useLanguage();
+    const t = translations[language].settings_page;
 
     React.useEffect(() => {
         async function fetchSettingsData() {
@@ -331,32 +340,32 @@ export default function SettingsPage() {
                 toast({
                     variant: "destructive",
                     title: "Error",
-                    description: "Failed to load settings from the database.",
+                    description: t.toast_load_error,
                 });
             } finally {
                 setIsLoading(false);
             }
         }
         fetchSettingsData();
-    }, [toast]);
+    }, [toast, t]);
 
     return (
         <div className="flex flex-col gap-6">
             <header>
                 <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Settings
+                {t.title}
                 </h1>
                 <p className="text-muted-foreground">
-                Manage your application settings and configurations.
+                {t.description}
                 </p>
             </header>
 
             {isLoading ? (
-                <div>Loading settings...</div>
+                <div>{t.loading}</div>
             ) : settings ? (
                 <SettingsManager initialSettings={settings} />
             ) : (
-                <div>Could not load settings. Please try again.</div>
+                <div>{t.load_error}</div>
             )}
         </div>
     );

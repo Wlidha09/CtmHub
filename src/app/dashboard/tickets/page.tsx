@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -8,6 +9,11 @@ import { getEmployees } from "@/lib/firebase/employees";
 import { generateWorkTicket } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { Employee, Ticket } from "@/lib/types";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 export default function TicketsPage() {
   const [employees, setEmployees] = React.useState<Employee[]>([]);
@@ -15,6 +21,8 @@ export default function TicketsPage() {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [ticket, setTicket] = React.useState<Ticket | null>(null);
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = translations[language].tickets_page;
 
   React.useEffect(() => {
     async function fetchInitialData() {
@@ -25,14 +33,14 @@ export default function TicketsPage() {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load employees.",
+          description: t.toast_load_error,
         });
       } finally {
         setIsLoading(false);
       }
     }
     fetchInitialData();
-  }, [toast]);
+  }, [toast, t]);
 
   const handleGenerateTicket = async (employeeId: string, month: Date) => {
     setIsGenerating(true);
@@ -43,13 +51,13 @@ export default function TicketsPage() {
         setTicket(result.data);
         toast({
             title: "Success",
-            description: "Work ticket generated successfully."
+            description: t.toast_generate_success
         });
       } else {
         toast({
           variant: "destructive",
           title: "Error",
-          description: result.message || "Failed to generate ticket.",
+          description: result.message || t.toast_generate_error,
         });
       }
     } catch (error) {
@@ -64,25 +72,25 @@ export default function TicketsPage() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t.loading}</div>;
   }
 
   return (
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Work Ticket Generator
+          {t.title}
         </h1>
         <p className="text-muted-foreground">
-          Calculate an employee's worked days for a specific month.
+          {t.description}
         </p>
       </header>
       
       <Card>
         <CardHeader>
-          <CardTitle>Generate Ticket</CardTitle>
+          <CardTitle>{t.generate_ticket}</CardTitle>
           <CardDescription>
-            Select an employee and a month to generate their work ticket.
+            {t.generate_ticket_desc}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -94,7 +102,7 @@ export default function TicketsPage() {
         </CardContent>
       </Card>
 
-      {isGenerating && <div>Generating ticket...</div>}
+      {isGenerating && <div>{t.generating}</div>}
 
       {ticket && (
         <TicketResults ticket={ticket} />
