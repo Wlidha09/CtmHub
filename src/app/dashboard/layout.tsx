@@ -111,7 +111,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <Sidebar side="left" variant="sidebar" collapsible="icon">
           <SidebarRail />
-          <SidebarHeader className="border-b border-sidebar-border">
+          <SidebarHeader>
             <Link
               href="/dashboard"
               className="flex items-center gap-2 font-bold"
@@ -139,46 +139,46 @@ export default function DashboardLayout({
           <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col">
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
-            <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
-              <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:items-center">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
-                        >
-                            <React.Fragment>
-                            <Avatar>
-                                <AvatarImage
-                                src="https://picsum.photos/seed/user-avatar/40/40"
-                                data-ai-hint="person portrait"
-                                />
-                                <AvatarFallback>AD</AvatarFallback>
-                            </Avatar>
-                            <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                                <p className="text-sm font-medium">Admin User</p>
-                                <p className="text-xs text-muted-foreground">
-                                admin@loophub.com
-                                </p>
-                            </div>
-                            </React.Fragment>
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                        className="w-56 mb-2"
-                        side="right"
-                        align="start"
-                        >
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Settings</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Logout</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <SidebarCollapse className="ml-auto group-data-[collapsible=icon]:ml-0" />
-                </div>
+            <div className="flex items-center justify-center gap-2 group-data-[state=expanded]:flex-row group-data-[state=collapsed]:flex-col">
+              <SidebarCollapse className="group-data-[state=collapsed]:order-1" />
+              <div className="group-data-[state=collapsed]:order-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
+                    >
+                        <React.Fragment>
+                        <Avatar>
+                            <AvatarImage
+                            src="https://picsum.photos/seed/user-avatar/40/40"
+                            data-ai-hint="person portrait"
+                            />
+                            <AvatarFallback>AD</AvatarFallback>
+                        </Avatar>
+                        <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
+                            <p className="text-sm font-medium">Admin User</p>
+                            <p className="text-xs text-muted-foreground">
+                            admin@loophub.com
+                            </p>
+                        </div>
+                        </React.Fragment>
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                    className="w-56 mb-2"
+                    side="right"
+                    align="start"
+                    >
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild><Link href="/dashboard/my-profile">Profile</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/dashboard/user-settings">Settings</Link></DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Logout</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </SidebarFooter>
         </Sidebar>
@@ -226,8 +226,8 @@ export default function DashboardLayout({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/dashboard/my-profile">Profile</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/dashboard/user-settings">Settings</Link></DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Logout</DropdownMenuItem>
                   </DropdownMenuContent>
