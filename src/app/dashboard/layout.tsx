@@ -235,8 +235,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <SidebarTrigger className="md:hidden" />
                 <h1 className="text-lg font-semibold md:text-xl"></h1>
               </div>
-              <div className="flex items-center w-full gap-4 ml-auto md:gap-2 lg:gap-4">
-                <form className="flex-1 ml-auto sm:flex-initial">
+              <div className="flex items-center w-full gap-4 md:gap-2 lg:gap-4">
+                <form className="flex-1 mr-auto sm:flex-initial">
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
