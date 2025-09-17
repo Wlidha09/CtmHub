@@ -11,7 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const SummarizeCvInputSchema = z.object({
+const SummarizeCvInputSchema = z.object({
   cvDataUri: z
     .string()
     .describe(
@@ -20,7 +20,7 @@ export const SummarizeCvInputSchema = z.object({
 });
 export type SummarizeCvInput = z.infer<typeof SummarizeCvInputSchema>;
 
-export const SummarizeCvOutputSchema = z.object({
+const SummarizeCvOutputSchema = z.object({
   fullName: z.string().describe("The full name of the candidate."),
   summary: z.string().describe("A concise 2-3 sentence summary of the candidate's profile, highlighting their key experience and qualifications."),
 });
