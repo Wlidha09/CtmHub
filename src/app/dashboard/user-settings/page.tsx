@@ -28,6 +28,7 @@ const FAKE_CURRENT_USER_ID = "e2";
 export default function UserSettingsPage() {
   const { language, setLanguage: setAppLanguage } = useLanguage();
   const t = translations[language].user_settings_page;
+  const commonT = translations[language].common;
   const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [defaultLanguage, setDefaultLanguage] = React.useState<Language | undefined>();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -43,7 +44,7 @@ export default function UserSettingsPage() {
       } catch (error) {
         toast({
           variant: "destructive",
-          title: t.common.error,
+          title: commonT.error,
           description: t.toast_load_error,
         });
       } finally {
@@ -51,7 +52,7 @@ export default function UserSettingsPage() {
       }
     }
     fetchUser();
-  }, [language, t.common.error, t.toast_load_error, toast]);
+  }, [language, t.toast_load_error, commonT.error, toast]);
   
   const handleSave = async () => {
     if (!currentUser || !defaultLanguage) return;
@@ -61,13 +62,13 @@ export default function UserSettingsPage() {
         await updateEmployee(currentUser.id, { defaultLanguage });
         setAppLanguage(defaultLanguage); // Update language in the app immediately
         toast({
-            title: t.common.success,
+            title: commonT.success,
             description: t.toast_save_success,
         });
     } catch (error) {
          toast({
             variant: "destructive",
-            title: t.common.error,
+            title: commonT.error,
             description: t.toast_save_error,
         });
     } finally {
@@ -92,7 +93,7 @@ export default function UserSettingsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p>{t.common.loading}</p>
+            <p>{commonT.loading}</p>
           ) : (
             <div className="space-y-2 max-w-sm">
                 <Label htmlFor="language-select">{t.default_language_label}</Label>
@@ -110,10 +111,11 @@ export default function UserSettingsPage() {
         </CardContent>
         <CardFooter>
             <Button onClick={handleSave} disabled={isLoading || isSaving}>
-                {isSaving ? t.saving : t.common.save}
+                {isSaving ? t.saving : commonT.save}
             </Button>
         </CardFooter>
       </Card>
     </div>
   );
 }
+
