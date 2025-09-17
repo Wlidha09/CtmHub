@@ -92,6 +92,13 @@ export type Holiday = {
     isPaid: boolean;
 };
 
+export type Candidate = {
+  id: string;
+  name: string;
+  cvUrl: string;
+  uploadedAt: string; // ISO string
+};
+
 export type Availability = {
   id: string;
   userId: string;
