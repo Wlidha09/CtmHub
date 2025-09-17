@@ -1,0 +1,26 @@
+
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Welcome to LoopHub! Here's a quick overview of your organization.",
+    "loading": "Loading requests...",
+    "employee": {
+      "myLeaveBalance": "My Leave Balance",
+      "myLeaveBalanceDescription": "Your remaining leave days for the year.",
+      "myLeaveRequests": "My Leave Requests",
+      "noLeaveRequests": "You have no leave requests."
+    },
+    "manager": {
+      "totalEmployees": "Total Employees",
+      "totalEmployeesDescription": "Currently active members in the organization.",
+      "departments": "Departments",
+      "departmentsDescription": "Number of departments across the company.",
+      "definedRoles": "Defined Roles",
+      "definedRolesDescription": "User roles with specific permissions.",
+      "pendingRequests": "Pending Requests",
+      "pendingRequestsDescription": "Leave requests awaiting approval.",
+      "totalLeaveDays": "Total Leave Days",
+      "totalLeaveDaysDescription": "Approved leave days for the current year."
+    }
+  }
+}

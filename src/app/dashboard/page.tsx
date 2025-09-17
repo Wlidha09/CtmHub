@@ -25,6 +25,11 @@ import { getDepartments } from "@/lib/firebase/departments";
 import { getLeaveRequests } from "@/lib/firebase/leave-requests";
 import type { Employee, LeaveRequest } from "@/lib/types";
 import { differenceInDays, parseISO } from "date-fns";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+import { Button } from "@/components/ui/button";
+
+const translations = { en, fr };
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -56,6 +61,9 @@ export default function DashboardPage() {
   const [leaveRequests, setLeaveRequests] = React.useState<LeaveRequest[]>([]);
   const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [language, setLanguage] = React.useState<"en" | "fr">("en");
+
+  const t = translations[language].dashboard;
 
   React.useEffect(() => {
     async function fetchData() {
@@ -105,42 +113,48 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Dashboard
+            {t.title}
           </h1>
           <p className="text-muted-foreground">
-            Welcome to LoopHub! Here's a quick overview of your organization.
+            {t.description}
           </p>
         </div>
-        <SeedButton />
+        <div className="flex gap-2">
+            <div className="flex gap-1 p-1 bg-muted rounded-md">
+                <Button size="sm" variant={language === 'en' ? 'default' : 'ghost'} onClick={() => setLanguage('en')}>EN</Button>
+                <Button size="sm" variant={language === 'fr' ? 'default' : 'ghost'} onClick={() => setLanguage('fr')}>FR</Button>
+            </div>
+            <SeedButton />
+        </div>
       </header>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {currentRole === "Employee" ? (
           <>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-sm font-medium">My Leave Balance</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t.employee.myLeaveBalance}</CardTitle>
                     <Coins className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{currentUser?.leaveBalance ?? 0} days</div>}
                     <p className="text-xs text-muted-foreground">
-                        Your remaining leave days for the year.
+                        {t.employee.myLeaveBalanceDescription}
                     </p>
                 </CardContent>
             </Card>
             <Card className="col-span-1 md:col-span-2 lg:col-span-3">
                 <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                    <span>My Leave Requests</span>
+                    <span>{t.employee.myLeaveRequests}</span>
                     <FileText className="w-4 h-4 text-muted-foreground" />
                 </CardTitle>
                 </CardHeader>
                 <CardContent>
                 {isLoading ? (
-                    <p>Loading requests...</p>
+                    <p>{t.loading}</p>
                 ) : leaveRequests.length > 0 ? (
                     <ul className="space-y-2">
                     {leaveRequests.slice(0, 3).map((request) => ( // Show a few recent ones
@@ -161,7 +175,7 @@ export default function DashboardPage() {
                     ))}
                     </ul>
                 ) : (
-                    <p>You have no leave requests.</p>
+                    <p>{t.employee.noLeaveRequests}</p>
                 )}
                 </CardContent>
             </Card>
@@ -172,14 +186,14 @@ export default function DashboardPage() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-sm font-medium">
-                      Total Employees
+                      {t.manager.totalEmployees}
                     </CardTitle>
                     <Users className="w-4 h-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalEmployees}</div>}
                     <p className="text-xs text-muted-foreground">
-                      Currently active members in the organization.
+                      {t.manager.totalEmployeesDescription}
                     </p>
                   </CardContent>
                 </Card>
@@ -187,54 +201,54 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">
-                  Departments
+                  {t.manager.departments}
                 </CardTitle>
                 <Building className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalDepartments}</div>}
                 <p className="text-xs text-muted-foreground">
-                  Number of departments across the company.
+                  {t.manager.departmentsDescription}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">
-                  Defined Roles
+                  {t.manager.definedRoles}
                 </CardTitle>
                 <ShieldCheck className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalRoles}</div>
                 <p className="text-xs text-muted-foreground">
-                  User roles with specific permissions.
+                  {t.manager.definedRolesDescription}
                 </p>
               </CardContent>
             </Card>
              <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">
-                  Pending Requests
+                  {t.manager.pendingRequests}
                 </CardTitle>
                 <FileClock className="w-4 h-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{pendingRequestsCount}</div>}
                 <p className="text-xs text-muted-foreground">
-                  Leave requests awaiting approval.
+                  {t.manager.pendingRequestsDescription}
                 </p>
               </CardContent>
             </Card>
              <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-sm font-medium">Total Leave Days</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t.manager.totalLeaveDays}</CardTitle>
                     <Plane className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     {isLoading ? <div className="text-2xl font-bold">...</div> : <div className="text-2xl font-bold">{totalLeaveDaysCumulated}</div>}
                     <p className="text-xs text-muted-foreground">
-                        Approved leave days for the current year.
+                        {t.manager.totalLeaveDaysDescription}
                     </p>
                 </CardContent>
             </Card>

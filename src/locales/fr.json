@@ -1,0 +1,26 @@
+
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "description": "Bienvenue sur LoopHub ! Voici un aperçu rapide de votre organisation.",
+    "loading": "Chargement des demandes...",
+    "employee": {
+      "myLeaveBalance": "Mon solde de congés",
+      "myLeaveBalanceDescription": "Vos jours de congés restants pour l'année.",
+      "myLeaveRequests": "Mes demandes de congé",
+      "noLeaveRequests": "Vous n'avez aucune demande de congé."
+    },
+    "manager": {
+      "totalEmployees": "Total des employés",
+      "totalEmployeesDescription": "Membres actuellement actifs dans l'organisation.",
+      "departments": "Départements",
+      "departmentsDescription": "Nombre de départements dans l'entreprise.",
+      "definedRoles": "Rôles définis",
+      "definedRolesDescription": "Rôles utilisateur avec des autorisations spécifiques.",
+      "pendingRequests": "Demandes en attente",
+      "pendingRequestsDescription": "Demandes de congé en attente d'approbation.",
+      "totalLeaveDays": "Total des jours de congé",
+      "totalLeaveDaysDescription": "Jours de congé approuvés pour l'année en cours."
+    }
+  }
+}
