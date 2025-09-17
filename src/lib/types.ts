@@ -10,6 +10,8 @@ export type AppSettings = {
     accentColor?: string;
 };
 
+export type Language = "en" | "fr";
+
 export type Employee = {
   id: string;
   name: string;
@@ -22,6 +24,7 @@ export type Employee = {
   startDate: string;
   birthDate?: string;
   leaveBalance?: number;
+  defaultLanguage?: Language;
 };
 
 export type Department = {
