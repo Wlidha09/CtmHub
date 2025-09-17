@@ -18,6 +18,7 @@ import {
   BookMarked,
   Settings,
   User,
+  Languages,
 } from "lucide-react";
 
 import {
@@ -26,69 +27,79 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useCurrentRole } from "@/hooks/use-current-role";
+import { useLanguage } from "@/hooks/use-language";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 type NavItem = {
   href: string;
-  label: string;
+  labelKey: keyof typeof translations.en.navigation;
   icon: LucideIcon;
   roles?: ('Dev' | 'Owner' | 'RH' | 'Manager' | 'Employee')[];
 };
 
 const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/employees", label: "Employees", icon: Users, roles: ['Dev', 'Owner', 'RH'] },
-  { href: "/dashboard/my-profile", label: "My Profile", icon: User, roles: ['Manager', 'Employee'] },
-  { href: "/dashboard/departments", label: "Departments", icon: Building },
-  { href: "/dashboard/roles", label: "Roles", icon: ShieldCheck, roles: ['Dev', 'Owner'] },
+  { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/employees", labelKey: "employees", icon: Users, roles: ['Dev', 'Owner', 'RH'] },
+  { href: "/dashboard/my-profile", labelKey: "my_profile", icon: User, roles: ['Manager', 'Employee'] },
+  { href: "/dashboard/departments", labelKey: "departments", icon: Building },
+  { href: "/dashboard/roles", labelKey: "roles", icon: ShieldCheck, roles: ['Dev', 'Owner'] },
   {
     href: "/dashboard/submit-leave",
-    label: "Leave Request",
+    labelKey: "leave_request",
     icon: FileText,
     roles: ['Manager', 'Employee']
   },
    {
     href: "/dashboard/manage-leave",
-    label: "Manage Leave",
+    labelKey: "manage_leave",
     icon: ShieldAlert,
     roles: ['Owner', 'RH']
   },
   {
     href: "/dashboard/holidays",
-    label: "Holidays",
+    labelKey: "holidays",
     icon: CalendarCheck,
     roles: ['Owner', 'RH', 'Manager'],
   },
   {
     href: "/dashboard/candidates",
-    label: "Candidates",
+    labelKey: "candidates",
     icon: Briefcase,
     roles: ['Owner', 'RH', 'Manager']
   },
   {
     href: "/dashboard/tickets",
-    label: "Tickets",
+    labelKey: "tickets",
     icon: Ticket,
     roles: ['Owner', 'RH', 'Manager'],
   },
   {
     href: "/dashboard/book-room",
-    label: "Book a Room",
+    labelKey: "book_a_room",
     icon: BookMarked,
   },
   {
     href: "/dashboard/manage-rooms",
-    label: "Manage Rooms",
+    labelKey: "manage_rooms",
     icon: Settings,
     roles: ['Owner', 'RH', 'Manager', 'Dev'],
   },
   {
     href: "/dashboard/availability",
-    label: "Availability",
+    labelKey: "availability",
     icon: CalendarClock,
+  },
+  {
+    href: "/dashboard/translator",
+    labelKey: "translator",
+    icon: Languages,
   },
    {
     href: "/dashboard/settings",
-    label: "Settings",
+    labelKey: "settings",
     icon: Settings,
   },
 ];
@@ -96,6 +107,8 @@ const navItems: NavItem[] = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { currentRole } = useCurrentRole();
+  const { language } = useLanguage();
+  const t = translations[language].navigation;
 
   const primaryNavItems = navItems.filter(item => item.href !== '/dashboard/settings');
   const settingsNavItem = navItems.find(item => item.href === '/dashboard/settings');
@@ -123,11 +136,11 @@ export function DashboardNav() {
           <Link href={item.href} passHref>
             <SidebarMenuButton
               isActive={pathname === item.href}
-              tooltip={item.label}
+              tooltip={t[item.labelKey]}
             >
               <div className="flex items-center gap-2">
                 <item.icon />
-                <span>{item.label}</span>
+                <span>{t[item.labelKey]}</span>
               </div>
             </SidebarMenuButton>
           </Link>

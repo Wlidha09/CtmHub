@@ -43,9 +43,15 @@ import { LanguageProvider, useLanguage } from "@/hooks/use-language";
 import { getSettings } from "@/lib/firebase/settings";
 import type { AppSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+
+const translations = { en, fr };
 
 function RoleSwitcher() {
   const { currentRole, setCurrentRole } = useCurrentRole();
+  const { language } = useLanguage();
+  const t = translations[language].layout;
   const canSwitchRole = currentRole === 'Dev' || currentRole === 'Owner';
 
   if (!canSwitchRole) return null;
@@ -56,7 +62,7 @@ function RoleSwitcher() {
         htmlFor="role-switcher"
         className="px-2 text-xs font-medium text-sidebar-foreground/70"
       >
-        Role
+        {t.role}
       </Label>
       <Select value={currentRole} onValueChange={setCurrentRole}>
         <SelectTrigger
@@ -79,13 +85,14 @@ function RoleSwitcher() {
 
 function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
+  const t = translations[language].layout;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="rounded-full">
           <span>{language === 'en' ? '🇬🇧' : '🇫🇷'}</span>
-          <span className="sr-only">Change language</span>
+          <span className="sr-only">{t.change_language}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -101,6 +108,9 @@ function LanguageSwitcher() {
 }
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
+  const { language } = useLanguage();
+  const t = translations[language].layout;
+
   const [settings, setSettings] = React.useState<AppSettings>({
     projectName: "LoopHub",
     leaveAccumulationAmount: 1.5,
@@ -201,12 +211,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       side="right"
                       align="start"
                       >
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuLabel>{t.my_account}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild><Link href="/dashboard/my-profile">Profile</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link href="/dashboard/user-settings">Settings</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.profile}</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/dashboard/user-settings">{t.settings}</Link></DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>Logout</DropdownMenuItem>
+                      <DropdownMenuItem>{t.logout}</DropdownMenuItem>
                       </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -231,7 +241,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="search"
-                      placeholder="Search..."
+                      placeholder={t.search_placeholder}
                       className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px] bg-background"
                     />
                   </div>
@@ -239,7 +249,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <LanguageSwitcher />
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Bell className="w-5 h-5" />
-                  <span className="sr-only">Toggle notifications</span>
+                  <span className="sr-only">{t.toggle_notifications}</span>
                 </Button>
                 <div className="hidden md:block">
                   <DropdownMenu>
@@ -257,17 +267,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             />
                             <AvatarFallback>AD</AvatarFallback>
                           </Avatar>
-                          <span className="sr-only">Toggle user menu</span>
+                          <span className="sr-only">{t.toggle_user_menu}</span>
                         </React.Fragment>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuLabel>{t.my_account}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild><Link href="/dashboard/my-profile">Profile</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link href="/dashboard/user-settings">Settings</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.profile}</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/dashboard/user-settings">{t.settings}</Link></DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>Logout</DropdownMenuItem>
+                      <DropdownMenuItem>{t.logout}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
