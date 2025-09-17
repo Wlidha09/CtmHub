@@ -4,7 +4,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Bell, User, Users, ChevronDown } from "lucide-react";
+import { Search, Bell, User, Users, ChevronDown, ChevronRight, PanelLeft } from "lucide-react";
 
 import {
   SidebarProvider,
@@ -41,6 +41,7 @@ import { Label } from "@/components/ui/label";
 import { RoleProvider, useCurrentRole } from "@/hooks/use-current-role";
 import { getSettings } from "@/lib/firebase/settings";
 import type { AppSettings } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 function RoleSwitcher() {
   const { currentRole, setCurrentRole } = useCurrentRole();
@@ -136,14 +137,24 @@ export default function DashboardLayout({
           <SidebarContent>
             <DashboardNav />
           </SidebarContent>
-          <SidebarFooter className="p-4 space-y-4 group-data-[collapsible=icon]:p-2 relative flex flex-col">
+          <SidebarFooter>
             <RoleSwitcher />
             <div className="w-full h-px bg-sidebar-border" />
-            <div className="flex items-center justify-center gap-2 group-data-[state=expanded]:flex-row group-data-[state=collapsed]:flex-col">
-              <SidebarCollapse className="group-data-[state=collapsed]:order-1" />
-              <div className="group-data-[state=collapsed]:order-2">
+            <div
+              className={cn(
+                "flex items-center gap-2",
+                "group-data-[state=expanded]:flex-row",
+                "group-data-[state=collapsed]:flex-col"
+              )}
+            >
+              <div
+                className={cn(
+                  "group-data-[state=expanded]:order-1",
+                  "group-data-[state=collapsed]:order-2"
+                )}
+              >
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild>
                     <Button
                         variant="ghost"
                         className="justify-start w-full gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center"
@@ -179,6 +190,12 @@ export default function DashboardLayout({
                     </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+              <SidebarCollapse
+                className={cn(
+                  "group-data-[state=expanded]:order-2",
+                  "group-data-[state=collapsed]:order-1"
+                )}
+              />
             </div>
           </SidebarFooter>
         </Sidebar>

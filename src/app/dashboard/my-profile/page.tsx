@@ -65,8 +65,7 @@ export default function MyProfilePage() {
       toast({ title: "Success", description: "Your profile has been updated." });
       setIsEditing(false);
       fetchData(); // Refresh data
-    } catch (error) {
-      toast({
+    } catch (error)      toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to save profile information.",
