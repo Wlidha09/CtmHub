@@ -4,6 +4,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Bell, User, Users, ChevronDown, ChevronRight, PanelLeft } from "lucide-react";
 
 import {
@@ -39,6 +40,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RoleProvider, useCurrentRole } from "@/hooks/use-current-role";
 import { LanguageProvider, useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/hooks/use-auth";
 import { getSettings } from "@/lib/firebase/settings";
 import type { AppSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -109,11 +111,20 @@ function LanguageSwitcher() {
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { language } = useLanguage();
   const t = translations[language].layout;
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
 
   const [settings, setSettings] = React.useState<AppSettings>({
     projectName: "LoopHub",
     leaveAccumulationAmount: 1.5,
   });
+  
+  React.useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
 
   React.useEffect(() => {
     const fetchProjectName = async () => {
@@ -126,6 +137,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     };
     fetchProjectName();
   }, []);
+
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
       <RoleProvider>
@@ -191,15 +210,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           <React.Fragment>
                           <Avatar>
                               <AvatarImage
-                              src="https://picsum.photos/seed/user-avatar/40/40"
+                              src={user.photoURL || "https://picsum.photos/seed/user-avatar/40/40"}
                               data-ai-hint="person portrait"
                               />
-                              <AvatarFallback>AD</AvatarFallback>
+                              <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
                           </Avatar>
                           <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                              <p className="text-sm font-medium">Admin User</p>
+                              <p className="text-sm font-medium">{user.displayName}</p>
                               <p className="text-xs text-muted-foreground">
-                              admin@loophub.com
+                              {user.email}
                               </p>
                           </div>
                           </React.Fragment>
@@ -215,7 +234,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.profile}</Link></DropdownMenuItem>
                       <DropdownMenuItem asChild><Link href="/dashboard/user-settings">{t.settings}</Link></DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>{t.logout}</DropdownMenuItem>
+                      <DropdownMenuItem onClick={signOut}>{t.logout}</DropdownMenuItem>
                       </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -255,10 +274,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         <React.Fragment>
                           <Avatar className="w-8 h-8">
                             <AvatarImage
-                              src="https://picsum.photos/seed/user-avatar/40/40"
+                              src={user.photoURL || "https://picsum.photos/seed/user-avatar/40/40"}
                               data-ai-hint="person portrait"
                             />
-                            <AvatarFallback>AD</AvatarFallback>
+                            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
                           </Avatar>
                           <span className="sr-only">{t.toggle_user_menu}</span>
                         </React.Fragment>
@@ -270,7 +289,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.profile}</Link></DropdownMenuItem>
                       <DropdownMenuItem asChild><Link href="/dashboard/user-settings">{t.settings}</Link></DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>{t.logout}</DropdownMenuItem>
+                      <DropdownMenuItem onClick={signOut}>{t.logout}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
