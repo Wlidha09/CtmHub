@@ -15,7 +15,6 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarRail,
-  SidebarCollapse,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -220,12 +219,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <SidebarCollapse
-                  className={cn(
-                    "group-data-[state=expanded]:order-2",
-                    "group-data-[state=collapsed]:order-1"
-                  )}
-                />
               </div>
             </SidebarFooter>
           </Sidebar>
