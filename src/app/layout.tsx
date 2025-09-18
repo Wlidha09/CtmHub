@@ -2,11 +2,15 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/hooks/use-auth';
+import { getSettings } from '@/lib/firebase/settings';
 
-export const metadata: Metadata = {
-  title: 'LoopHub',
-  description: 'Your central hub for everything work.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  return {
+    title: settings.projectName,
+    description: 'Your central hub for everything work.',
+  };
+}
 
 export default function RootLayout({
   children,
