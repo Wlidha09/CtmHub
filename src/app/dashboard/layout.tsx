@@ -72,7 +72,7 @@ function RoleSwitcher() {
           <SelectValue placeholder="Select a role" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Dev">Dev</SelectItem>
+          {currentRole === 'Dev' && <SelectItem value="Dev">Dev</SelectItem>}
           <SelectItem value="Owner">Owner</SelectItem>
           <SelectItem value="RH">RH</SelectItem>
           <SelectItem value="Manager">Manager</SelectItem>
