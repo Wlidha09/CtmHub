@@ -338,6 +338,14 @@ export default function RolesPage() {
     }
   }
 
+  const displayedRoles = React.useMemo(() => {
+    if (currentRole === 'Dev') {
+        return roles;
+    }
+    return roles.filter(role => role.name !== 'Dev');
+  }, [roles, currentRole]);
+
+
   if (isLoading) {
     return <div>{t.loading}</div>;
   }
@@ -353,7 +361,7 @@ export default function RolesPage() {
         </p>
       </header>
       
-      <RoleManager roles={roles} addRole={addRole} deleteRole={deleteRole} canManage={canManage} />
+      <RoleManager roles={displayedRoles} addRole={addRole} deleteRole={deleteRole} canManage={canManage} />
 
       <Card>
         <CardHeader>
@@ -362,7 +370,7 @@ export default function RolesPage() {
         </CardHeader>
         <CardContent>
             <PermissionsTable
-                roles={roles}
+                roles={displayedRoles}
                 handlePermissionChange={handlePermissionChange}
                 canManage={canManage}
             />
