@@ -202,7 +202,6 @@ export function DepartmentList({
                           </SelectTrigger>
                           <SelectContent>
                             {allEmployees
-                              .filter((e) => e.departmentId === dept.id)
                               .map((employee) => (
                                 <SelectItem key={employee.id} value={employee.id}>
                                   {employee.name}
