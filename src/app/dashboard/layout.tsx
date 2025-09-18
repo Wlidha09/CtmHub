@@ -114,10 +114,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
 
-  const [settings, setSettings] = React.useState<AppSettings>({
-    projectName: "LoopHub",
-    leaveAccumulationAmount: 1.5,
-  });
+  const [settings, setSettings] = React.useState<AppSettings | null>(null);
   
   React.useEffect(() => {
     if (!loading && !user) {
@@ -138,7 +135,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     fetchProjectName();
   }, []);
 
-  if (loading || !user) {
+  if (loading || !user || !settings) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p>Loading...</p>

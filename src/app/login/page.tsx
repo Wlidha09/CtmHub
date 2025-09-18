@@ -3,10 +3,12 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { getSettings } from "@/lib/firebase/settings";
+import type { AppSettings } from "@/lib/types";
 
 const GoogleIcon = () => (
     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -23,6 +25,7 @@ export default function LoginPage() {
     const { user, loading, signInWithGoogle } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const [settings, setSettings] = React.useState<AppSettings | null>(null);
 
     useEffect(() => {
         if (!loading && user) {
@@ -30,6 +33,18 @@ export default function LoginPage() {
         }
     }, [user, loading, router]);
     
+    useEffect(() => {
+        const fetchProjectName = async () => {
+            try {
+                const fetchedSettings = await getSettings();
+                setSettings(fetchedSettings);
+            } catch (error) {
+                console.error("Failed to fetch settings", error);
+            }
+        };
+        fetchProjectName();
+    }, []);
+
     const handleSignIn = async () => {
         try {
             await signInWithGoogle();
@@ -41,7 +56,7 @@ export default function LoginPage() {
     };
 
 
-    if (loading || user) {
+    if (loading || user || !settings) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <p>Loading...</p>
@@ -67,7 +82,7 @@ export default function LoginPage() {
                         <path d="M12 2 L14.5 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L9.5 9 Z"></path>
                         </svg>
                     </div>
-                    <CardTitle className="text-2xl">Welcome to LoopHub</CardTitle>
+                    <CardTitle className="text-2xl">Welcome to {settings.projectName}</CardTitle>
                     <CardDescription>Sign in to access your dashboard</CardDescription>
                 </CardHeader>
                 <CardContent>
