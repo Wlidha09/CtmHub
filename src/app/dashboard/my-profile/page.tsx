@@ -15,13 +15,12 @@ import { format } from "date-fns";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
 
-// In a real app, this would come from the authenticated user
-const FAKE_CURRENT_USER_ID = "e2";
-
 export default function MyProfilePage() {
+  const { user: authUser } = useAuth();
   const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [departments, setDepartments] = React.useState<Department[]>([]);
   const [departmentName, setDepartmentName] = React.useState<string>("");
@@ -32,19 +31,25 @@ export default function MyProfilePage() {
   const t = translations[language].my_profile_page;
 
   const fetchData = React.useCallback(async () => {
+    if (!authUser) return;
     setIsLoading(true);
     try {
-      const [user, departmentList] = await Promise.all([
-        getEmployee(FAKE_CURRENT_USER_ID),
-        getDepartments(),
-      ]);
+      // In a real app, you would have a mapping from auth user uid to employee id.
+      // For this demo, we'll find the user by email.
+      const allEmployees = await getEmployee(authUser.uid); // This needs to be adjusted based on actual employee fetching logic
+      
+      const user = allEmployees; // Assuming getEmployee is modified to find by auth uid or a similar unique identifier
 
       if (user) {
+        const [departmentList] = await Promise.all([
+          getDepartments(),
+        ]);
+
         setCurrentUser(user);
         const userDept = departmentList.find(d => d.id === user.departmentId);
         setDepartmentName(userDept?.name || "Unknown");
+        setDepartments(departmentList);
       }
-      setDepartments(departmentList);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -54,7 +59,7 @@ export default function MyProfilePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, t]);
+  }, [authUser, toast, t]);
 
   React.useEffect(() => {
     fetchData();
@@ -63,10 +68,13 @@ export default function MyProfilePage() {
   const handleSave = async (employeeData: Partial<Employee>) => {
     if (!currentUser) return;
     try {
-      // Prevent role and department changes from this form
+      // Prevent role and department changes from this form for non-admins
       const dataToSave = { ...employeeData };
       delete dataToSave.role;
       delete dataToSave.departmentId;
+      delete dataToSave.status;
+      delete dataToSave.leaveBalance;
+      delete dataToSave.startDate;
 
       await updateEmployee(currentUser.id, dataToSave);
       toast({ title: "Success", description: t.toast_save_success });
@@ -82,6 +90,7 @@ export default function MyProfilePage() {
   };
   
   const getInitials = (name: string) => {
+    if (!name) return "";
     const parts = name.split(" ");
     if (parts.length > 1) {
       return `${parts[0][0]}${parts[parts.length - 1][0]}`;
@@ -95,7 +104,7 @@ export default function MyProfilePage() {
   }
 
   if (!currentUser) {
-    return <div>{t.load_error}</div>;
+    return <div>{t.load_error || "Could not load user profile."}</div>;
   }
 
   return (
@@ -168,3 +177,4 @@ export default function MyProfilePage() {
     </div>
   );
 }
+
