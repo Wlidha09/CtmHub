@@ -85,6 +85,22 @@ export function DepartmentList({
     const originalDept = departments.find(d => d.id === departmentId);
     if (!originalDept) return;
 
+    // Check if the selected lead is already a lead of another department
+    if (selectedLead && selectedLead !== originalDept.leadId) {
+      const isAlreadyLead = departments.some(
+        (dept) => dept.leadId === selectedLead && dept.id !== departmentId
+      );
+      if (isAlreadyLead) {
+        toast({
+          variant: "destructive",
+          title: "Assignment Failed",
+          description: "This employee is already leading another department.",
+        });
+        setIsUpdating(false);
+        return;
+      }
+    }
+
     const newLead = allEmployees.find(e => e.id === selectedLead);
 
     const updates: Partial<Department> = {};
