@@ -1,4 +1,7 @@
 # Firebase Studio
+Developers:
+    Adel Cherif
+    Gemini*
 
 This is a NextJS starter in Firebase Studio.
 
