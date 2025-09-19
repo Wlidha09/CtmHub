@@ -34,7 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import { useCurrentRole } from "@/hooks/use-current-role";
@@ -77,7 +77,7 @@ export function DepartmentList({
 
   const handleEdit = (dept: Department) => {
     setDepartmentName(dept.name);
-    setSelectedLead(undefined);
+    setSelectedLead(dept.leadId);
   };
 
   const handleSaveChanges = async (departmentId: string) => {
@@ -88,11 +88,14 @@ export function DepartmentList({
     const newLead = allEmployees.find(e => e.id === selectedLead);
 
     const updates: Partial<Department> = {};
+    let shouldUpdateEmployeeRole = false;
+
     if (departmentName && departmentName !== originalDept.name) {
       updates.name = departmentName;
     }
     if (selectedLead && selectedLead !== originalDept.leadId) {
       updates.leadId = selectedLead;
+      shouldUpdateEmployeeRole = true;
     }
     
     if (Object.keys(updates).length === 0) {
@@ -101,8 +104,16 @@ export function DepartmentList({
     }
 
     try {
+        const batch = writeBatch(db);
         const departmentRef = doc(db, 'departments', departmentId);
-        await updateDoc(departmentRef, updates);
+        batch.update(departmentRef, updates);
+
+        if (shouldUpdateEmployeeRole && updates.leadId) {
+            const employeeRef = doc(db, 'employees', updates.leadId);
+            batch.update(employeeRef, { role: 'Manager' });
+        }
+
+        await batch.commit();
 
         setDepartments(prevDepartments => 
           prevDepartments.map(dept => {
@@ -110,6 +121,7 @@ export function DepartmentList({
                 return {
                     ...dept,
                     name: updates.name || dept.name,
+                    leadId: updates.leadId || dept.leadId,
                     lead: newLead || dept.lead,
                 }
             }
