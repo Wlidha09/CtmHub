@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, getDocs, doc, getDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, deleteDoc, addDoc, query, where, writeBatch } from 'firebase/firestore';
 import type { Department } from '@/lib/types';
 
 export async function getDepartments(): Promise<Department[]> {
@@ -29,6 +29,23 @@ export async function addDepartment(department: Omit<Department, 'id'>) {
 }
 
 export async function deleteDepartment(id: string): Promise<void> {
-    const departmentDoc = doc(db, 'departments', id);
-    await deleteDoc(departmentDoc);
+    const batch = writeBatch(db);
+
+    // 1. Reference the department to be deleted
+    const departmentDocRef = doc(db, 'departments', id);
+    batch.delete(departmentDocRef);
+
+    // 2. Find all employees in that department
+    const employeesRef = collection(db, 'employees');
+    const q = query(employeesRef, where('departmentId', '==', id));
+    const querySnapshot = await getDocs(q);
+
+    // 3. Update each employee to remove their departmentId
+    querySnapshot.forEach(employeeDoc => {
+        const employeeRef = doc(db, 'employees', employeeDoc.id);
+        batch.update(employeeRef, { departmentId: '' });
+    });
+    
+    // 4. Commit the batch
+    await batch.commit();
 }
