@@ -42,10 +42,11 @@ import { RoleProvider, useCurrentRole } from "@/hooks/use-current-role";
 import { LanguageProvider, useLanguage } from "@/hooks/use-language";
 import { useAuth } from "@/hooks/use-auth";
 import { getSettings } from "@/lib/firebase/settings";
-import type { AppSettings } from "@/lib/types";
+import type { AppSettings, Employee } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { getEmployees } from "@/lib/firebase/employees";
 
 const translations = { en, fr };
 
@@ -115,6 +116,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const [settings, setSettings] = React.useState<AppSettings | null>(null);
+  const [currentEmployee, setCurrentEmployee] = React.useState<Employee | null>(null);
   
   React.useEffect(() => {
     if (!loading && !user) {
@@ -124,16 +126,23 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
 
   React.useEffect(() => {
-    const fetchProjectName = async () => {
+    const fetchInitialData = async () => {
         try {
             const fetchedSettings = await getSettings();
             setSettings(fetchedSettings);
+            
+            if (user?.email) {
+              const allEmployees = await getEmployees();
+              const employee = allEmployees.find(emp => emp.email === user.email) || null;
+              setCurrentEmployee(employee);
+            }
+
         } catch (error) {
-            console.error("Failed to fetch settings", error);
+            console.error("Failed to fetch initial data", error);
         }
     };
-    fetchProjectName();
-  }, []);
+    fetchInitialData();
+  }, [user]);
 
   if (loading || !user || !settings) {
     return (
@@ -142,6 +151,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  const getInitials = (name?: string | null) => {
+    if (!name) return 'U';
+    const parts = name.split(" ");
+    if (parts.length > 1) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`;
+    }
+    return name.substring(0, 2);
+  };
 
   return (
       <RoleProvider>
@@ -207,13 +225,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           <React.Fragment>
                           <Avatar>
                               <AvatarImage
-                              src={user.photoURL || "https://picsum.photos/seed/user-avatar/40/40"}
-                              data-ai-hint="person portrait"
+                                src={currentEmployee?.avatarUrl || user.photoURL || undefined}
+                                data-ai-hint="person portrait"
                               />
-                              <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                              <AvatarFallback>{getInitials(currentEmployee?.name || user.displayName)}</AvatarFallback>
                           </Avatar>
                           <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                              <p className="text-sm font-medium">{user.displayName}</p>
+                              <p className="text-sm font-medium">{currentEmployee?.name || user.displayName}</p>
                               <p className="text-xs text-muted-foreground">
                               {user.email}
                               </p>
@@ -271,10 +289,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         <React.Fragment>
                           <Avatar className="w-8 h-8">
                             <AvatarImage
-                              src={user.photoURL || "https://picsum.photos/seed/user-avatar/40/40"}
-                              data-ai-hint="person portrait"
+                                src={currentEmployee?.avatarUrl || user.photoURL || undefined}
+                                data-ai-hint="person portrait"
                             />
-                            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                            <AvatarFallback>{getInitials(currentEmployee?.name || user.displayName)}</AvatarFallback>
                           </Avatar>
                           <span className="sr-only">{t.toggle_user_menu}</span>
                         </React.Fragment>
@@ -337,3 +355,5 @@ const AvatarFallback = ({
 }: React.ComponentProps<typeof UIAvatarFallback>) => (
   <UIAvatarFallback {...props}>{children}</UIAvatarFallback>
 );
+
+    
