@@ -118,6 +118,25 @@ export default function EmployeesPage() {
         }
       }
 
+      // Check for one manager per department
+      if (employeeData.role === 'Manager' && employeeData.departmentId) {
+        const departmentHasManager = employees.some(emp => 
+          emp.departmentId === employeeData.departmentId &&
+          emp.role === 'Manager' &&
+          emp.id !== employeeId
+        );
+
+        if (departmentHasManager) {
+          toast({
+            variant: "destructive",
+            title: "Manager Already Assigned",
+            description: "This department already has a manager. Please assign a different role or department.",
+          });
+          return;
+        }
+      }
+
+
       if (isEditing) {
         // Update existing employee
         await updateEmployee(employeeId!, employeeData);
