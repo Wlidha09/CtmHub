@@ -15,8 +15,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DENIED_EMAILS: string[] = [];
-const DENIED_DOMAINS: string[] = [];
+const ALLOWED_EMAILS: string[] = ["wlidha09@gmail.com"];
+const ALLOWED_DOMAINS: string[] = ["@contractor.atolls.com"];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -39,10 +39,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userEmail = result.user.email;
 
       if (userEmail) {
-        if (DENIED_EMAILS.includes(userEmail) || DENIED_DOMAINS.some(domain => userEmail.endsWith(domain))) {
+        const isAllowed = ALLOWED_EMAILS.includes(userEmail) || ALLOWED_DOMAINS.some(domain => userEmail.endsWith(domain));
+        if (!isAllowed) {
            await signOut(); // Sign out the user immediately
-           throw new Error("Access denied for this account.");
+           throw new Error("Access restricted for this account.");
         }
+      } else {
+        // No email available, deny access
+        await signOut();
+        throw new Error("Could not verify email. Access denied.");
       }
       // If not denied, user state will be set by onAuthStateChanged
     } catch (error: any) {
