@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getEmployee, updateEmployee } from "@/lib/firebase/employees";
+import { getEmployees, updateEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import type { Employee, Department } from "@/lib/types";
 import { EmployeeForm } from "../employees/employee-form";
@@ -31,24 +31,26 @@ export default function MyProfilePage() {
   const t = translations[language].my_profile_page;
 
   const fetchData = React.useCallback(async () => {
-    if (!authUser) return;
+    if (!authUser?.email) return;
     setIsLoading(true);
     try {
-      // In a real app, you would have a mapping from auth user uid to employee id.
-      // For this demo, we'll find the user by email.
-      const allEmployees = await getEmployee(authUser.uid); // This needs to be adjusted based on actual employee fetching logic
-      
-      const user = allEmployees; // Assuming getEmployee is modified to find by auth uid or a similar unique identifier
+      // In our demo setup, we find the employee by matching the auth user's email.
+      const allEmployees = await getEmployees();
+      const user = allEmployees.find(emp => emp.email === authUser.email) || null;
 
       if (user) {
-        const [departmentList] = await Promise.all([
-          getDepartments(),
-        ]);
-
+        const departmentList = await getDepartments();
         setCurrentUser(user);
         const userDept = departmentList.find(d => d.id === user.departmentId);
         setDepartmentName(userDept?.name || "Unknown");
         setDepartments(departmentList);
+      } else {
+        // If no matching employee is found, it's an error state.
+        toast({
+          variant: "destructive",
+          title: "Profile Not Found",
+          description: "We couldn't find an employee profile associated with your login.",
+        });
       }
     } catch (error) {
       toast({
@@ -177,4 +179,3 @@ export default function MyProfilePage() {
     </div>
   );
 }
-
