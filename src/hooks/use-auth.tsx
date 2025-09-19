@@ -16,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DENIED_EMAILS: string[] = [];
-const DENIED_DOMAINS = ["@contractor.atolls.com"];
+const DENIED_DOMAINS: string[] = [];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
