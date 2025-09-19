@@ -18,7 +18,6 @@ import {
   BookMarked,
   Settings,
   User,
-  Languages,
 } from "lucide-react";
 
 import {
@@ -91,11 +90,6 @@ const navItems: NavItem[] = [
     href: "/dashboard/availability",
     labelKey: "availability",
     icon: CalendarClock,
-  },
-  {
-    href: "/dashboard/translator",
-    labelKey: "translator",
-    icon: Languages,
   },
    {
     href: "/dashboard/settings",
