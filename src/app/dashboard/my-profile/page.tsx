@@ -133,7 +133,7 @@ export default function MyProfilePage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint="person portrait"/>
+                <AvatarImage src={authUser?.photoURL || currentUser.avatarUrl} alt={currentUser.name} data-ai-hint="person portrait"/>
                 <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
               </Avatar>
               <div>
