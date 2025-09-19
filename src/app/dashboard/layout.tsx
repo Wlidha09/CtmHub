@@ -225,7 +225,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           <React.Fragment>
                           <Avatar>
                               <AvatarImage
-                                src={currentEmployee?.avatarUrl || user.photoURL || undefined}
+                                src={user.photoURL || currentEmployee?.avatarUrl || undefined}
                                 data-ai-hint="person portrait"
                               />
                               <AvatarFallback>{getInitials(currentEmployee?.name || user.displayName)}</AvatarFallback>
@@ -289,7 +289,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         <React.Fragment>
                           <Avatar className="w-8 h-8">
                             <AvatarImage
-                                src={currentEmployee?.avatarUrl || user.photoURL || undefined}
+                                src={user.photoURL || currentEmployee?.avatarUrl || undefined}
                                 data-ai-hint="person portrait"
                             />
                             <AvatarFallback>{getInitials(currentEmployee?.name || user.displayName)}</AvatarFallback>
@@ -355,5 +355,7 @@ const AvatarFallback = ({
 }: React.ComponentProps<typeof UIAvatarFallback>) => (
   <UIAvatarFallback {...props}>{children}</UIAvatarFallback>
 );
+
+    
 
     
