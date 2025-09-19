@@ -86,8 +86,9 @@ export function DepartmentList({
     const originalDept = departments.find(d => d.id === departmentId);
     if (!originalDept) return;
 
-    // Check if the selected lead is already a lead of another department
-    if (selectedLead && selectedLead !== originalDept.leadId) {
+    const leadHasChanged = selectedLead !== originalDept.leadId;
+
+    if (selectedLead && leadHasChanged) {
       const isAlreadyLead = departments.some(
         (dept) => dept.leadId === selectedLead && dept.id !== departmentId
       );
@@ -101,24 +102,13 @@ export function DepartmentList({
         return;
       }
     }
-
-    const newLead = allEmployees.find(e => e.id === selectedLead);
-
+    
     const updates: Partial<Department> = {};
-    let shouldUpdateNewLeadRole = false;
-    let shouldUpdateOldLeadRole = false;
-
     if (departmentName && departmentName !== originalDept.name) {
       updates.name = departmentName;
     }
-    if (selectedLead !== originalDept.leadId) {
-        updates.leadId = selectedLead || "";
-        if (selectedLead) {
-            shouldUpdateNewLeadRole = true;
-        }
-        if (originalDept.leadId) {
-            shouldUpdateOldLeadRole = true;
-        }
+    if (leadHasChanged) {
+      updates.leadId = selectedLead || "";
     }
     
     if (Object.keys(updates).length === 0) {
@@ -131,38 +121,28 @@ export function DepartmentList({
         const departmentRef = doc(db, 'departments', departmentId);
         batch.update(departmentRef, updates);
 
-        if (shouldUpdateNewLeadRole && updates.leadId) {
-            const employeeRef = doc(db, 'employees', updates.leadId);
-            batch.update(employeeRef, { role: 'Manager' });
-        }
-        
-        if (shouldUpdateOldLeadRole && originalDept.leadId) {
-            // Check if the old lead is still a lead of any other department
-            const isStillLead = departments.some(
-                (dept) => dept.leadId === originalDept.leadId && dept.id !== departmentId
-            );
-            if (!isStillLead) {
-                const oldLeadRef = doc(db, 'employees', originalDept.leadId);
-                batch.update(oldLeadRef, { role: 'Employee' });
+        if (leadHasChanged) {
+            // New lead is assigned
+            if (selectedLead) {
+                const newLeadRef = doc(db, 'employees', selectedLead);
+                batch.update(newLeadRef, { role: 'Manager' });
+            }
+            
+            // Old lead is unassigned
+            if (originalDept.leadId) {
+                // Check if the old lead is still a lead of any other department
+                const isStillLead = departments.some(
+                    (dept) => dept.leadId === originalDept.leadId && dept.id !== departmentId
+                );
+                if (!isStillLead) {
+                    const oldLeadRef = doc(db, 'employees', originalDept.leadId);
+                    batch.update(oldLeadRef, { role: 'Employee' });
+                }
             }
         }
 
 
         await batch.commit();
-
-        setDepartments(prevDepartments => 
-          prevDepartments.map(dept => {
-            if (dept.id === departmentId) {
-                return {
-                    ...dept,
-                    name: updates.name || dept.name,
-                    leadId: updates.leadId === undefined ? dept.leadId : updates.leadId,
-                    lead: newLead || (updates.leadId === "" ? undefined : dept.lead),
-                } as DepartmentWithLead;
-            }
-            return dept;
-          })
-        );
 
         toast({
             title: "Department Updated",
@@ -297,4 +277,3 @@ export function DepartmentList({
     </div>
   );
 }
-
