@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -104,14 +105,20 @@ export function DepartmentList({
     const newLead = allEmployees.find(e => e.id === selectedLead);
 
     const updates: Partial<Department> = {};
-    let shouldUpdateEmployeeRole = false;
+    let shouldUpdateNewLeadRole = false;
+    let shouldUpdateOldLeadRole = false;
 
     if (departmentName && departmentName !== originalDept.name) {
       updates.name = departmentName;
     }
-    if (selectedLead && selectedLead !== originalDept.leadId) {
-      updates.leadId = selectedLead;
-      shouldUpdateEmployeeRole = true;
+    if (selectedLead !== originalDept.leadId) {
+        updates.leadId = selectedLead || "";
+        if (selectedLead) {
+            shouldUpdateNewLeadRole = true;
+        }
+        if (originalDept.leadId) {
+            shouldUpdateOldLeadRole = true;
+        }
     }
     
     if (Object.keys(updates).length === 0) {
@@ -124,10 +131,22 @@ export function DepartmentList({
         const departmentRef = doc(db, 'departments', departmentId);
         batch.update(departmentRef, updates);
 
-        if (shouldUpdateEmployeeRole && updates.leadId) {
+        if (shouldUpdateNewLeadRole && updates.leadId) {
             const employeeRef = doc(db, 'employees', updates.leadId);
             batch.update(employeeRef, { role: 'Manager' });
         }
+        
+        if (shouldUpdateOldLeadRole && originalDept.leadId) {
+            // Check if the old lead is still a lead of any other department
+            const isStillLead = departments.some(
+                (dept) => dept.leadId === originalDept.leadId && dept.id !== departmentId
+            );
+            if (!isStillLead) {
+                const oldLeadRef = doc(db, 'employees', originalDept.leadId);
+                batch.update(oldLeadRef, { role: 'Employee' });
+            }
+        }
+
 
         await batch.commit();
 
@@ -137,9 +156,9 @@ export function DepartmentList({
                 return {
                     ...dept,
                     name: updates.name || dept.name,
-                    leadId: updates.leadId || dept.leadId,
-                    lead: newLead || dept.lead,
-                }
+                    leadId: updates.leadId === undefined ? dept.leadId : updates.leadId,
+                    lead: newLead || (updates.leadId === "" ? undefined : dept.lead),
+                } as DepartmentWithLead;
             }
             return dept;
           })
@@ -224,11 +243,12 @@ export function DepartmentList({
                     </div>
                     <div className="space-y-2">
                         <Label>Department Lead</Label>
-                        <Select onValueChange={setSelectedLead} defaultValue={dept.leadId}>
+                        <Select onValueChange={setSelectedLead} defaultValue={dept.leadId || ""}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a new lead" />
                           </SelectTrigger>
                           <SelectContent>
+                             <SelectItem value="">No Leader</SelectItem>
                             {allEmployees
                               .map((employee) => (
                                 <SelectItem key={employee.id} value={employee.id}>
@@ -277,3 +297,4 @@ export function DepartmentList({
     </div>
   );
 }
+
