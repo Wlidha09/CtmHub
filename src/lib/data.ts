@@ -19,7 +19,7 @@ export const employees: Employee[] = [
   { id: 'e8', name: 'Mason Jones', email: 'mason.jones@loophub.com', phoneNumber: '+1-202-555-0169', avatarUrl: 'https://picsum.photos/seed/avatar8/100/100', role: 'Manager', departmentId: 'd4', status: 'active', startDate: '2020-12-05' },
   { id: 'e9', name: 'Harper Garcia', email: 'harper.garcia@loophub.com', phoneNumber: '+1-202-555-0125', avatarUrl: 'https://picsum.photos/seed/avatar9/100/100', role: 'Employee', departmentId: 'd4', status: 'active', startDate: '2023-02-15' },
   { id: 'e10', name: 'Ethan Miller', email: 'ethan.miller@loophub.com', phoneNumber: '+1-202-555-0158', avatarUrl: 'https://picsum.photos/seed/avatar10/100/100', role: 'Employee', departmentId: 'd4', status: 'active', startDate: '2023-07-22' },
-  { id: 'e11', name: 'Dev User', email: 'dev@loophub.com', phoneNumber: '+1-202-555-0100', avatarUrl: 'https://picsum.photos/seed/avatar11/100/100', role: 'Dev', departmentId: 'd1', status: 'active', startDate: '2020-01-01' },
+  { id: 'e11', name: 'Dev User', email: 'dev@loophub.com', phoneNumber: '+1-202-555-0100', avatarUrl: 'https://picsum.photos/seed/avatar11/100/100', role: 'Dev', departmentId: 'd1', status: 'active', startDate: '2020-01-01', isDev: true },
   { id: 'e12', name: 'Owner User', email: 'owner@loophub.com', phoneNumber: '+1-202-555-0101', avatarUrl: 'https://picsum.photos/seed/avatar12/100/100', role: 'Owner', departmentId: 'd1', status: 'active', startDate: '2020-01-01' },
 ];
 

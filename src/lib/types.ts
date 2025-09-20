@@ -29,6 +29,7 @@ export type Employee = {
   birthDate?: string;
   leaveBalance?: number;
   userSettings?: UserSettings;
+  isDev?: boolean;
 };
 
 export type Department = {

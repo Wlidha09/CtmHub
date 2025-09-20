@@ -23,6 +23,7 @@ import {
 import type { Employee, Department } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentRole } from "@/hooks/use-current-role";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         startDate: employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : '',
         birthDate: employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : '',
         leaveBalance: employee.leaveBalance ?? 0,
+        isDev: employee.isDev || false,
       });
     } else {
       setFormData({
@@ -60,6 +62,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
         birthDate: new Date().toISOString().split('T')[0],
         leaveBalance: 0,
         userSettings: { language: 'en' },
+        isDev: false,
       });
     }
   }, [employee, isOpen]);
@@ -87,6 +90,10 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData(prev => ({...prev, [name]: checked}));
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +178,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 name="role"
                 value={formData.role || ""}
                 onValueChange={(value) => handleSelectChange("role", value)}
-                disabled={!canEditSensitiveFields}
+                disabled={!canEditSensitiveFields || formData.isDev}
                 >
                 <SelectTrigger id="role">
                     <SelectValue placeholder="Select a role" />
@@ -258,6 +265,17 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 />
             </div>
            </div>
+            {canEditSensitiveFields && (
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="isDev" name="isDev" checked={formData.isDev} onCheckedChange={(checked) => handleCheckboxChange('isDev', !!checked)} />
+                    <label
+                        htmlFor="isDev"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                        Is Developer? (assigns Dev role)
+                    </label>
+                </div>
+            )}
            <DialogFooter>
              <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>

@@ -87,6 +87,11 @@ export default function EmployeesPage() {
     try {
       const isEditing = !!editingEmployee;
       const employeeId = isEditing ? editingEmployee.id : null;
+
+      // Automatically set role to 'Dev' if isDev is true
+      if (employeeData.isDev) {
+        employeeData.role = 'Dev';
+      }
   
       // Uniqueness check for email
       if (employeeData.email) {
@@ -154,7 +159,8 @@ export default function EmployeesPage() {
             startDate: employeeData.startDate || new Date().toISOString(),
             birthDate: employeeData.birthDate || new Date().toISOString(),
             leaveBalance: employeeData.leaveBalance ?? 0,
-            userSettings: employeeData.userSettings || { language: 'en' }
+            userSettings: employeeData.userSettings || { language: 'en' },
+            isDev: employeeData.isDev || false,
         };
         await addEmployee(newEmployeeData);
         toast({ title: "Success", description: t.toast_add_success });
