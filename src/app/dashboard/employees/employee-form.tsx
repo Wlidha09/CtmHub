@@ -265,17 +265,6 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 />
             </div>
            </div>
-            {canEditSensitiveFields && (
-                <div className="flex items-center space-x-2">
-                    <Checkbox id="isDev" name="isDev" checked={formData.isDev} onCheckedChange={(checked) => handleCheckboxChange('isDev', !!checked)} />
-                    <label
-                        htmlFor="isDev"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                        Is Developer? (assigns Dev role)
-                    </label>
-                </div>
-            )}
            <DialogFooter>
              <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>
