@@ -50,11 +50,12 @@ import { getEmployees } from "@/lib/firebase/employees";
 
 const translations = { en, fr };
 
-function RoleSwitcher() {
+function RoleSwitcher({ currentEmployee }: { currentEmployee: Employee | null }) {
   const { currentRole, setCurrentRole } = useCurrentRole();
   const { language } = useLanguage();
   const t = translations[language].layout;
-  const canSwitchRole = currentRole === 'Dev' || currentRole === 'Owner';
+  
+  const canSwitchRole = currentEmployee?.isDev === true;
 
   if (!canSwitchRole) return null;
 
@@ -201,7 +202,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <DashboardNav />
             </SidebarContent>
             <SidebarFooter>
-              <RoleSwitcher />
+              <RoleSwitcher currentEmployee={currentEmployee} />
               <div className="w-full h-px bg-sidebar-border" />
               <div
                 className={cn(
@@ -355,6 +356,8 @@ const AvatarFallback = ({
 }: React.ComponentProps<typeof UIAvatarFallback>) => (
   <UIAvatarFallback {...props}>{children}</UIAvatarFallback>
 );
+
+    
 
     
 
