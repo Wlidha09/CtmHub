@@ -159,7 +159,7 @@ export function EmployeeTable({
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={employee.avatarUrl} alt={employee.name} data-ai-hint="person portrait"/>
+                        <AvatarImage src={`https://picsum.photos/seed/${employee.id}/100/100`} alt={employee.name} data-ai-hint="person portrait"/>
                         <AvatarFallback>
                           {getInitials(employee.name)}
                         </AvatarFallback>
