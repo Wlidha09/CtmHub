@@ -24,13 +24,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser && currentUser.email && !ALLOWED_EMAILS.includes(currentUser.email)) {
+        // If user is not allowed, sign them out and prevent access
+        auth.signOut();
+        setUser(null);
+        console.error("Access denied for this email:", currentUser.email);
+        // Optionally redirect or show a message
+        router.push('/login');
+      } else {
+        setUser(currentUser);
+      }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signOut = async () => {
     try {
@@ -45,28 +54,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user.email;
-
-      if (!userEmail || !ALLOWED_EMAILS.includes(userEmail)) {
-         await signOut();
-         const message = userEmail ? "Access restricted for this account." : "Could not verify email. Access denied.";
-         throw new Error(message);
-      }
-      // If not denied, user state will be set by onAuthStateChanged
+      await signInWithPopup(auth, provider);
+      // After successful sign-in, onAuthStateChanged will handle the user state
+      // and the email validation logic.
     } catch (error: any) {
        console.error("Google Sign-In Error:", error);
        // Ensure user is signed out on any error during sign-in
        await auth.signOut().catch(e => console.error("Sign-out failed after sign-in error:", e));
        setUser(null);
        
+       let errorMessage = "An unexpected error occurred during sign-in.";
        if (error.code === 'auth/unauthorized-domain') {
-           throw new Error("This domain is not authorized. Please add it to the authorized domains in your Firebase console's Authentication settings.");
+           errorMessage = "This domain is not authorized for sign-in. Please add it to the authorized domains in your Firebase console's Authentication settings and try again.";
+       } else if (error.code === 'auth/popup-closed-by-user') {
+            errorMessage = "Sign-in process was cancelled.";
        }
-       if (error.code === 'auth/popup-closed-by-user') {
-            throw new Error("Sign-in process was cancelled.");
-       }
-       throw error;
+       throw new Error(errorMessage);
     }
   };
 
