@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 
 interface AuthContextType {
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       // This is the key change: explicitly trust the current domain.
-      await auth.setPersistence({type: 'SESSION'});
+      await setPersistence(auth, browserSessionPersistence);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
