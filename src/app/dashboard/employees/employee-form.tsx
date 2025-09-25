@@ -38,7 +38,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
 
-  const canEditSensitiveFields = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
+  const canEditEmployees = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
   React.useEffect(() => {
     if (employee) {
@@ -97,6 +97,14 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canEditEmployees) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "You do not have permission to save employee data.",
+      });
+      return;
+    }
     if (!formData.name || !formData.email || !formData.role || !formData.departmentId) {
        toast({
         variant: "destructive",
@@ -143,6 +151,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
             onChange={handleChange}
             placeholder="e.g., John Doe"
             required
+            disabled={!canEditEmployees}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -156,6 +165,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 onChange={handleChange}
                 placeholder="e.g., john.doe@example.com"
                 required
+                disabled={!canEditEmployees}
                 />
             </div>
             <div className="space-y-2">
@@ -168,6 +178,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 onChange={handleChange}
                 placeholder="+216 12345678"
                 maxLength={12}
+                disabled={!canEditEmployees}
                 />
             </div>
           </div>
@@ -178,7 +189,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 name="role"
                 value={formData.role || ""}
                 onValueChange={(value) => handleSelectChange("role", value)}
-                disabled={!canEditSensitiveFields || formData.isDev}
+                disabled={!canEditEmployees || formData.isDev}
                 >
                 <SelectTrigger id="role">
                     <SelectValue placeholder="Select a role" />
@@ -198,7 +209,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                 name="departmentId"
                 value={formData.departmentId || ""}
                 onValueChange={(value) => handleSelectChange("departmentId", value)}
-                disabled={!canEditSensitiveFields}
+                disabled={!canEditEmployees}
                 >
                 <SelectTrigger id="departmentId">
                     <SelectValue placeholder="Select a department" />
@@ -218,7 +229,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     name="status"
                     value={formData.status || ""}
                     onValueChange={(value) => handleSelectChange("status", value as 'active' | 'inactive')}
-                    disabled={!canEditSensitiveFields}
+                    disabled={!canEditEmployees}
                 >
                     <SelectTrigger id="status">
                         <SelectValue placeholder="Select status" />
@@ -237,7 +248,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                     type="date"
                     value={formData.startDate || ''}
                     onChange={handleChange}
-                    disabled={!canEditSensitiveFields}
+                    disabled={!canEditEmployees}
                 />
             </div>
           </div>
@@ -250,6 +261,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
                         type="date"
                         value={formData.birthDate || ''}
                         onChange={handleChange}
+                        disabled={!canEditEmployees}
                     />
             </div>
             <div className="space-y-2">
@@ -269,7 +281,7 @@ export function EmployeeForm({ isOpen, onClose, onSave, employee, departments }:
              <DialogClose asChild>
                 <Button type="button" variant="secondary">Cancel</Button>
              </DialogClose>
-             <Button type="submit">Save Changes</Button>
+             {canEditEmployees && <Button type="submit">Save Changes</Button>}
            </DialogFooter>
         </form>
       </DialogContent>
