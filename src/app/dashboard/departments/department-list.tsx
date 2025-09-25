@@ -68,7 +68,7 @@ function EditDepartmentDialog({
         setDepartmentName(dept.name);
         setSelectedLead(dept.leadId);
     }
-  }, [dept]);
+  }, [dept, isOpen]); // Rerun when dialog opens
 
   if (!dept) {
     return null;
