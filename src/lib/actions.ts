@@ -207,8 +207,7 @@ export async function seedDatabase() {
     for (let i = 0; i < numDepartments; i++) {
         const newDeptId = doc(collection(db, 'departments')).id;
         const newDeptName = `${getRandomElement(deptNames)} #${getRandomInt(1, 100)}`;
-        const newDepartment: Omit<Department, 'leadId'> = {
-            id: newDeptId,
+        const newDepartment: Omit<Department, 'id' | 'leadId'> = {
             name: newDeptName,
         };
 
@@ -236,6 +235,7 @@ export async function seedDatabase() {
         // Assign a lead to the new department from the new employees
         const lead = newEmployees[0];
         const finalNewDepartment: Department = {
+          id: newDeptId,
           ...newDepartment,
           leadId: lead.id,
         };
