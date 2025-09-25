@@ -184,8 +184,8 @@ export function EmployeeTable({
                    <TableCell>
                       <Badge 
                         variant={(employee.status || 'active') === 'active' ? 'default' : 'secondary'}
-                        className="cursor-pointer"
-                        onClick={() => onToggleStatus(employee)}
+                        className={canManageEmployees ? "cursor-pointer" : ""}
+                        onClick={() => canManageEmployees && onToggleStatus(employee)}
                       >
                         {(employee.status || 'active') === 'active' ? 'Active' : 'Inactive'}
                       </Badge>

@@ -179,6 +179,7 @@ function EmployeesPage() {
   }
 
   const handleToggleStatus = async (employee: FormattedEmployee) => {
+    if (!canManageEmployees) return;
     const newStatus = (employee.status || 'active') === 'active' ? 'inactive' : 'active';
     try {
       await updateEmployee(employee.id, { status: newStatus });
