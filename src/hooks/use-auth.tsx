@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             throw new Error("Sign-in process was cancelled.");
        }
        if (error.code === 'auth/unauthorized-domain') {
-           throw new Error("This domain is not authorized for sign-in. Please contact support.");
+           throw new Error("This domain is not authorized. Please add it to the authorized domains in your Firebase console's Authentication settings.");
        }
        throw error;
     }
