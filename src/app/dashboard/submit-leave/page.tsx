@@ -13,31 +13,52 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewLeaveRequestForm } from "./new-leave-request-form";
-import type { LeaveRequest } from "@/lib/types";
+import type { Employee, LeaveRequest } from "@/lib/types";
 import { getLeaveRequests } from "@/lib/firebase/leave-requests";
+import { getEmployees } from "@/lib/firebase/employees";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
 
+type FormattedLeaveRequest = LeaveRequest & { employeeName: string };
+
 function LeaveRequestPage() {
-  const [requests, setRequests] = React.useState<LeaveRequest[]>([]);
+  const [requests, setRequests] = React.useState<FormattedLeaveRequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
   const { language } = useLanguage();
+  const { user: authUser } = useAuth();
   const t = translations[language].submit_leave_page;
 
   const fetchRequests = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      // Assuming we have a way to get current user ID, for now fetching all
-      // In a real app, you'd pass a userId to getLeaveRequests
-      const leaveRequests = await getLeaveRequests();
-      setRequests(leaveRequests);
+      const [leaveRequests, employees, allEmployees] = await Promise.all([
+        getLeaveRequests(),
+        getEmployees(),
+        getEmployees(),
+      ]);
+
+      const employeeMap = new Map(allEmployees.map((e) => [e.id, e.name]));
+      let currentUser: Employee | null = null;
+      if (authUser?.email) {
+        currentUser = employees.find(e => e.email === authUser.email) || null;
+      }
+
+      const formattedRequests = leaveRequests
+        .filter(req => currentUser && req.userId === currentUser.id)
+        .map(req => ({
+          ...req,
+          employeeName: employeeMap.get(req.userId) || "Unknown",
+        }));
+        
+      setRequests(formattedRequests);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -47,7 +68,7 @@ function LeaveRequestPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, t]);
+  }, [toast, t, authUser]);
 
   React.useEffect(() => {
     fetchRequests();
@@ -93,6 +114,7 @@ function LeaveRequestPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>{t.table_header_employee}</TableHead>
                 <TableHead>{t.table_header_type}</TableHead>
                 <TableHead>{t.table_header_start}</TableHead>
                 <TableHead>{t.table_header_end}</TableHead>
@@ -102,11 +124,12 @@ function LeaveRequestPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">{t.loading}</TableCell>
+                  <TableCell colSpan={5} className="text-center">{t.loading}</TableCell>
                 </TableRow>
               ) : requests.length > 0 ? (
                 requests.map((request) => (
                   <TableRow key={request.id}>
+                    <TableCell>{request.employeeName}</TableCell>
                     <TableCell>{request.leaveType}</TableCell>
                     <TableCell>{format(new Date(request.startDate), "PPP")}</TableCell>
                     <TableCell>{format(new Date(request.endDate), "PPP")}</TableCell>
@@ -119,7 +142,7 @@ function LeaveRequestPage() {
                 ))
               ) : (
                  <TableRow>
-                  <TableCell colSpan={4} className="text-center">{t.no_requests}</TableCell>
+                  <TableCell colSpan={5} className="text-center">{t.no_requests}</TableCell>
                 </TableRow>
               )}
             </TableBody>

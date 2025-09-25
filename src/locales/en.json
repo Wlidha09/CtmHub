@@ -172,6 +172,7 @@
     "description": "View your leave requests and submit new ones.",
     "new_request": "New Leave Request",
     "my_requests": "My Requests",
+    "table_header_employee": "Employee",
     "table_header_type": "Leave Type",
     "table_header_start": "Start Date",
     "table_header_end": "End Date",

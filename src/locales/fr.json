@@ -172,6 +172,7 @@
     "description": "Visualisez vos demandes de congé et soumettez-en de nouvelles.",
     "new_request": "Nouvelle demande de congé",
     "my_requests": "Mes demandes",
+    "table_header_employee": "Employé",
     "table_header_type": "Type de congé",
     "table_header_start": "Date de début",
     "table_header_end": "Date de fin",
