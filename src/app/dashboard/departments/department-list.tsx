@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -44,21 +43,36 @@ import { deleteDepartment } from "@/lib/firebase/departments";
 type DepartmentWithLead = Department & { lead?: Employee };
 
 function EditDepartmentDialog({
+  isOpen,
+  onOpenChange,
   dept,
   allEmployees,
   departments,
   onUpdateSuccess,
 }: {
-  dept: DepartmentWithLead;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  dept: DepartmentWithLead | null;
   allEmployees: Employee[];
   departments: DepartmentWithLead[];
   onUpdateSuccess: () => void;
 }) {
-  const [departmentName, setDepartmentName] = React.useState<string>(dept.name);
-  const [selectedLead, setSelectedLead] = React.useState<string | undefined>(dept.leadId);
+  const [departmentName, setDepartmentName] = React.useState<string>("");
+  const [selectedLead, setSelectedLead] = React.useState<string | undefined>();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (dept) {
+        setDepartmentName(dept.name);
+        setSelectedLead(dept.leadId);
+    }
+  }, [dept]);
+
+  if (!dept) {
+    return null;
+  }
 
   const handleSaveChanges = async () => {
     setIsUpdating(true);
@@ -90,6 +104,7 @@ function EditDepartmentDialog({
     
     if (Object.keys(updates).length === 0) {
       setIsUpdating(false);
+      onOpenChange(false);
       return true; // No changes to save
     }
 
@@ -126,7 +141,8 @@ function EditDepartmentDialog({
             title: "Department Updated",
             description: `The ${dept.name} department has been updated.`,
         });
-        onUpdateSuccess(); // This will trigger a refresh on the parent
+        onUpdateSuccess();
+        onOpenChange(false);
         return true;
     } catch (error) {
         toast({
@@ -141,46 +157,48 @@ function EditDepartmentDialog({
   };
   
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Edit {dept.name}</DialogTitle>
-      </DialogHeader>
-      <div className="py-4 space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="dept-name">Department Name</Label>
-            <Input 
-                id="dept-name"
-                value={departmentName} 
-                onChange={(e) => setDepartmentName(e.target.value)}
-            />
-        </div>
-        <div className="space-y-2">
-            <Label>Department Lead</Label>
-            <Select onValueChange={setSelectedLead} defaultValue={dept.leadId || ""}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a new lead" />
-              </SelectTrigger>
-              <SelectContent>
-                 <SelectItem value="">No Leader</SelectItem>
-                {allEmployees
-                  .map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-        </div>
-      </div>
-      <DialogFooter>
-          <DialogClose asChild>
-              <Button type="button" variant="secondary">Cancel</Button>
-          </DialogClose>
-          <Button onClick={handleSaveChanges} disabled={isUpdating}>
-              {isUpdating ? "Saving..." : "Save Changes"}
-          </Button>
-      </DialogFooter>
-    </DialogContent>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit {dept.name}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="dept-name">Department Name</Label>
+                    <Input 
+                        id="dept-name"
+                        value={departmentName} 
+                        onChange={(e) => setDepartmentName(e.target.value)}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Department Lead</Label>
+                    <Select onValueChange={setSelectedLead} value={selectedLead || ""}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select a new lead" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="">No Leader</SelectItem>
+                        {allEmployees
+                        .map((employee) => (
+                            <SelectItem key={employee.id} value={employee.id}>
+                            {employee.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button type="button" variant="secondary">Cancel</Button>
+                </DialogClose>
+                <Button onClick={handleSaveChanges} disabled={isUpdating}>
+                    {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
   )
 }
 
@@ -194,6 +212,8 @@ export function DepartmentList({
   onAction: () => void;
 }) {
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [selectedDept, setSelectedDept] = React.useState<DepartmentWithLead | null>(null);
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
   const canManageDepartments = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
@@ -234,63 +254,67 @@ export function DepartmentList({
     }
   };
 
+  const handleEditClick = (dept: DepartmentWithLead) => {
+    setSelectedDept(dept);
+    setIsEditDialogOpen(true);
+  }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {initialDepartments.map((dept) => (
-        <Card key={dept.id}>
-          <CardHeader className="flex flex-col items-center justify-center gap-4">
-             <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-background"
-                style={{ backgroundColor: generateColor(dept.name) }}
-            >
-                {getInitials(dept.name)}
-            </div>
-            <CardTitle>{dept.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-center">
-            {dept.lead ? (
-                <p className="font-semibold">{dept.lead.name}</p>
-            ) : (
-                <p className="text-muted-foreground">No lead assigned.</p>
+    <>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {initialDepartments.map((dept) => (
+            <Card key={dept.id}>
+            <CardHeader className="flex flex-col items-center justify-center gap-4">
+                <div 
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-background"
+                    style={{ backgroundColor: generateColor(dept.name) }}
+                >
+                    {getInitials(dept.name)}
+                </div>
+                <CardTitle>{dept.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-center">
+                {dept.lead ? (
+                    <p className="font-semibold">{dept.lead.name}</p>
+                ) : (
+                    <p className="text-muted-foreground">No lead assigned.</p>
+                )}
+            </CardContent>
+            {canManageDepartments && (
+                <CardFooter className="flex justify-center gap-2">
+                <Button variant="outline" className="w-full" onClick={() => handleEditClick(dept)}>Edit</Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full">Delete</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the department.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(dept.id)} disabled={isUpdating}>
+                        {isUpdating ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                </CardFooter>
             )}
-          </CardContent>
-          {canManageDepartments && (
-            <CardFooter className="flex justify-center gap-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">Edit</Button>
-                </DialogTrigger>
-                <EditDepartmentDialog 
-                  dept={dept}
-                  allEmployees={allEmployees}
-                  departments={initialDepartments}
-                  onUpdateSuccess={onAction}
-                />
-              </Dialog>
-               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full">Delete</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the department.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDelete(dept.id)} disabled={isUpdating}>
-                      {isUpdating ? "Deleting..." : "Delete"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardFooter>
-          )}
-        </Card>
-      ))}
-    </div>
+            </Card>
+        ))}
+        </div>
+         <EditDepartmentDialog
+            isOpen={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            dept={selectedDept}
+            allEmployees={allEmployees}
+            departments={initialDepartments}
+            onUpdateSuccess={onAction}
+        />
+    </>
   );
 }
