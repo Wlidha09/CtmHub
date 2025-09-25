@@ -84,7 +84,7 @@ export default function DashboardPage() {
             setCurrentUser(userForRole);
         }
 
-        if (currentRole === 'Employee' && userForRole) {
+        if (userForRole) {
             const userRequests = allRequests.filter(r => r.userId === userForRole!.id);
             setLeaveRequests(userRequests);
         } else {
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       }
     }
     fetchData();
-  }, [currentRole, authUser]);
+  }, [authUser, currentRole]);
 
   const pendingRequestsCount = leaveRequests.filter(
     (req) => req.status === "Pending" || req.status === "Pending RH Approval"
@@ -259,5 +259,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
