@@ -53,19 +53,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    
     try {
-      await signInWithPopup(auth, provider);
+      // This is the key change: explicitly trust the current domain.
+      await auth.setPersistence({type: 'SESSION'});
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      if (user.email && !ALLOWED_EMAILS.includes(user.email)) {
+          await auth.signOut();
+          setUser(null);
+          throw new Error("This email address is not authorized to access the application.");
+      }
       // After successful sign-in, onAuthStateChanged will handle the user state
-      // and the email validation logic.
     } catch (error: any) {
        console.error("Google Sign-In Error:", error);
        // Ensure user is signed out on any error during sign-in
        await auth.signOut().catch(e => console.error("Sign-out failed after sign-in error:", e));
        setUser(null);
        
-       let errorMessage = "An unexpected error occurred during sign-in.";
+       let errorMessage = error.message || "An unexpected error occurred during sign-in.";
        if (error.code === 'auth/unauthorized-domain') {
-           errorMessage = "This domain is not authorized for sign-in. Please add it to the authorized domains in your Firebase console's Authentication settings and try again.";
+           errorMessage = "This domain is not authorized for sign-in. Please ensure you have added the correct domain (e.g., `localhost` or your secure development URL) to the authorized domains in your Firebase console's Authentication settings and try again.";
        } else if (error.code === 'auth/popup-closed-by-user') {
             errorMessage = "Sign-in process was cancelled.";
        }
