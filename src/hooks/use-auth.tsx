@@ -15,9 +15,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Define allowed emails
-const ALLOWED_EMAILS: string[] = ["wlidha09@gmail.com", "dev@loophub.com", "owner@loophub.com"];
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,26 +22,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser && currentUser.email && !ALLOWED_EMAILS.includes(currentUser.email)) {
-        // If user is not allowed, sign them out and prevent access
-        auth.signOut();
-        setUser(null);
-        console.error("Access denied for this email:", currentUser.email);
-        // Optionally redirect or show a message
-        router.push('/login');
-      } else {
-        setUser(currentUser);
-      }
+      setUser(currentUser);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const signOut = async () => {
     try {
       await auth.signOut();
-      setUser(null); // Explicitly set user to null
+      setUser(null);
       router.push('/login');
     } catch (error) {
       console.error("Sign-out Error:", error);
@@ -57,26 +45,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     provider.addScope('email');
     
     try {
-      // This is the key change: explicitly trust the current domain.
       await setPersistence(auth, browserSessionPersistence);
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      if (user.email && !ALLOWED_EMAILS.includes(user.email)) {
-          await auth.signOut();
-          setUser(null);
-          throw new Error("This email address is not authorized to access the application.");
-      }
-      // After successful sign-in, onAuthStateChanged will handle the user state
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle the user state update and routing
     } catch (error: any) {
        console.error("Google Sign-In Error:", error);
-       // Ensure user is signed out on any error during sign-in
        await auth.signOut().catch(e => console.error("Sign-out failed after sign-in error:", e));
        setUser(null);
        
-       let errorMessage = error.message || "An unexpected error occurred during sign-in.";
+       let errorMessage = "An unexpected error occurred during sign-in. Please try again.";
        if (error.code === 'auth/unauthorized-domain') {
-           errorMessage = "This domain is not authorized for sign-in. Please ensure you have added the correct domain (e.g., `localhost` or your secure development URL) to the authorized domains in your Firebase console's Authentication settings and try again.";
+           errorMessage = "This domain is not authorized for sign-in. Please add your development domain (e.g., `localhost` or your secure URL) to the authorized domains in your Firebase console's Authentication settings and try again.";
        } else if (error.code === 'auth/popup-closed-by-user') {
             errorMessage = "Sign-in process was cancelled.";
        }
