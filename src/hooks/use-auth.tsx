@@ -15,8 +15,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ALLOWED_EMAILS: string[] = ["wlidha09@gmail.com"];
+// Define allowed emails and domains
+const ALLOWED_EMAILS: string[] = ["wlidha09@gmail.com", "dev@loophub.com", "owner@loophub.com"];
 const ALLOWED_DOMAINS: string[] = ["@contractor.atolls.com"];
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
