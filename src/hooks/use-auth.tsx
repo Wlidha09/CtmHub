@@ -15,9 +15,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Define allowed emails and domains
+// Define allowed emails
 const ALLOWED_EMAILS: string[] = ["wlidha09@gmail.com", "dev@loophub.com", "owner@loophub.com"];
-const ALLOWED_DOMAINS: string[] = ["@contractor.atolls.com"];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -54,8 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Could not verify email. Access denied.");
       }
 
-      const isAllowed = ALLOWED_EMAILS.includes(userEmail) || ALLOWED_DOMAINS.some(domain => userEmail.endsWith(domain));
-      if (!isAllowed) {
+      if (!ALLOWED_EMAILS.includes(userEmail)) {
          await signOut();
          throw new Error("Access restricted for this account.");
       }
