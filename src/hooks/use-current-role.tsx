@@ -13,7 +13,7 @@ const RoleContext = React.createContext<RoleContextType | undefined>(
 );
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [currentRole, setCurrentRole] = React.useState<string>("Dev");
+  const [currentRole, setCurrentRole] = React.useState<string>("Employee");
 
   return (
     <RoleContext.Provider value={{ currentRole, setCurrentRole }}>

@@ -115,6 +115,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const t = translations[language].layout;
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const { setCurrentRole } = useCurrentRole();
 
   const [settings, setSettings] = React.useState<AppSettings | null>(null);
   const [currentEmployee, setCurrentEmployee] = React.useState<Employee | null>(null);
@@ -136,6 +137,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               const allEmployees = await getEmployees();
               const employee = allEmployees.find(emp => emp.email === user.email) || null;
               setCurrentEmployee(employee);
+              if (employee?.role) {
+                setCurrentRole(employee.role);
+              }
             }
 
         } catch (error) {
@@ -143,7 +147,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         }
     };
     fetchInitialData();
-  }, [user]);
+  }, [user, setCurrentRole]);
 
   if (loading || !user || !settings) {
     return (
@@ -163,7 +167,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-      <RoleProvider>
+      <>
         <style>{`
           :root {
             --sidebar-primary: ${settings.logoSvgColor};
@@ -316,7 +320,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             </SidebarInset>
           </div>
         </SidebarProvider>
-      </RoleProvider>
+      </>
   );
 }
 
@@ -328,7 +332,9 @@ export default function DashboardLayout({
 }) {
   return (
     <LanguageProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <RoleProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </RoleProvider>
     </LanguageProvider>
   );
 }
