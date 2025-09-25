@@ -64,11 +64,14 @@ function EditDepartmentDialog({
   const router = useRouter();
 
   React.useEffect(() => {
-    if (dept) {
+    if (dept && isOpen) {
         setDepartmentName(dept.name);
         setSelectedLead(dept.leadId);
+    } else if (!isOpen) {
+        setDepartmentName("");
+        setSelectedLead(undefined);
     }
-  }, [dept, isOpen]); // Rerun when dialog opens
+  }, [dept, isOpen]);
 
   if (!dept) {
     return null;
@@ -77,11 +80,12 @@ function EditDepartmentDialog({
   const handleSaveChanges = async () => {
     setIsUpdating(true);
     
-    const leadHasChanged = selectedLead !== dept.leadId;
+    const finalSelectedLead = selectedLead === 'none' ? '' : selectedLead;
+    const leadHasChanged = finalSelectedLead !== dept.leadId;
 
-    if (selectedLead && leadHasChanged) {
+    if (finalSelectedLead && leadHasChanged) {
       const isAlreadyLead = departments.some(
-        (d) => d.leadId === selectedLead && d.id !== dept.id
+        (d) => d.leadId === finalSelectedLead && d.id !== dept.id
       );
       if (isAlreadyLead) {
         toast({
@@ -99,7 +103,7 @@ function EditDepartmentDialog({
       updates.name = departmentName;
     }
     if (leadHasChanged) {
-        updates.leadId = selectedLead || "";
+        updates.leadId = finalSelectedLead || "";
     }
     
     if (Object.keys(updates).length === 0) {
@@ -115,8 +119,8 @@ function EditDepartmentDialog({
 
         if (leadHasChanged) {
             // New lead is assigned
-            if (selectedLead) {
-                const newLeadRef = doc(db, 'employees', selectedLead);
+            if (finalSelectedLead) {
+                const newLeadRef = doc(db, 'employees', finalSelectedLead);
                 batch.update(newLeadRef, { role: 'Manager' });
             }
             
@@ -173,12 +177,12 @@ function EditDepartmentDialog({
                 </div>
                 <div className="space-y-2">
                     <Label>Department Lead</Label>
-                    <Select onValueChange={setSelectedLead} value={selectedLead || ""}>
+                    <Select onValueChange={setSelectedLead} value={selectedLead || "none"}>
                     <SelectTrigger>
                         <SelectValue placeholder="Select a new lead" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">No Leader</SelectItem>
+                        <SelectItem value="none">No Leader</SelectItem>
                         {allEmployees
                         .map((employee) => (
                             <SelectItem key={employee.id} value={employee.id}>
