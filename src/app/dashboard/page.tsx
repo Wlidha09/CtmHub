@@ -21,7 +21,7 @@ import * as React from "react";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { useLanguage } from "@/hooks/use-language";
 import { Badge } from "@/components/ui/badge";
-import { getEmployees } from "@/lib/firebase/employees";
+import { getEmployees, getEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import { getLeaveRequests } from "@/lib/firebase/leave-requests";
 import type { Employee, LeaveRequest } from "@/lib/types";
@@ -29,6 +29,7 @@ import { differenceInDays, parseISO } from "date-fns";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
 
@@ -51,13 +52,12 @@ const getStatusVariant = (status: string) => {
   }
 };
 
-// In a real app, this would come from the authenticated user
-const FAKE_CURRENT_USER_ID = "e2";
 const totalRoles = 5; // This is static based on our defined roles
 
 export default function DashboardPage() {
   const { currentRole } = useCurrentRole();
   const { language } = useLanguage();
+  const { user: authUser } = useAuth();
   const [totalEmployees, setTotalEmployees] = React.useState(0);
   const [totalDepartments, setTotalDepartments] = React.useState(0);
   const [leaveRequests, setLeaveRequests] = React.useState<LeaveRequest[]>([]);
@@ -70,21 +70,25 @@ export default function DashboardPage() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const [employees, departments, requests] = await Promise.all([
+        const [employees, departments, allRequests] = await Promise.all([
           getEmployees(),
           getDepartments(),
-          getLeaveRequests(), // Assuming this fetches all for admin roles
+          getLeaveRequests(), // Fetch all requests initially
         ]);
         setTotalEmployees(employees.length);
         setTotalDepartments(departments.length);
         
-        if (currentRole === 'Employee') {
-            const user = employees.find(e => e.id === FAKE_CURRENT_USER_ID) || null;
-            setCurrentUser(user);
-            const userRequests = requests.filter(r => r.userId === FAKE_CURRENT_USER_ID);
+        let userForRole: Employee | null = null;
+        if (authUser?.email) {
+            userForRole = employees.find(e => e.email === authUser.email) || null;
+            setCurrentUser(userForRole);
+        }
+
+        if (currentRole === 'Employee' && userForRole) {
+            const userRequests = allRequests.filter(r => r.userId === userForRole!.id);
             setLeaveRequests(userRequests);
         } else {
-            setLeaveRequests(requests);
+            setLeaveRequests(allRequests);
         }
 
       } catch (error) {
@@ -94,7 +98,7 @@ export default function DashboardPage() {
       }
     }
     fetchData();
-  }, [currentRole]);
+  }, [currentRole, authUser]);
 
   const pendingRequestsCount = leaveRequests.filter(
     (req) => req.status === "Pending" || req.status === "Pending RH Approval"
@@ -179,7 +183,7 @@ export default function DashboardPage() {
           </>
         ) : (
           <>
-            {currentRole === "RH" && (
+            {(currentRole === "RH" || currentRole === 'Dev' || currentRole === 'Owner') && (
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-sm font-medium">
@@ -255,3 +259,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
