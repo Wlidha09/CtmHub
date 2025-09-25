@@ -48,14 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user.email;
 
-      if (!userEmail) {
-        await signOut();
-        throw new Error("Could not verify email. Access denied.");
-      }
-
-      if (!ALLOWED_EMAILS.includes(userEmail)) {
+      if (!userEmail || !ALLOWED_EMAILS.includes(userEmail)) {
          await signOut();
-         throw new Error("Access restricted for this account.");
+         const message = userEmail ? "Access restricted for this account." : "Could not verify email. Access denied.";
+         throw new Error(message);
       }
       // If not denied, user state will be set by onAuthStateChanged
     } catch (error: any) {
@@ -63,11 +59,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
        // Ensure user is signed out on any error during sign-in
        await auth.signOut().catch(e => console.error("Sign-out failed after sign-in error:", e));
        setUser(null);
-       if (error.code === 'auth/popup-closed-by-user') {
-            throw new Error("Sign-in process was cancelled.");
-       }
+       
        if (error.code === 'auth/unauthorized-domain') {
            throw new Error("This domain is not authorized. Please add it to the authorized domains in your Firebase console's Authentication settings.");
+       }
+       if (error.code === 'auth/popup-closed-by-user') {
+            throw new Error("Sign-in process was cancelled.");
        }
        throw error;
     }
