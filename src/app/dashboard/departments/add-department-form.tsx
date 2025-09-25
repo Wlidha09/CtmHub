@@ -37,6 +37,18 @@ export function AddDepartmentForm({ allEmployees, onDepartmentAdded }: AddDepart
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
 
+  const resetForm = () => {
+    setDepartmentName("");
+    setSelectedLeadId(undefined);
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!departmentName) {
@@ -50,15 +62,12 @@ export function AddDepartmentForm({ allEmployees, onDepartmentAdded }: AddDepart
 
     setIsSubmitting(true);
     try {
-      // The leadId is optional for new departments
       await addDepartment({ name: departmentName, leadId: selectedLeadId || "" });
       toast({
         title: "Department Created",
         description: `The ${departmentName} department has been created successfully.`,
       });
       setIsOpen(false);
-      setDepartmentName("");
-      setSelectedLeadId(undefined);
       onDepartmentAdded();
     } catch (error) {
       toast({
@@ -72,7 +81,7 @@ export function AddDepartmentForm({ allEmployees, onDepartmentAdded }: AddDepart
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <PlusCircle className="w-4 h-4 mr-2" />

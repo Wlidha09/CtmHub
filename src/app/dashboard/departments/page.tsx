@@ -79,10 +79,14 @@ export default function DepartmentsPage() {
           </p>
         </header>
         {canManageDepartments && (
-          <AddDepartmentForm allEmployees={employees} onDepartmentAdded={() => router.refresh()} />
+          <AddDepartmentForm allEmployees={employees} onDepartmentAdded={fetchData} />
         )}
       </div>
-      <DepartmentList initialDepartments={departments} allEmployees={employees} />
+      <DepartmentList 
+        initialDepartments={departments} 
+        allEmployees={employees}
+        onAction={fetchData} 
+      />
     </div>
   );
 }

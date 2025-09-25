@@ -41,21 +41,160 @@ import { useRouter } from "next/navigation";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { deleteDepartment } from "@/lib/firebase/departments";
 
-type DepartmentWithLead = Department & { lead: Employee };
+type DepartmentWithLead = Department & { lead?: Employee };
+
+function EditDepartmentDialog({
+  dept,
+  allEmployees,
+  departments,
+  onUpdateSuccess,
+}: {
+  dept: DepartmentWithLead;
+  allEmployees: Employee[];
+  departments: DepartmentWithLead[];
+  onUpdateSuccess: () => void;
+}) {
+  const [departmentName, setDepartmentName] = React.useState<string>(dept.name);
+  const [selectedLead, setSelectedLead] = React.useState<string | undefined>(dept.leadId);
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleSaveChanges = async () => {
+    setIsUpdating(true);
+    
+    const leadHasChanged = selectedLead !== dept.leadId;
+
+    if (selectedLead && leadHasChanged) {
+      const isAlreadyLead = departments.some(
+        (d) => d.leadId === selectedLead && d.id !== dept.id
+      );
+      if (isAlreadyLead) {
+        toast({
+          variant: "destructive",
+          title: "Assignment Failed",
+          description: "This employee is already leading another department.",
+        });
+        setIsUpdating(false);
+        return false;
+      }
+    }
+    
+    const updates: Partial<Department> = {};
+    if (departmentName && departmentName !== dept.name) {
+      updates.name = departmentName;
+    }
+    if (leadHasChanged) {
+        updates.leadId = selectedLead || "";
+    }
+    
+    if (Object.keys(updates).length === 0) {
+      setIsUpdating(false);
+      return true; // No changes to save
+    }
+
+    try {
+        const batch = writeBatch(db);
+        const departmentRef = doc(db, 'departments', dept.id);
+        batch.update(departmentRef, updates);
+
+        if (leadHasChanged) {
+            // New lead is assigned
+            if (selectedLead) {
+                const newLeadRef = doc(db, 'employees', selectedLead);
+                batch.update(newLeadRef, { role: 'Manager' });
+            }
+            
+            // Old lead is unassigned
+            if (dept.leadId) {
+                // Check if the old lead is still a lead of any other department in the *original* list
+                const isStillLead = departments.some(
+                    (d) => d.leadId === dept.leadId && d.id !== dept.id
+                );
+
+                if (!isStillLead) {
+                    const oldLeadRef = doc(db, 'employees', dept.leadId);
+                    batch.update(oldLeadRef, { role: 'Employee' });
+                }
+            }
+        }
+
+
+        await batch.commit();
+
+        toast({
+            title: "Department Updated",
+            description: `The ${dept.name} department has been updated.`,
+        });
+        onUpdateSuccess(); // This will trigger a refresh on the parent
+        return true;
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to update the department.",
+        });
+        return false;
+    } finally {
+        setIsUpdating(false);
+    }
+  };
+  
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Edit {dept.name}</DialogTitle>
+      </DialogHeader>
+      <div className="py-4 space-y-4">
+        <div className="space-y-2">
+            <Label htmlFor="dept-name">Department Name</Label>
+            <Input 
+                id="dept-name"
+                value={departmentName} 
+                onChange={(e) => setDepartmentName(e.target.value)}
+            />
+        </div>
+        <div className="space-y-2">
+            <Label>Department Lead</Label>
+            <Select onValueChange={setSelectedLead} defaultValue={dept.leadId || ""}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a new lead" />
+              </SelectTrigger>
+              <SelectContent>
+                 <SelectItem value="">No Leader</SelectItem>
+                {allEmployees
+                  .map((employee) => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+        </div>
+      </div>
+      <DialogFooter>
+          <DialogClose asChild>
+              <Button type="button" variant="secondary">Cancel</Button>
+          </DialogClose>
+          <Button onClick={handleSaveChanges} disabled={isUpdating}>
+              {isUpdating ? "Saving..." : "Save Changes"}
+          </Button>
+      </DialogFooter>
+    </DialogContent>
+  )
+}
 
 export function DepartmentList({
   initialDepartments,
   allEmployees,
+  onAction,
 }: {
   initialDepartments: DepartmentWithLead[];
   allEmployees: Employee[];
+  onAction: () => void;
 }) {
-  const [departments, setDepartments] = React.useState(initialDepartments);
-  const [selectedLead, setSelectedLead] = React.useState<string | undefined>();
-  const [departmentName, setDepartmentName] = React.useState<string>("");
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { toast } = useToast();
-  const router = useRouter();
   const { currentRole } = useCurrentRole();
   const canManageDepartments = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
 
@@ -75,101 +214,15 @@ export function DepartmentList({
         .join('');
   };
 
-
-  const handleEdit = (dept: Department) => {
-    setDepartmentName(dept.name);
-    setSelectedLead(dept.leadId);
-  };
-
-  const handleSaveChanges = async (departmentId: string) => {
-    setIsUpdating(true);
-    const originalDept = departments.find(d => d.id === departmentId);
-    if (!originalDept) return;
-
-    const leadHasChanged = selectedLead !== originalDept.leadId;
-
-    if (selectedLead && leadHasChanged) {
-      const isAlreadyLead = departments.some(
-        (dept) => dept.leadId === selectedLead && dept.id !== departmentId
-      );
-      if (isAlreadyLead) {
-        toast({
-          variant: "destructive",
-          title: "Assignment Failed",
-          description: "This employee is already leading another department.",
-        });
-        setIsUpdating(false);
-        return;
-      }
-    }
-    
-    const updates: Partial<Department> = {};
-    if (departmentName && departmentName !== originalDept.name) {
-      updates.name = departmentName;
-    }
-    if (leadHasChanged) {
-      updates.leadId = selectedLead || "";
-    }
-    
-    if (Object.keys(updates).length === 0) {
-      setIsUpdating(false);
-      return;
-    }
-
-    try {
-        const batch = writeBatch(db);
-        const departmentRef = doc(db, 'departments', departmentId);
-        batch.update(departmentRef, updates);
-
-        if (leadHasChanged) {
-            // New lead is assigned
-            if (selectedLead) {
-                const newLeadRef = doc(db, 'employees', selectedLead);
-                batch.update(newLeadRef, { role: 'Manager' });
-            }
-            
-            // Old lead is unassigned
-            if (originalDept.leadId) {
-                // Check if the old lead is still a lead of any other department
-                const isStillLead = departments.some(
-                    (dept) => dept.leadId === originalDept.leadId && dept.id !== departmentId
-                );
-                if (!isStillLead) {
-                    const oldLeadRef = doc(db, 'employees', originalDept.leadId);
-                    batch.update(oldLeadRef, { role: 'Employee' });
-                }
-            }
-        }
-
-
-        await batch.commit();
-
-        toast({
-            title: "Department Updated",
-            description: `The ${originalDept.name} department has been updated.`,
-        });
-        router.refresh();
-    } catch (error) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to update the department.",
-        });
-    } finally {
-        setIsUpdating(false);
-    }
-  };
-
   const handleDelete = async (departmentId: string) => {
     setIsUpdating(true);
     try {
       await deleteDepartment(departmentId);
-      setDepartments(prev => prev.filter(d => d.id !== departmentId));
       toast({
         title: "Department Deleted",
         description: "The department has been successfully deleted.",
       });
-      router.refresh();
+      onAction();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -184,7 +237,7 @@ export function DepartmentList({
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {departments.map((dept) => (
+      {initialDepartments.map((dept) => (
         <Card key={dept.id}>
           <CardHeader className="flex flex-col items-center justify-center gap-4">
              <div 
@@ -206,50 +259,14 @@ export function DepartmentList({
             <CardFooter className="flex justify-center gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full" onClick={() => handleEdit(dept)}>Edit</Button>
+                  <Button variant="outline" className="w-full">Edit</Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit {dept.name}</DialogTitle>
-                  </DialogHeader>
-                  <div className="py-4 space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="dept-name">Department Name</Label>
-                        <Input 
-                            id="dept-name"
-                            value={departmentName} 
-                            onChange={(e) => setDepartmentName(e.target.value)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Department Lead</Label>
-                        <Select onValueChange={setSelectedLead} defaultValue={dept.leadId || ""}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a new lead" />
-                          </SelectTrigger>
-                          <SelectContent>
-                             <SelectItem value="">No Leader</SelectItem>
-                            {allEmployees
-                              .map((employee) => (
-                                <SelectItem key={employee.id} value={employee.id}>
-                                  {employee.name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                      <DialogClose asChild>
-                          <Button type="button" variant="secondary">Cancel</Button>
-                      </DialogClose>
-                      <DialogClose asChild>
-                          <Button onClick={() => handleSaveChanges(dept.id)} disabled={isUpdating}>
-                              {isUpdating ? "Saving..." : "Save Changes"}
-                          </Button>
-                      </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
+                <EditDepartmentDialog 
+                  dept={dept}
+                  allEmployees={allEmployees}
+                  departments={initialDepartments}
+                  onUpdateSuccess={onAction}
+                />
               </Dialog>
                <AlertDialog>
                 <AlertDialogTrigger asChild>
