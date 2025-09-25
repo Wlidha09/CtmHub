@@ -2,7 +2,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import type { Role, PagePermissions, Permission } from "@/lib/types";
 import { initialRoles, appPages } from "@/lib/data";
 import { useCurrentRole } from "@/hooks/use-current-role";

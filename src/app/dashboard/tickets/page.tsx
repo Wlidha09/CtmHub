@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketForm } from "./components/ticket-form";
 import { TicketResults } from "./components/ticket-results";

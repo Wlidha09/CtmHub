@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { DepartmentList } from "./department-list";
 import type { Department, Employee } from "@/lib/types";
 import { getDepartments } from "@/lib/firebase/departments";

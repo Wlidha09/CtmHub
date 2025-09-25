@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { EmployeeTable } from "./employee-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";

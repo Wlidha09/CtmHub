@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { SubmitAvailability } from "./components/submit-availability";
 import { AvailabilityOverview } from "./components/availability-overview";

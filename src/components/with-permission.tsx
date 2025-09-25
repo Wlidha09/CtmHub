@@ -1,6 +1,7 @@
+
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { useRouter } from "next/navigation";
 import { usePermissions } from "@/hooks/use-permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -37,7 +38,7 @@ export function withPermission<P extends object>(
   pageName: string
 ) {
   const WithPermissionComponent = (props: P) => {
-    const { permissions, isLoading } = usePermissions();
+    const { permissions, isLoading } = usePermissions(pageName);
     const router = useRouter();
 
     React.useEffect(() => {

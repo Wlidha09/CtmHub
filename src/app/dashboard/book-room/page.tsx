@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { MeetingRoom, Booking, Employee, Department } from "@/lib/types";
 import { getRooms } from "@/lib/firebase/rooms";

@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getEmployees, updateEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";

@@ -1,7 +1,7 @@
 
 "use client";
 
-import *delineate React from "react";
+import * as React from "react";
 import { HolidayTable } from "./holiday-table";
 import { HolidayActions } from "./holiday-actions";
 import { getHolidaysByYear, deleteHoliday } from "@/lib/firebase/holidays";
