@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import {
   Table,
   TableBody,
@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
@@ -44,7 +45,7 @@ const STATUSES: LeaveRequest["status"][] = [
   "Cancelled",
 ];
 
-export default function ManageLeavePage() {
+function ManageLeavePage() {
   const [requests, setRequests] = React.useState<FormattedLeaveRequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
@@ -91,7 +92,9 @@ export default function ManageLeavePage() {
 
   React.useEffect(() => {
     if (!canManage) {
-        router.push('/dashboard');
+        // The withPermission HOC will handle redirection, 
+        // but we can keep this as a secondary check.
+        // router.push('/dashboard'); 
         return;
     }
     fetchRequests();
@@ -183,11 +186,6 @@ export default function ManageLeavePage() {
     );
   };
   
-  if (!canManage) {
-    return null; // or a loading/access denied component
-  }
-
-
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -224,3 +222,5 @@ export default function ManageLeavePage() {
     </div>
   );
 }
+
+export default withPermission(ManageLeavePage, "Manage Leave");

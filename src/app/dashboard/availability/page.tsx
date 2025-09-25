@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { SubmitAvailability } from "./components/submit-availability";
 import { AvailabilityOverview } from "./components/availability-overview";
@@ -12,13 +12,14 @@ import { startOfWeek, format } from "date-fns";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
 // In a real app, this would come from the authenticated user
 const FAKE_CURRENT_USER_ID = "e2";
 
-export default function AvailabilityPage() {
+function AvailabilityPage() {
   const { currentRole } = useCurrentRole();
   const [userAvailability, setUserAvailability] = React.useState<Availability | null>(null);
   const [weeklySchedule, setWeeklySchedule] = React.useState<WeeklySchedule[]>([]);
@@ -89,3 +90,5 @@ export default function AvailabilityPage() {
     </div>
   );
 }
+
+export default withPermission(AvailabilityPage, "Availability");

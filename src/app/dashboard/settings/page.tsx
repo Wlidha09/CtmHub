@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,7 @@ import { getSettings } from "@/lib/firebase/settings";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
@@ -324,7 +325,7 @@ function SettingsManager({ initialSettings }: { initialSettings: AppSettings }) 
     );
 }
 
-export default function SettingsPage() {
+function SettingsPage() {
     const [settings, setSettings] = React.useState<AppSettings | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const { toast } = useToast();
@@ -370,3 +371,5 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+export default withPermission(SettingsPage, "Settings");

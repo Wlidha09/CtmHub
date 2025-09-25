@@ -2,7 +2,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import type { Role, PagePermissions, Permission } from "@/lib/types";
 import { initialRoles, appPages } from "@/lib/data";
 import { useCurrentRole } from "@/hooks/use-current-role";
@@ -36,6 +36,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
@@ -207,7 +208,7 @@ function RoleManager({
 }
 
 // Main page component
-export default function RolesPage() {
+function RolesPage() {
   const [roles, setRoles] = React.useState<Role[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { currentRole } = useCurrentRole();
@@ -379,3 +380,5 @@ export default function RolesPage() {
     </div>
   );
 }
+
+export default withPermission(RolesPage, "Roles");

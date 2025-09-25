@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { MeetingRoom } from "@/lib/types";
 import { useCurrentRole } from "@/hooks/use-current-role";
@@ -12,10 +12,11 @@ import { addRoom, updateRoom, deleteRoom as deleteRoomAction } from "./actions";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
-export default function ManageRoomsPage() {
+function ManageRoomsPage() {
   const [rooms, setRooms] = React.useState<MeetingRoom[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
@@ -100,3 +101,5 @@ export default function ManageRoomsPage() {
     </div>
   );
 }
+
+export default withPermission(ManageRoomsPage, "Manage Rooms");

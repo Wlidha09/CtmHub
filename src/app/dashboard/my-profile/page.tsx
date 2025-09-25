@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getEmployees, updateEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
@@ -16,10 +16,11 @@ import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { useAuth } from "@/hooks/use-auth";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
-export default function MyProfilePage() {
+function MyProfilePage() {
   const { user: authUser } = useAuth();
   const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [departments, setDepartments] = React.useState<Department[]>([]);
@@ -179,3 +180,5 @@ export default function MyProfilePage() {
     </div>
   );
 }
+
+export default withPermission(MyProfilePage, "My Profile");

@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { DepartmentList } from "./department-list";
 import type { Department, Employee } from "@/lib/types";
 import { getDepartments } from "@/lib/firebase/departments";
@@ -13,12 +13,13 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
 type DepartmentWithLead = Department & { lead: Employee | undefined };
 
-export default function DepartmentsPage() {
+function DepartmentsPage() {
   const [departments, setDepartments] = React.useState<DepartmentWithLead[]>([]);
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -90,3 +91,5 @@ export default function DepartmentsPage() {
     </div>
   );
 }
+
+export default withPermission(DepartmentsPage, "Departments");

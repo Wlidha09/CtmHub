@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { HolidayTable } from "./holiday-table";
 import { HolidayActions } from "./holiday-actions";
 import { getHolidaysByYear, deleteHoliday } from "@/lib/firebase/holidays";
@@ -12,10 +12,11 @@ import { updateHoliday } from "@/lib/actions";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
-export default function HolidaysPage() {
+function HolidaysPage() {
   const [holidays, setHolidays] = React.useState<Holiday[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
@@ -119,3 +120,5 @@ export default function HolidaysPage() {
     </div>
   );
 }
+
+export default withPermission(HolidaysPage, "Holidays");

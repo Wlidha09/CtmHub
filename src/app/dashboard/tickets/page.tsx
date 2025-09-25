@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketForm } from "./components/ticket-form";
 import { TicketResults } from "./components/ticket-results";
@@ -12,10 +12,11 @@ import type { Employee, Ticket } from "@/lib/types";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
-export default function TicketsPage() {
+function TicketsPage() {
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isGenerating, setIsGenerating] = React.useState(false);
@@ -110,3 +111,5 @@ export default function TicketsPage() {
     </div>
   );
 }
+
+export default withPermission(TicketsPage, "Tickets");

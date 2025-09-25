@@ -45,6 +45,7 @@ export const appPages = [
   'Book a Room',
   'Manage Rooms',
   'Settings',
+  'Translator'
 ];
 
 

@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { EmployeeTable } from "./employee-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -17,12 +17,13 @@ import { db } from "@/lib/firebase/config";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
 type FormattedEmployee = Employee & { departmentName: string };
 
-export default function EmployeesPage() {
+function EmployeesPage() {
   const { currentRole } = useCurrentRole();
   const canManageEmployees = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH';
   const { toast } = useToast();
@@ -280,3 +281,5 @@ export default function EmployeesPage() {
     </div>
   );
 }
+
+export default withPermission(EmployeesPage, "Employees");

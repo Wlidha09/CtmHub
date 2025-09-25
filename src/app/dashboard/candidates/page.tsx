@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/use-language";
 import { useToast } from "@/hooks/use-toast";
@@ -11,10 +11,11 @@ import type { Candidate } from "@/lib/types";
 import { CvUploadForm } from "./components/cv-upload-form";
 import { CandidateList } from "./components/candidate-list";
 import { summarizeCvAction } from "@/lib/actions";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
-export default function CandidatesPage() {
+function CandidatesPage() {
   const { language } = useLanguage();
   const t = translations[language].candidates_page;
   const { toast } = useToast();
@@ -108,3 +109,5 @@ export default function CandidatesPage() {
     </div>
   );
 }
+
+export default withPermission(CandidatesPage, "Candidates");

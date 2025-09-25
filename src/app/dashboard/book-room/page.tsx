@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import *delineate React from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { MeetingRoom, Booking, Employee, Department } from "@/lib/types";
 import { getRooms } from "@/lib/firebase/rooms";
@@ -23,13 +23,14 @@ import { format } from "date-fns";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
+import { withPermission } from "@/components/with-permission";
 
 const translations = { en, fr };
 
 // In a real app, this would come from the authenticated user
 const FAKE_CURRENT_USER_ID = "e2";
 
-export default function BookRoomPage() {
+function BookRoomPage() {
   const [rooms, setRooms] = React.useState<MeetingRoom[]>([]);
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [departments, setDepartments] = React.useState<Department[]>([]);
@@ -170,3 +171,5 @@ export default function BookRoomPage() {
     </div>
   );
 }
+
+export default withPermission(BookRoomPage, "Book a Room");
