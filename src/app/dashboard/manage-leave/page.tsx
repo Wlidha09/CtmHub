@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getLeaveRequests,
 } from "@/lib/firebase/leave-requests";
-import { getEmployees } from "@/lib/firebase/employees";
+import { getEmployees, getEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import { useToast } from "@/hooks/use-toast";
 import type { LeaveRequest, Employee, Department } from "@/lib/types";
@@ -29,6 +29,7 @@ import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
 
@@ -49,23 +50,28 @@ function ManageLeavePage() {
   const [requests, setRequests] = React.useState<FormattedLeaveRequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
+  const { user: authUser } = useAuth();
   const { currentRole } = useCurrentRole();
   const router = useRouter();
   const { language } = useLanguage();
   const t = translations[language].manage_leave_page;
 
-  const canManage = currentRole === 'Owner' || currentRole === 'RH';
+  const canManageAll = currentRole === 'Owner' || currentRole === 'RH' || currentRole === 'Dev';
 
   const fetchRequests = React.useCallback(async () => {
+    if (!authUser) return;
     setIsLoading(true);
+
     try {
-      const [leaveRequests, employees, departments] = await Promise.all([
+      const [leaveRequests, allEmployees, departments] = await Promise.all([
         getLeaveRequests(),
         getEmployees(),
         getDepartments(),
       ]);
 
-      const employeeMap = new Map(employees.map((e) => [e.id, e]));
+      const currentUser = allEmployees.find(e => e.email === authUser.email);
+      
+      const employeeMap = new Map(allEmployees.map((e) => [e.id, e]));
       const departmentMap = new Map(departments.map((d) => [d.id, d.name]));
 
       const formattedRequests = leaveRequests.map((req) => {
@@ -73,12 +79,23 @@ function ManageLeavePage() {
         return {
           ...req,
           employeeName: employee?.name || "Unknown",
-          departmentName:
-            departmentMap.get(employee?.departmentId || "") || "Unknown",
+          departmentName: departmentMap.get(employee?.departmentId || "") || "Unknown",
+          // Include departmentId on the request for filtering
+          departmentId: employee?.departmentId,
         };
       });
 
-      setRequests(formattedRequests);
+      if (canManageAll) {
+         setRequests(formattedRequests);
+      } else if (currentRole === 'Manager' && currentUser) {
+          const managerDepartmentId = currentUser.departmentId;
+          const filtered = formattedRequests.filter(req => req.departmentId === managerDepartmentId);
+          setRequests(filtered);
+      } else {
+        setRequests([]); // If not a manager or admin, show no requests
+      }
+
+
     } catch (error) {
       toast({
         variant: "destructive",
@@ -88,17 +105,11 @@ function ManageLeavePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, t]);
+  }, [toast, t, authUser, currentRole, canManageAll]);
 
   React.useEffect(() => {
-    if (!canManage) {
-        // The withPermission HOC will handle redirection, 
-        // but we can keep this as a secondary check.
-        // router.push('/dashboard'); 
-        return;
-    }
     fetchRequests();
-  }, [fetchRequests, canManage, router]);
+  }, [fetchRequests]);
 
   const handleStatusUpdate = async (id: string, status: LeaveRequest['status']) => {
     const result = await updateLeaveRequestStatus(id, status);
@@ -169,10 +180,16 @@ function ManageLeavePage() {
                   {format(new Date(request.endDate), "PPP")}
                 </TableCell>
                 <TableCell className="text-right">
-                  {status === "Pending" && (
+                  {status === "Pending" && currentRole !== 'RH' && (
                      <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Pending RH Approval')}>{t.approve}</Button>
                   )}
-                  {status === "Pending RH Approval" && (
+                  {status === "Pending" && currentRole === 'RH' && (
+                     <div className="flex gap-2 justify-end">
+                      <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Approved')}>{t.approve}</Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(request.id, 'Rejected')}>{t.reject}</Button>
+                    </div>
+                  )}
+                  {status === "Pending RH Approval" && (currentRole === 'RH' || currentRole === 'Owner' || currentRole === 'Dev') && (
                     <div className="flex gap-2 justify-end">
                       <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'Approved')}>{t.approve}</Button>
                       <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(request.id, 'Rejected')}>{t.reject}</Button>
@@ -235,3 +252,5 @@ function ManageLeavePage() {
 }
 
 export default withPermission(ManageLeavePage, "Manage Leave");
+
+    
