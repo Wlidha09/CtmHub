@@ -20,6 +20,7 @@ const translations = { en, fr };
 
 function TicketsPage() {
   const [employees, setEmployees] = React.useState<Employee[]>([]);
+  const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [ticket, setTicket] = React.useState<Ticket | null>(null);
@@ -35,6 +36,10 @@ function TicketsPage() {
       try {
         const employeeList = await getEmployees();
         setEmployees(employeeList);
+        if (authUser?.email) {
+          const user = employeeList.find(emp => emp.email === authUser.email) || null;
+          setCurrentUser(user);
+        }
       } catch (error) {
         toast({
           variant: "destructive",
@@ -46,7 +51,7 @@ function TicketsPage() {
       }
     }
     fetchInitialData();
-  }, [toast, t]);
+  }, [toast, t, authUser]);
 
   const handleGenerateTicket = async (employeeId: string, month: Date) => {
     setIsGenerating(true);
@@ -77,17 +82,16 @@ function TicketsPage() {
     }
   };
   
-  const formEmployees = React.useMemo(() => {
+  const {formEmployees, defaultEmployeeId} = React.useMemo(() => {
     const isPrivileged = ['Owner', 'RH', 'Dev'].includes(currentRole);
     if (isPrivileged) {
-      return employees;
+      return { formEmployees: employees, defaultEmployeeId: undefined };
     }
-    if (authUser?.email) {
-      const currentUser = employees.find(emp => emp.email === authUser.email);
-      return currentUser ? [currentUser] : [];
+    if (currentUser) {
+      return { formEmployees: [currentUser], defaultEmployeeId: currentUser.id };
     }
-    return [];
-  }, [employees, currentRole, authUser]);
+    return { formEmployees: [], defaultEmployeeId: undefined };
+  }, [employees, currentRole, currentUser]);
 
 
   if (isLoading) {
@@ -117,6 +121,7 @@ function TicketsPage() {
             employees={formEmployees}
             onGenerate={handleGenerateTicket}
             isGenerating={isGenerating}
+            defaultEmployeeId={defaultEmployeeId}
           />
         </CardContent>
       </Card>

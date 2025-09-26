@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -24,19 +25,32 @@ interface TicketFormProps {
   employees: Employee[];
   onGenerate: (employeeId: string, month: Date) => void;
   isGenerating: boolean;
+  defaultEmployeeId?: string;
 }
 
 export function TicketForm({
   employees,
   onGenerate,
   isGenerating,
+  defaultEmployeeId,
 }: TicketFormProps) {
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState<
     string | undefined
-  >();
+  >(defaultEmployeeId);
   const [selectedMonth, setSelectedMonth] = React.useState<Date | undefined>(
     new Date()
   );
+
+  React.useEffect(() => {
+    // If there is a default employee, or the list of available employees changes to a single one,
+    // automatically select them.
+    if (defaultEmployeeId) {
+      setSelectedEmployeeId(defaultEmployeeId);
+    } else if (employees.length === 1) {
+      setSelectedEmployeeId(employees[0].id);
+    }
+  }, [defaultEmployeeId, employees]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +68,7 @@ export function TicketForm({
             onValueChange={setSelectedEmployeeId}
             value={selectedEmployeeId}
             required
+            disabled={employees.length === 1 && !!defaultEmployeeId}
           >
             <SelectTrigger id="employee">
               <SelectValue placeholder="Select an employee" />
