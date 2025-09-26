@@ -8,7 +8,7 @@ import { AvailabilityOverview } from "./components/availability-overview";
 import type { Availability, Employee, WeeklySchedule } from "@/lib/types";
 import { getUserAvailabilityForWeek, getWeeklySchedule } from "@/lib/firebase/availability";
 import { useToast } from "@/hooks/use-toast";
-import { startOfWeek, format } from "date-fns";
+import { startOfWeek, format, addDays, getDay } from "date-fns";
 import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
@@ -30,7 +30,11 @@ function AvailabilityPage() {
 
   const isManagerView = currentRole === 'Manager' || currentRole === 'RH' || currentRole === 'Owner' || currentRole === 'Dev';
   
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Monday
+  const today = new Date();
+  const currentDay = getDay(today); // Sunday is 0, Monday is 1, ..., Saturday is 6
+  // If it's Thursday (4), Friday (5), Saturday (6), or Sunday (0), show next week's calendar.
+  const targetDate = (currentDay >= 4 || currentDay === 0) ? addDays(today, 7) : today;
+  const weekStart = startOfWeek(targetDate, { weekStartsOn: 1 }); // Monday
   const weekStartDate = format(weekStart, 'yyyy-MM-dd');
 
   const fetchData = React.useCallback(async () => {

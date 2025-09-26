@@ -3,7 +3,7 @@ import { db } from './config';
 import { collection, getDocs, doc, setDoc, query, where } from 'firebase/firestore';
 import type { Availability, WeeklySchedule, Employee } from '@/lib/types';
 import { getEmployees } from './employees';
-import { startOfWeek, format, eachDayOfInterval, endOfWeek, isWeekend } from 'date-fns';
+import { startOfWeek, format, eachDayOfInterval, endOfWeek, isWeekend, getDay, addDays } from 'date-fns';
 
 export async function getAvailabilitiesForWeek(weekStartDate: string): Promise<Availability[]> {
     const availabilitiesCol = collection(db, 'availability');
@@ -41,7 +41,10 @@ export async function saveAvailability(userId: string, weekStartDate: string, se
 
 export async function getWeeklySchedule(): Promise<WeeklySchedule[]> {
     const today = new Date();
-    const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+    const currentDay = getDay(today); // Sunday is 0, Monday is 1, ..., Saturday is 6
+    // If it's Thursday (4) or later, show next week.
+    const targetDate = (currentDay >= 4 || currentDay === 0) ? addDays(today, 7) : today;
+    const weekStart = startOfWeek(targetDate, { weekStartsOn: 1 }); // Monday
     const weekStartDate = format(weekStart, 'yyyy-MM-dd');
 
     const [employees, availabilities] = await Promise.all([
@@ -52,7 +55,7 @@ export async function getWeeklySchedule(): Promise<WeeklySchedule[]> {
     const availabilityMap = new Map(availabilities.map(a => [a.userId, a.selectedDays]));
     const weekDays = eachDayOfInterval({
         start: weekStart,
-        end: endOfWeek(today, { weekStartsOn: 1 }),
+        end: endOfWeek(targetDate, { weekStartsOn: 1 }),
     }).filter(day => !isWeekend(day)).map(day => format(day, 'EEEE'));
 
 

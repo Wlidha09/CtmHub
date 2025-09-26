@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import type { WeeklySchedule } from "@/lib/types";
-import { startOfWeek, endOfWeek, format, eachDayOfInterval, isWeekend } from 'date-fns';
+import { startOfWeek, endOfWeek, format, eachDayOfInterval, isWeekend, getDay, addDays } from 'date-fns';
 import { getWeeklySchedule } from "@/lib/firebase/availability";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,8 +27,6 @@ export function AvailabilityOverview({ initialSchedule }: AvailabilityOverviewPr
   const { toast } = useToast();
 
   React.useEffect(() => {
-    // Initial data is already there, but we can fetch fresh data on mount
-    // in case it's stale. This is optional.
     const fetchFreshData = async () => {
         setIsLoading(true);
         try {
@@ -47,20 +45,25 @@ export function AvailabilityOverview({ initialSchedule }: AvailabilityOverviewPr
     fetchFreshData();
   }, [toast])
 
-
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+  const currentDay = getDay(today); // Sunday is 0, Monday is 1, ..., Saturday is 6
+  // If it's Thursday (4) or later, show next week.
+  const targetDate = (currentDay >= 4 || currentDay === 0) ? addDays(today, 7) : today;
+  const weekStart = startOfWeek(targetDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(targetDate, { weekStartsOn: 1 });
+  
   const allWeekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
   const weekDays = allWeekDays.filter(day => !isWeekend(day));
   const weekDisplayEnd = weekDays[weekDays.length - 1];
+
+  const weekDescription = (currentDay >= 4 || currentDay === 0) ? "next week" : "this week";
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Team Availability</CardTitle>
         <CardDescription>
-          Showing who is scheduled to be in the office from {format(weekStart, 'MMM d')} to {format(weekDisplayEnd, 'MMM d, yyyy')}.
+          Showing who is scheduled to be in the office {weekDescription} from {format(weekStart, 'MMM d')} to {format(weekDisplayEnd, 'MMM d, yyyy')}.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -101,7 +104,7 @@ export function AvailabilityOverview({ initialSchedule }: AvailabilityOverviewPr
                     ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">No availability data submitted for this week yet.</TableCell>
+                        <TableCell colSpan={6} className="h-24 text-center">No availability data submitted for {weekDescription} yet.</TableCell>
                     </TableRow>
                 )}
             </TableBody>
