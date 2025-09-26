@@ -13,14 +13,15 @@ import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
+import { useAuth } from "@/hooks/use-auth";
+import { getEmployee, getEmployees } from "@/lib/firebase/employees";
 
 const translations = { en, fr };
 
-// In a real app, this would come from the authenticated user
-const FAKE_CURRENT_USER_ID = "e2";
-
 function AvailabilityPage() {
   const { currentRole } = useCurrentRole();
+  const { user: authUser } = useAuth();
+  const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [userAvailability, setUserAvailability] = React.useState<Availability | null>(null);
   const [weeklySchedule, setWeeklySchedule] = React.useState<WeeklySchedule[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -38,13 +39,18 @@ function AvailabilityPage() {
   const weekStartDate = format(weekStart, 'yyyy-MM-dd');
 
   const fetchData = React.useCallback(async () => {
+    if (!authUser?.email) return;
     setIsLoading(true);
     try {
+      const allEmployees = await getEmployees();
+      const user = allEmployees.find(emp => emp.email === authUser.email) || null;
+      setCurrentUser(user);
+
       if (isManagerView) {
         const schedule = await getWeeklySchedule();
         setWeeklySchedule(schedule);
-      } else {
-        const availability = await getUserAvailabilityForWeek(FAKE_CURRENT_USER_ID, weekStartDate);
+      } else if (user) {
+        const availability = await getUserAvailabilityForWeek(user.id, weekStartDate);
         setUserAvailability(availability);
       }
     } catch (error) {
@@ -56,13 +62,13 @@ function AvailabilityPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isManagerView, weekStartDate, toast, t]);
+  }, [isManagerView, weekStartDate, toast, t, authUser]);
 
   React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  if (isLoading) {
+  if (isLoading || !currentUser) {
     return <div>{t.loading}</div>;
   }
 
@@ -86,7 +92,7 @@ function AvailabilityPage() {
         <AvailabilityOverview initialSchedule={weeklySchedule} />
       ) : (
         <SubmitAvailability 
-          userId={FAKE_CURRENT_USER_ID}
+          userId={currentUser.id}
           weekStartDate={weekStartDate}
           onScheduleSubmit={fetchData} 
         />
