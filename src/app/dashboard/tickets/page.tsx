@@ -5,7 +5,7 @@ import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TicketForm } from "./components/ticket-form";
 import { TicketResults } from "./components/ticket-results";
-import { getEmployees } from "@/lib/firebase/employees";
+import { getEmployees, getEmployee } from "@/lib/firebase/employees";
 import { generateWorkTicket } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { Employee, Ticket } from "@/lib/types";
@@ -13,6 +13,8 @@ import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
+import { useAuth } from "@/hooks/use-auth";
+import { useCurrentRole } from "@/hooks/use-current-role";
 
 const translations = { en, fr };
 
@@ -23,10 +25,13 @@ function TicketsPage() {
   const [ticket, setTicket] = React.useState<Ticket | null>(null);
   const { toast } = useToast();
   const { language } = useLanguage();
+  const { user: authUser } = useAuth();
+  const { currentRole } = useCurrentRole();
   const t = translations[language].tickets_page;
 
   React.useEffect(() => {
     async function fetchInitialData() {
+      setIsLoading(true);
       try {
         const employeeList = await getEmployees();
         setEmployees(employeeList);
@@ -71,6 +76,19 @@ function TicketsPage() {
       setIsGenerating(false);
     }
   };
+  
+  const formEmployees = React.useMemo(() => {
+    const isPrivileged = ['Owner', 'RH', 'Dev'].includes(currentRole);
+    if (isPrivileged) {
+      return employees;
+    }
+    if (authUser?.email) {
+      const currentUser = employees.find(emp => emp.email === authUser.email);
+      return currentUser ? [currentUser] : [];
+    }
+    return [];
+  }, [employees, currentRole, authUser]);
+
 
   if (isLoading) {
     return <div>{t.loading}</div>;
@@ -96,7 +114,7 @@ function TicketsPage() {
         </CardHeader>
         <CardContent>
           <TicketForm
-            employees={employees}
+            employees={formEmployees}
             onGenerate={handleGenerateTicket}
             isGenerating={isGenerating}
           />
