@@ -39,16 +39,15 @@ function LeaveRequestPage() {
   const fetchRequests = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const [leaveRequests, employees, allEmployees] = await Promise.all([
+      const [leaveRequests, allEmployees] = await Promise.all([
         getLeaveRequests(),
-        getEmployees(),
         getEmployees(),
       ]);
 
       const employeeMap = new Map(allEmployees.map((e) => [e.id, e.name]));
       let currentUser: Employee | null = null;
       if (authUser?.email) {
-        currentUser = employees.find(e => e.email === authUser.email) || null;
+        currentUser = allEmployees.find(e => e.email === authUser.email) || null;
       }
 
       const formattedRequests = leaveRequests
