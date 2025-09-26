@@ -45,11 +45,11 @@ function AvailabilityPage() {
       const allEmployees = await getEmployees();
       const user = allEmployees.find(emp => emp.email === authUser.email) || null;
       setCurrentUser(user);
+      
+      const schedule = await getWeeklySchedule();
+      setWeeklySchedule(schedule);
 
-      if (isManagerView) {
-        const schedule = await getWeeklySchedule();
-        setWeeklySchedule(schedule);
-      } else if (user) {
+      if (user) {
         const availability = await getUserAvailabilityForWeek(user.id, weekStartDate);
         setUserAvailability(availability);
       }
@@ -62,7 +62,7 @@ function AvailabilityPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isManagerView, weekStartDate, toast, t, authUser]);
+  }, [weekStartDate, toast, t, authUser]);
 
   React.useEffect(() => {
     fetchData();
@@ -73,6 +73,7 @@ function AvailabilityPage() {
   }
 
   const hasSubmitted = !!userAvailability;
+  const isPrivilegedUser = currentRole === 'Owner' || currentRole === 'Dev';
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,14 +89,29 @@ function AvailabilityPage() {
         </p>
       </header>
 
-      {isManagerView || hasSubmitted ? (
-        <AvailabilityOverview initialSchedule={weeklySchedule} />
+      {isManagerView ? (
+        // Manager, RH, Owner, Dev view
+        <div className="space-y-6">
+          {!isPrivilegedUser && (
+             <SubmitAvailability 
+                userId={currentUser.id}
+                weekStartDate={weekStartDate}
+                onScheduleSubmit={fetchData} 
+              />
+          )}
+          <AvailabilityOverview initialSchedule={weeklySchedule} />
+        </div>
       ) : (
-        <SubmitAvailability 
-          userId={currentUser.id}
-          weekStartDate={weekStartDate}
-          onScheduleSubmit={fetchData} 
-        />
+        // Employee view
+        hasSubmitted ? (
+          <AvailabilityOverview initialSchedule={weeklySchedule} />
+        ) : (
+          <SubmitAvailability 
+            userId={currentUser.id}
+            weekStartDate={weekStartDate}
+            onScheduleSubmit={fetchData} 
+          />
+        )
       )}
     </div>
   );
