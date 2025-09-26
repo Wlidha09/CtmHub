@@ -30,6 +30,7 @@ type FormattedLeaveRequest = LeaveRequest & { employeeName: string };
 
 function LeaveRequestPage() {
   const [requests, setRequests] = React.useState<FormattedLeaveRequest[]>([]);
+  const [currentUser, setCurrentUser] = React.useState<Employee | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const { toast } = useToast();
   const { language } = useLanguage();
@@ -45,13 +46,14 @@ function LeaveRequestPage() {
       ]);
 
       const employeeMap = new Map(allEmployees.map((e) => [e.id, e.name]));
-      let currentUser: Employee | null = null;
+      let user: Employee | null = null;
       if (authUser?.email) {
-        currentUser = allEmployees.find(e => e.email === authUser.email) || null;
+        user = allEmployees.find(e => e.email === authUser.email) || null;
       }
+      setCurrentUser(user);
 
       const formattedRequests = leaveRequests
-        .filter(req => currentUser && req.userId === currentUser.id)
+        .filter(req => user && req.userId === user.id)
         .map(req => ({
           ...req,
           employeeName: employeeMap.get(req.userId) || "Unknown",
@@ -103,7 +105,7 @@ function LeaveRequestPage() {
             {t.description}
           </p>
         </header>
-        <NewLeaveRequestForm onFormSubmit={fetchRequests} />
+        {currentUser && <NewLeaveRequestForm userId={currentUser.id} onFormSubmit={fetchRequests} />}
       </div>
       <Card>
         <CardHeader>

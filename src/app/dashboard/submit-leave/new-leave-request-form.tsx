@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -31,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { addLeaveRequest } from "@/lib/firebase/leave-requests";
 import { useToast } from "@/hooks/use-toast";
 
-export function NewLeaveRequestForm({ onFormSubmit }: { onFormSubmit: () => void }) {
+export function NewLeaveRequestForm({ userId, onFormSubmit }: { userId: string, onFormSubmit: () => void }) {
   const [leaveType, setLeaveType] = React.useState<string | undefined>();
   const [startDate, setStartDate] = React.useState<Date | undefined>();
   const [endDate, setEndDate] = React.useState<Date | undefined>();
@@ -53,8 +54,7 @@ export function NewLeaveRequestForm({ onFormSubmit }: { onFormSubmit: () => void
     setIsSubmitting(true);
     try {
         await addLeaveRequest({
-            // This is a placeholder. In a real app, you would get the current user's ID
-            userId: "e1", 
+            userId: userId, 
             leaveType: leaveType as any,
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
