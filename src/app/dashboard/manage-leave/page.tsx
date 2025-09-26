@@ -111,14 +111,14 @@ function ManageLeavePage() {
   }
 
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" => {
     switch (status) {
       case "Approved":
-        return "default";
+        return "success";
       case "Pending":
         return "secondary";
       case "Pending RH Approval":
-        return "secondary";
+        return "warning";
       case "Action Required":
         return "secondary";
       case "Rejected":
@@ -128,6 +128,13 @@ function ManageLeavePage() {
       default:
         return "outline";
     }
+  };
+  
+  const getStatusStyle = (status: string) => {
+    if (status === 'Pending') {
+      return { backgroundColor: '#FF7F50', color: 'white' };
+    }
+    return {};
   };
 
   const renderTable = (status: LeaveRequest["status"]) => {
@@ -204,7 +211,11 @@ function ManageLeavePage() {
                 {STATUSES.map((status) => (
                     <TabsTrigger key={status} value={status}>
                         {status}
-                        <Badge variant={getStatusVariant(status)} className="ml-2">
+                         <Badge 
+                            variant={getStatusVariant(status)}
+                            style={getStatusStyle(status)}
+                            className="ml-2"
+                        >
                             {requests.filter(r => r.status === status).length}
                         </Badge>
                     </TabsTrigger>

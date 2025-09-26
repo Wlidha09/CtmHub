@@ -75,14 +75,14 @@ function LeaveRequestPage() {
     fetchRequests();
   }, [fetchRequests]);
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" => {
     switch (status) {
       case "Approved":
-        return "default";
+        return "success";
       case "Pending":
         return "secondary";
       case "Pending RH Approval":
-        return "secondary";
+        return "warning";
       case "Action Required":
         return "secondary";
       case "Rejected":
@@ -92,6 +92,13 @@ function LeaveRequestPage() {
       default:
         return "outline";
     }
+  };
+
+  const getStatusStyle = (status: string) => {
+    if (status === 'Pending') {
+      return { backgroundColor: '#FF7F50', color: 'white' };
+    }
+    return {};
   };
 
   return (
@@ -135,7 +142,10 @@ function LeaveRequestPage() {
                     <TableCell>{format(new Date(request.startDate), "PPP")}</TableCell>
                     <TableCell>{format(new Date(request.endDate), "PPP")}</TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={getStatusVariant(request.status)}>
+                       <Badge 
+                        variant={getStatusVariant(request.status)}
+                        style={getStatusStyle(request.status)}
+                      >
                         {request.status}
                       </Badge>
                     </TableCell>
