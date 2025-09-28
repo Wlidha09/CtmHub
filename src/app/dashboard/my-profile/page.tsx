@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getEmployees, updateEmployee } from "@/lib/firebase/employees";
+import { getEmployees, updateEmployee, getEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import type { Employee, Department } from "@/lib/types";
 import { EmployeeForm } from "../employees/employee-form";
@@ -35,9 +35,7 @@ function MyProfilePage() {
     if (!authUser?.email) return;
     setIsLoading(true);
     try {
-      // In our demo setup, we find the employee by matching the auth user's email.
-      const allEmployees = await getEmployees();
-      const user = allEmployees.find(emp => emp.email === authUser.email) || null;
+      const user = await getEmployee(authUser.uid);
 
       if (user) {
         const departmentList = await getDepartments();
@@ -46,7 +44,6 @@ function MyProfilePage() {
         setDepartmentName(userDept?.name || "Unknown");
         setDepartments(departmentList);
       } else {
-        // If no matching employee is found, it's an error state.
         toast({
           variant: "destructive",
           title: "Profile Not Found",

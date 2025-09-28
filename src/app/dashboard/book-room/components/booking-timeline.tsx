@@ -31,16 +31,14 @@ import { useCurrentRole } from "@/hooks/use-current-role";
 
 interface BookingTimelineProps {
   bookings: Booking[];
+  currentUserId: string;
   onBookingDeleted: () => void;
   onEditBooking: (booking: Booking) => void;
 }
 
-export function BookingTimeline({ bookings, onBookingDeleted, onEditBooking }: BookingTimelineProps) {
+export function BookingTimeline({ bookings, currentUserId, onBookingDeleted, onEditBooking }: BookingTimelineProps) {
   const { toast } = useToast();
   const { currentRole } = useCurrentRole();
-
-  // In a real app, you would get this from auth state
-  const FAKE_CURRENT_USER_ID = "e2";
 
   const handleDelete = async (id: string) => {
     const result = await deleteBooking(id);
@@ -64,7 +62,7 @@ export function BookingTimeline({ bookings, onBookingDeleted, onEditBooking }: B
         {bookings.length > 0 ? (
           <ul className="space-y-4">
             {bookings.map((booking) => {
-              const canManage = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH' || booking.userId === FAKE_CURRENT_USER_ID;
+              const canManage = currentRole === 'Dev' || currentRole === 'Owner' || currentRole === 'RH' || booking.userId === currentUserId;
               return (
               <li key={booking.id} className="p-4 rounded-lg bg-muted/50 flex items-center justify-between gap-4">
                 <div>

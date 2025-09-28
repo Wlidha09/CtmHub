@@ -75,7 +75,7 @@ function RoleSwitcher({ currentEmployee }: { currentEmployee: Employee | null })
           <SelectValue placeholder="Select a role" />
         </SelectTrigger>
         <SelectContent>
-          {currentRole === 'Dev' && <SelectItem value="Dev">Dev</SelectItem>}
+          <SelectItem value="Dev">Dev</SelectItem>
           <SelectItem value="Owner">Owner</SelectItem>
           <SelectItem value="RH">RH</SelectItem>
           <SelectItem value="Manager">Manager</SelectItem>
@@ -146,11 +146,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               }
             }
 
-        } catch (error) => {
+        } catch (error) {
             console.error("Failed to fetch initial data", error);
         }
     };
-    fetchInitialData();
+    if (user) {
+      fetchInitialData();
+    }
   }, [user, setCurrentRole]);
 
   if (loading || !user || !settings) {
@@ -191,7 +193,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
+                  viewBox="0 0 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"

@@ -5,7 +5,7 @@ import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { MeetingRoom, Booking, Employee, Department } from "@/lib/types";
 import { getRooms } from "@/lib/firebase/rooms";
-import { getEmployees, getEmployee } from "@/lib/firebase/employees";
+import { getEmployees } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import { getBookingsForRoomByDate } from "@/lib/firebase/bookings";
 import { BookingForm } from "./components/booking-form";
@@ -24,13 +24,12 @@ import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
 
-// In a real app, this would come from the authenticated user
-const FAKE_CURRENT_USER_ID = "e2";
-
 function BookRoomPage() {
+  const { user: authUser } = useAuth();
   const [rooms, setRooms] = React.useState<MeetingRoom[]>([]);
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [departments, setDepartments] = React.useState<Department[]>([]);
@@ -45,14 +44,17 @@ function BookRoomPage() {
   const t = translations[language].book_room_page;
 
   const fetchInitialData = React.useCallback(async () => {
+    if (!authUser) return;
     setIsLoading(true);
     try {
-      const [roomList, employeeList, departmentList, user] = await Promise.all([
+      const [roomList, employeeList, departmentList] = await Promise.all([
         getRooms(),
         getEmployees(),
         getDepartments(),
-        getEmployee(FAKE_CURRENT_USER_ID)
       ]);
+
+      const user = employeeList.find(e => e.email === authUser.email) || null;
+      
       setRooms(roomList);
       setEmployees(employeeList);
       setDepartments(departmentList);
@@ -70,7 +72,7 @@ function BookRoomPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, selectedRoomId, t]);
+  }, [toast, selectedRoomId, t, authUser]);
 
   React.useEffect(() => {
     fetchInitialData();
@@ -99,7 +101,7 @@ function BookRoomPage() {
     setEditingBooking(booking);
   };
   
-  if (isLoading) {
+  if (isLoading || !currentUser) {
       return <div>{t.loading}</div>;
   }
 
@@ -150,7 +152,8 @@ function BookRoomPage() {
           </Card>
 
           <BookingTimeline 
-            bookings={timelineBookings} 
+            bookings={timelineBookings}
+            currentUserId={currentUser.id}
             onBookingDeleted={fetchBookings}
             onEditBooking={handleEditBooking}
           />

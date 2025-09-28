@@ -14,7 +14,7 @@ import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
 import { useAuth } from "@/hooks/use-auth";
-import { getEmployee, getEmployees } from "@/lib/firebase/employees";
+import { getEmployees } from "@/lib/firebase/employees";
 
 const translations = { en, fr };
 
@@ -29,7 +29,7 @@ function AvailabilityPage() {
   const { language } = useLanguage();
   const t = translations[language].availability_page;
 
-  const isManagerView = currentRole === 'Manager' || currentRole === 'RH' || currentRole === 'Owner' || currentRole === 'Dev';
+  const isManagerView = currentRole === 'Manager' || currentRole === 'RH';
   
   const today = new Date();
   const currentDay = getDay(today); // Sunday is 0, Monday is 1, ..., Saturday is 6
@@ -74,6 +74,8 @@ function AvailabilityPage() {
 
   const hasSubmitted = !!userAvailability;
   const isPrivilegedUser = currentRole === 'Owner' || currentRole === 'Dev';
+  
+  const showSubmitForm = !isPrivilegedUser;
 
   return (
     <div className="flex flex-col gap-6">
@@ -82,37 +84,23 @@ function AvailabilityPage() {
           {t.title}
         </h1>
         <p className="text-muted-foreground">
-          {isManagerView 
+          {isManagerView || isPrivilegedUser
             ? t.manager_description
             : t.employee_description
           }
         </p>
       </header>
 
-      {isManagerView ? (
-        // Manager, RH, Owner, Dev view
-        <div className="space-y-6">
-          {!isPrivilegedUser && (
-             <SubmitAvailability 
-                userId={currentUser.id}
-                weekStartDate={weekStartDate}
-                onScheduleSubmit={fetchData} 
-              />
-          )}
-          <AvailabilityOverview initialSchedule={weeklySchedule} />
-        </div>
-      ) : (
-        // Employee view
-        hasSubmitted ? (
-          <AvailabilityOverview initialSchedule={weeklySchedule} />
-        ) : (
-          <SubmitAvailability 
-            userId={currentUser.id}
-            weekStartDate={weekStartDate}
-            onScheduleSubmit={fetchData} 
-          />
-        )
-      )}
+      <div className="space-y-6">
+        {showSubmitForm && (
+           <SubmitAvailability 
+              userId={currentUser.id}
+              weekStartDate={weekStartDate}
+              onScheduleSubmit={fetchData} 
+            />
+        )}
+        <AvailabilityOverview initialSchedule={weeklySchedule} />
+      </div>
     </div>
   );
 }

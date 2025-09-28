@@ -18,11 +18,19 @@ export async function getEmployee(id: string): Promise<Employee | null> {
         return { id: docSnap.id, ...docSnap.data() } as Employee;
     }
     
-    // If not found by ID, try to find by email, assuming ID might be an email or other unique field
-    const q = query(employeesRef, where("email", "==", id));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0];
+    // If not found by ID, try to find by email, as ID could be an email or other unique field
+    const qByEmail = query(employeesRef, where("email", "==", id));
+    const emailSnapshot = await getDocs(qByEmail);
+    if (!emailSnapshot.empty) {
+        const userDoc = emailSnapshot.docs[0];
+        return { id: userDoc.id, ...userDoc.data() } as Employee;
+    }
+    
+    // Fallback for systems where UID might be stored differently
+    const qByUid = query(employeesRef, where("uid", "==", id));
+    const uidSnapshot = await getDocs(qByUid);
+    if (!uidSnapshot.empty) {
+        const userDoc = uidSnapshot.docs[0];
         return { id: userDoc.id, ...userDoc.data() } as Employee;
     }
 

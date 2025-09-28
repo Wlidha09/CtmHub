@@ -18,14 +18,12 @@ import {
 import type { Employee, Language } from "@/lib/types";
 import { getEmployee, updateEmployee } from "@/lib/firebase/employees";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
 
-// In a real app, this would come from the authenticated user
-const FAKE_CURRENT_USER_ID = "e2";
-
-
 export default function UserSettingsPage() {
+  const { user: authUser } = useAuth();
   const { language, setLanguage: setAppLanguage } = useLanguage();
   const t = translations[language].user_settings_page;
   const commonT = translations[language].common;
@@ -37,8 +35,9 @@ export default function UserSettingsPage() {
 
   React.useEffect(() => {
     async function fetchUser() {
+      if (!authUser) return;
       try {
-        const user = await getEmployee(FAKE_CURRENT_USER_ID);
+        const user = await getEmployee(authUser.uid);
         setCurrentUser(user);
         setDefaultLanguage(user?.userSettings?.language || language);
       } catch (error) {
@@ -52,7 +51,7 @@ export default function UserSettingsPage() {
       }
     }
     fetchUser();
-  }, [language, commonT.error, t.toast_load_error, toast]);
+  }, [language, commonT.error, t.toast_load_error, toast, authUser]);
   
   const handleSave = async () => {
     if (!currentUser || !defaultLanguage) return;
