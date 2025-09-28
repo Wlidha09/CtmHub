@@ -137,12 +137,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               const allEmployees = await getEmployees();
               const employee = allEmployees.find(emp => emp.email === user.email) || null;
               setCurrentEmployee(employee);
-              if (employee?.role) {
-                setCurrentRole(employee.role);
+              if (employee) {
+                if (employee.isDev) {
+                  setCurrentRole('Dev');
+                } else if (employee.role) {
+                  setCurrentRole(employee.role);
+                }
               }
             }
 
-        } catch (error) {
+        } catch (error) => {
             console.error("Failed to fetch initial data", error);
         }
     };
@@ -362,6 +366,8 @@ const AvatarFallback = ({
 }: React.ComponentProps<typeof UIAvatarFallback>) => (
   <UIAvatarFallback {...props}>{children}</UIAvatarFallback>
 );
+
+    
 
     
 
