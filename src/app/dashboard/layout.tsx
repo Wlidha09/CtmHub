@@ -119,10 +119,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const [settings, setSettings] = React.useState<AppSettings | null>(null);
   const [currentEmployee, setCurrentEmployee] = React.useState<Employee | null>(null);
+  const [isInitialized, setIsInitialized] = React.useState(false);
   
   React.useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    if (!loading) {
+      if (user) {
+        setIsInitialized(true);
+      } else {
+        router.push('/login');
+      }
     }
   }, [user, loading, router]);
 
@@ -153,12 +158,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             console.error("Failed to fetch initial data", error);
         }
     };
-    if (user) {
+    if (isInitialized && user) {
       fetchInitialData();
     }
-  }, [user, setCurrentRole]);
+  }, [isInitialized, user, setCurrentRole]);
 
-  if (loading || !user || !settings) {
+  if (!isInitialized || !settings) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p>Loading...</p>
