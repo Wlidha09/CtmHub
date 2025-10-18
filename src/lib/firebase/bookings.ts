@@ -2,31 +2,65 @@
 import { db } from './config';
 import { collection, getDocs, query, where, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
+import { errorEmitter } from '@/lib/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/firebase/errors';
 
 export async function getBookingsForRoomByDate(roomId: string, date: string): Promise<Booking[]> {
   const bookingsCol = collection(db, 'bookings');
   const q = query(bookingsCol, where('roomId', '==', roomId), where('date', '==', date));
-  const bookingSnapshot = await getDocs(q);
-  const bookings = bookingSnapshot.docs.map(doc => doc.data() as Booking);
-  return bookings.sort((a,b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  try {
+    const bookingSnapshot = await getDocs(q);
+    const bookings = bookingSnapshot.docs.map(doc => doc.data() as Booking);
+    return bookings.sort((a,b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  } catch (serverError) {
+    const permissionError = new FirestorePermissionError({
+        path: q.toString(),
+        operation: 'list',
+    } satisfies SecurityRuleContext);
+    errorEmitter.emit('permission-error', permissionError);
+    throw permissionError;
+  }
 }
 
-export async function addBooking(booking: Omit<Booking, 'id'>): Promise<string> {
+export function addBooking(booking: Omit<Booking, 'id'>): void {
   const newDocRef = doc(collection(db, 'bookings'));
   const newBooking: Booking = {
     id: newDocRef.id,
     ...booking,
   };
-  await setDoc(newDocRef, newBooking);
-  return newDocRef.id;
+  
+  setDoc(newDocRef, newBooking)
+    .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: newDocRef.path,
+          operation: 'create',
+          requestResourceData: newBooking,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
 }
 
-export async function updateBooking(id: string, booking: Partial<Omit<Booking, 'id'>>): Promise<void> {
+export function updateBooking(id: string, booking: Partial<Omit<Booking, 'id'>>): void {
     const bookingDoc = doc(db, 'bookings', id);
-    await updateDoc(bookingDoc, booking);
+    updateDoc(bookingDoc, booking)
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: bookingDoc.path,
+                operation: 'update',
+                requestResourceData: booking,
+            } satisfies SecurityRuleContext);
+            errorEmitter.emit('permission-error', permissionError);
+        });
 }
 
-export async function deleteBooking(id: string): Promise<void> {
+export function deleteBooking(id: string): void {
   const bookingDoc = doc(db, 'bookings', id);
-  await deleteDoc(bookingDoc);
+  deleteDoc(bookingDoc)
+    .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: bookingDoc.path,
+            operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+    });
 }
