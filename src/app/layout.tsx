@@ -1,15 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { getSettings } from '@/lib/firebase/settings';
 import { ClientLayout } from './client-layout';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSettings();
-  return {
-    title: settings.projectName,
-    description: 'Your central hub for everything work.',
-  };
-}
+export const metadata: Metadata = {
+  title: 'LoopHub',
+  description: 'Your central hub for everything work.',
+};
 
 export default function RootLayout({
   children,
