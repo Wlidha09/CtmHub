@@ -46,7 +46,7 @@ import type { AppSettings, Employee } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
-import { getEmployees } from "@/lib/firebase/employees";
+import { getEmployee } from "@/lib/firebase/employees";
 
 const translations = { en, fr };
 
@@ -142,8 +142,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             }
             
             if (user?.email) {
-              const allEmployees = await getEmployees();
-              const employee = allEmployees.find(emp => emp.email === user.email) || null;
+              const employee = await getEmployee(user.email);
               setCurrentEmployee(employee);
               if (employee) {
                 if (employee.isDev) {
