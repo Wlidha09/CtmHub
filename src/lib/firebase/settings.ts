@@ -15,7 +15,7 @@ export async function getSettings(): Promise<AppSettings> {
         }
         // Return default settings if the document doesn't exist
         return {
-            projectName: 'LoopHub',
+            projectName: 'CtmHub',
             leaveAccumulationAmount: 1.5,
             logoSvgColor: '208 44% 49%',
             logoTextColor: '220 13% 90%',

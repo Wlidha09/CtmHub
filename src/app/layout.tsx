@@ -3,7 +3,7 @@ import './globals.css';
 import { ClientLayout } from './client-layout';
 
 export const metadata: Metadata = {
-  title: 'LoopHub',
+  title: 'CtmHub',
   description: 'Your central hub for everything work.',
 };
 

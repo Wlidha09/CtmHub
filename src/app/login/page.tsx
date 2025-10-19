@@ -67,7 +67,7 @@ export default function LoginPage() {
                         <path d="M12 2 L14.5 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L9.5 9 Z"></path>
                         </svg>
                     </div>
-                    <CardTitle className="text-2xl">Welcome to LoopHub</CardTitle>
+                    <CardTitle className="text-2xl">Welcome to CtmHub</CardTitle>
                     <CardDescription>Sign in to access your dashboard</CardDescription>
                 </CardHeader>
                 <CardContent>
