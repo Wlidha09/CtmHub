@@ -23,25 +23,21 @@ export async function getEmployees(): Promise<Employee[]> {
 
 export async function getEmployee(id: string): Promise<Employee | null> {
     const employeesRef = collection(db, 'employees');
-    // First try to get by document ID
-    const docRef = doc(db, 'employees', id);
-
+    
+    // First, try to get the document by its ID, as this is the most direct way.
     try {
+        const docRef = doc(db, 'employees', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             return { id: docSnap.id, ...docSnap.data() } as Employee;
         }
     } catch (serverError) {
-        const permissionError = new FirestorePermissionError({
-            path: docRef.path,
-            operation: 'get',
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-        throw permissionError;
+        // This might be a permission error if rules are strict. We'll let the query below handle it
+        // as the primary method, but log this for debugging if needed.
+        console.warn(`Could not fetch employee directly by ID '${id}'. Falling back to query. Error: ${serverError}`);
     }
 
-    
-    // If not found by ID, try to find by email, assuming ID might be an email or other unique field
+    // If not found by ID (or if ID is an email), query by the email field.
     try {
         const q = query(employeesRef, where("email", "==", id));
         const querySnapshot = await getDocs(q);
@@ -51,13 +47,12 @@ export async function getEmployee(id: string): Promise<Employee | null> {
         }
     } catch (serverError) {
         const permissionError = new FirestorePermissionError({
-            path: employeesRef.path,
-            operation: 'list',
+            path: employeesRef.path, // The query is on the collection
+            operation: 'list', // A query is a 'list' operation
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
         throw permissionError;
     }
-
 
     return null;
 }
