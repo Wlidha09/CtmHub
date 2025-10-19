@@ -21,25 +21,12 @@ export async function getEmployees(): Promise<Employee[]> {
   }
 }
 
-export async function getEmployee(id: string): Promise<Employee | null> {
+export async function getEmployee(email: string): Promise<Employee | null> {
     const employeesRef = collection(db, 'employees');
     
-    // First, try to get the document by its ID, as this is the most direct way.
+    // Query by the email field.
     try {
-        const docRef = doc(db, 'employees', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() } as Employee;
-        }
-    } catch (serverError) {
-        // This might be a permission error if rules are strict. We'll let the query below handle it
-        // as the primary method, but log this for debugging if needed.
-        console.warn(`Could not fetch employee directly by ID '${id}'. Falling back to query. Error: ${serverError}`);
-    }
-
-    // If not found by ID (or if ID is an email), query by the email field.
-    try {
-        const q = query(employeesRef, where("email", "==", id));
+        const q = query(employeesRef, where("email", "==", email));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0];
@@ -58,10 +45,8 @@ export async function getEmployee(id: string): Promise<Employee | null> {
 }
 
 export function addEmployee(employee: Omit<Employee, 'id'>): void {
-    addDoc(collection(db, 'employees'), employee)
-        .then(docRef => {
-             updateDoc(docRef, { id: docRef.id });
-        })
+    const newDocRef = doc(collection(db, 'employees'));
+    addDoc(collection(db, 'employees'), { ...employee, id: newDocRef.id })
         .catch(async (serverError) => {
             const permissionError = new FirestorePermissionError({
                 path: 'employees',
