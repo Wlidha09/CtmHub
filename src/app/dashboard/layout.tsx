@@ -116,7 +116,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const t = translations[language].layout;
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const { setCurrentRole } = useCurrentRole();
+  const { currentRole, setCurrentRole } = useCurrentRole();
 
   const [settings, setSettings] = React.useState<AppSettings | null>(null);
   const [currentEmployee, setCurrentEmployee] = React.useState<Employee | null>(null);
@@ -124,52 +124,65 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = React.useState(false);
   
   React.useEffect(() => {
-    if (!loading) {
-      if (user) {
-        setIsInitialized(true);
-      } else {
-        router.push('/login');
-      }
+    if (!loading && user) {
+      setIsInitialized(true);
+    } else if (!loading && !user) {
+      router.push('/login');
     }
   }, [user, loading, router]);
 
 
-  React.useEffect(() => {
+ React.useEffect(() => {
     const fetchInitialData = async () => {
-        try {
+      if (!user?.email) return;
+
+      try {
+        const employee = await getEmployee(user.email);
+        setCurrentEmployee(employee);
+
+        if (employee) {
+          const userRole = employee.isDev ? 'Dev' : employee.role;
+          setCurrentRole(userRole);
+
+          if (employee.departmentId) {
+            const dept = await getDepartment(employee.departmentId);
+            setDepartmentName(dept?.name || 'Unknown');
+          }
+
+          // Only fetch settings if user has a privileged role
+          const privilegedRoles = ['Dev', 'Owner', 'RH'];
+          if (privilegedRoles.includes(userRole)) {
             const fetchedSettings = await getSettings();
             setSettings(fetchedSettings);
-            if (fetchedSettings.projectName) {
-              document.title = fetchedSettings.projectName;
-            }
-            
-            if (user?.email) {
-              const employee = await getEmployee(user.email);
-              setCurrentEmployee(employee);
-              if (employee) {
-                if (employee.isDev) {
-                  setCurrentRole('Dev');
-                } else {
-                  setCurrentRole(employee.role);
-                }
-
-                if (employee.departmentId) {
-                  const dept = await getDepartment(employee.departmentId);
-                  setDepartmentName(dept?.name || 'Unknown');
-                }
-              }
-            }
-
-        } catch (error) {
-            console.error("Failed to fetch initial data", error);
+            document.title = fetchedSettings.projectName || "CtmHub";
+          } else {
+            // Set default settings for non-privileged users to avoid permission errors
+            setSettings({
+                projectName: 'CtmHub',
+                leaveAccumulationAmount: 0, // Default value
+            });
+            document.title = "CtmHub";
+          }
+        } else {
+            // No employee profile found, use defaults
+            setCurrentRole('Employee');
+            setSettings({ projectName: 'CtmHub', leaveAccumulationAmount: 0 });
+            document.title = "CtmHub";
         }
+      } catch (error) {
+        console.error("Failed to fetch initial data", error);
+        // Fallback to default settings on any error during fetch
+        setSettings({ projectName: 'CtmHub', leaveAccumulationAmount: 0 });
+        document.title = "CtmHub";
+      }
     };
-    if (isInitialized && user) {
+
+    if (isInitialized) {
       fetchInitialData();
     }
   }, [isInitialized, user, setCurrentRole]);
 
-  if (!isInitialized || !settings) {
+  if (!settings || !isInitialized) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p>Loading...</p>
@@ -250,15 +263,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           <React.Fragment>
                           <Avatar>
                               <AvatarImage
-                                src={user.photoURL || currentEmployee?.avatarUrl || undefined}
+                                src={user?.photoURL || currentEmployee?.avatarUrl || undefined}
                                 data-ai-hint="person portrait"
                               />
-                              <AvatarFallback>{getInitials(currentEmployee?.name || user.displayName)}</AvatarFallback>
+                              <AvatarFallback>{getInitials(currentEmployee?.name || user?.displayName)}</AvatarFallback>
                           </Avatar>
                           <div className="text-left duration-200 group-data-[collapsible=icon]:opacity-0">
-                              <p className="text-sm font-medium">{currentEmployee?.name || user.displayName}</p>
+                              <p className="text-sm font-medium">{currentEmployee?.name || user?.displayName}</p>
                               <p className="text-xs text-muted-foreground">
-                              {user.email}
+                              {user?.email}
                               </p>
                           </div>
                           </React.Fragment>
@@ -314,10 +327,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         <React.Fragment>
                           <Avatar className="w-8 h-8">
                             <AvatarImage
-                                src={user.photoURL || currentEmployee?.avatarUrl || undefined}
+                                src={user?.photoURL || currentEmployee?.avatarUrl || undefined}
                                 data-ai-hint="person portrait"
                             />
-                            <AvatarFallback>{getInitials(currentEmployee?.name || user.displayName)}</AvatarFallback>
+                            <AvatarFallback>{getInitials(currentEmployee?.name || user?.displayName)}</AvatarFallback>
                           </Avatar>
                           <span className="sr-only">{t.toggle_user_menu}</span>
                         </React.Fragment>
@@ -327,7 +340,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       <DropdownMenuLabel>{t.my_account}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.profile}</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.settings}</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/dashboard/user-settings">{t.settings}</Link></DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={signOut}>{t.logout}</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -382,3 +395,5 @@ const AvatarFallback = ({
 }: React.ComponentProps<typeof UIAvatarFallback>) => (
   <UIAvatarFallback {...props}>{children}</UIAvatarFallback>
 );
+
+    
