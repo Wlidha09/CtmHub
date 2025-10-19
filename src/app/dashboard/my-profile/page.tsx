@@ -17,6 +17,8 @@ import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { useAuth } from "@/hooks/use-auth";
 import { withPermission } from "@/components/with-permission";
+import { getEmployee } from "@/lib/firebase/employees";
+import { getDepartment } from "@/lib/firebase/departments";
 
 const translations = { en, fr };
 
@@ -32,21 +34,20 @@ function MyProfilePage() {
   const t = translations[language].my_profile_page;
 
   const fetchData = React.useCallback(async () => {
-    if (!authUser?.email) return;
+    if (!authUser?.uid) return;
     setIsLoading(true);
     try {
-      // In our demo setup, we find the employee by matching the auth user's email.
-      const allEmployees = await getEmployees();
-      const user = allEmployees.find(emp => emp.email === authUser.email) || null;
+      const user = await getEmployee(authUser.uid);
 
       if (user) {
         const departmentList = await getDepartments();
         setCurrentUser(user);
-        const userDept = departmentList.find(d => d.id === user.departmentId);
-        setDepartmentName(userDept?.name || "Unknown");
+        if (user.departmentId) {
+          const userDept = departmentList.find(d => d.id === user.departmentId);
+          setDepartmentName(userDept?.name || "Unknown");
+        }
         setDepartments(departmentList);
       } else {
-        // If no matching employee is found, it's an error state.
         toast({
           variant: "destructive",
           title: "Profile Not Found",
