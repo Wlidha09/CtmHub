@@ -320,7 +320,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       <DropdownMenuLabel>{t.my_account}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.profile}</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link href="/dashboard/user-settings">{t.settings}</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/dashboard/my-profile">{t.settings}</Link></DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={signOut}>{t.logout}</DropdownMenuItem>
                     </DropdownMenuContent>

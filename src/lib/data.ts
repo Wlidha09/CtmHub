@@ -15,7 +15,7 @@ export const appPages = [
   'Tickets',
   'Book a Room',
   'Manage Rooms',
-  'Settings',
+  'User Settings',
   'Translator'
 ];
 
@@ -66,7 +66,7 @@ export const initialRoles: Role[] = [
       if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
       }
-      if (page === 'Settings') {
+      if (page === 'User Settings') {
         acc[page] = { view: true, create: false, edit: false, delete: false };
       }
       return acc;
@@ -85,7 +85,7 @@ export const initialRoles: Role[] = [
        if (page === 'Book a Room' || page === 'Manage Rooms') {
         acc[page] = { view: true, create: true, edit: true, delete: true };
       }
-       if (page === 'Settings') {
+       if (page === 'User Settings') {
         acc[page] = { view: false, create: false, edit: false, delete: false };
       }
       return acc;

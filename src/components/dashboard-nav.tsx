@@ -55,7 +55,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/book-room", labelKey: "book_a_room", icon: BookMarked, pageName: "Book a Room" },
   { href: "/dashboard/manage-rooms", labelKey: "manage_rooms", icon: Settings, pageName: "Manage Rooms" },
   { href: "/dashboard/availability", labelKey: "availability", icon: CalendarClock, pageName: "Availability" },
-  { href: "/dashboard/settings", labelKey: "settings", icon: Settings, pageName: "Settings" },
+  { href: "/dashboard/user-settings", labelKey: "settings", icon: Settings, pageName: "Settings" },
   { href: "/dashboard/translator", labelKey: "translator", icon: Languages, pageName: "Translator" },
 ];
 
