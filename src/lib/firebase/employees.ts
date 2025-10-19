@@ -1,4 +1,6 @@
 
+"use client";
+
 import { db } from './config';
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, query, where } from 'firebase/firestore';
 import type { Employee } from '@/lib/types';
@@ -21,28 +23,33 @@ export async function getEmployees(): Promise<Employee[]> {
   }
 }
 
-export async function getEmployee(email: string): Promise<Employee | null> {
-    const employeesRef = collection(db, 'employees');
-    
-    // Query by the email field.
+export async function getEmployee(id: string): Promise<Employee | null> {
+    const employeeDoc = doc(db, 'employees', id);
     try {
-        const q = query(employeesRef, where("email", "==", email));
+        const employeeSnapshot = await getDoc(employeeDoc);
+        if (employeeSnapshot.exists()) {
+            return { id: employeeSnapshot.id, ...employeeSnapshot.data() } as Employee;
+        }
+        // If not found by ID, try by email as a fallback for seeding/legacy
+        const q = query(collection(db, 'employees'), where("email", "==", id));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0];
             return { id: userDoc.id, ...userDoc.data() } as Employee;
         }
+
+        return null;
+
     } catch (serverError) {
         const permissionError = new FirestorePermissionError({
-            path: employeesRef.path, // The query is on the collection
-            operation: 'list', // A query is a 'list' operation
+            path: employeeDoc.path,
+            operation: 'get',
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
         throw permissionError;
     }
-
-    return null;
 }
+
 
 export function addEmployee(employee: Omit<Employee, 'id'>): void {
     const newDocRef = doc(collection(db, 'employees'));

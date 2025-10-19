@@ -134,10 +134,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
  React.useEffect(() => {
     const fetchInitialData = async () => {
-      if (!user?.email) return;
+      if (!user?.uid) return;
 
       try {
-        const employee = await getEmployee(user.email);
+        const employee = await getEmployee(user.uid);
         setCurrentEmployee(employee);
 
         if (employee) {
@@ -149,29 +149,25 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             setDepartmentName(dept?.name || 'Unknown');
           }
 
-          // Only fetch settings if user has a privileged role
           const privilegedRoles = ['Dev', 'Owner', 'RH'];
           if (privilegedRoles.includes(userRole)) {
             const fetchedSettings = await getSettings();
             setSettings(fetchedSettings);
             document.title = fetchedSettings.projectName || "CtmHub";
           } else {
-            // Set default settings for non-privileged users to avoid permission errors
             setSettings({
                 projectName: 'CtmHub',
-                leaveAccumulationAmount: 0, // Default value
+                leaveAccumulationAmount: 0,
             });
             document.title = "CtmHub";
           }
         } else {
-            // No employee profile found, use defaults
             setCurrentRole('Employee');
             setSettings({ projectName: 'CtmHub', leaveAccumulationAmount: 0 });
             document.title = "CtmHub";
         }
       } catch (error) {
         console.error("Failed to fetch initial data", error);
-        // Fallback to default settings on any error during fetch
         setSettings({ projectName: 'CtmHub', leaveAccumulationAmount: 0 });
         document.title = "CtmHub";
       }
@@ -395,5 +391,3 @@ const AvatarFallback = ({
 }: React.ComponentProps<typeof UIAvatarFallback>) => (
   <UIAvatarFallback {...props}>{children}</UIAvatarFallback>
 );
-
-    
