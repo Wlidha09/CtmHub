@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { getEmployee } from "@/lib/firebase/employees";
+import { getDepartment } from "@/lib/firebase/departments";
 
 const translations = { en, fr };
 
@@ -119,6 +120,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const [settings, setSettings] = React.useState<AppSettings | null>(null);
   const [currentEmployee, setCurrentEmployee] = React.useState<Employee | null>(null);
+  const [departmentName, setDepartmentName] = React.useState<string | null>(null);
   const [isInitialized, setIsInitialized] = React.useState(false);
   
   React.useEffect(() => {
@@ -149,6 +151,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   setCurrentRole('Dev');
                 } else {
                   setCurrentRole(employee.role);
+                }
+
+                if (employee.departmentId) {
+                  const dept = await getDepartment(employee.departmentId);
+                  setDepartmentName(dept?.name || 'Unknown');
                 }
               }
             }
