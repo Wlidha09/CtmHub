@@ -73,6 +73,7 @@ export default function DashboardPage() {
       try {
           const user = await getEmployee(authUser.uid);
           setCurrentUser(user);
+          console.log("Current user data:", user);
 
           // Fetch different data based on role
           if (user && (user.role === 'Employee')) {
