@@ -68,29 +68,27 @@ export default function DashboardPage() {
 
   React.useEffect(() => {
     async function fetchData() {
+      if (!authUser?.uid) return;
       setIsLoading(true);
       try {
-        const [employees, departments, allRequests] = await Promise.all([
-          getEmployees(),
-          getDepartments(),
-          getLeaveRequests(), // Fetch all requests initially
-        ]);
-        setTotalEmployees(employees.length);
-        setTotalDepartments(departments.length);
-        
-        let userForRole: Employee | null = null;
-        if (authUser?.email) {
-            userForRole = employees.find(e => e.email === authUser.email) || null;
-            setCurrentUser(userForRole);
-        }
+          const user = await getEmployee(authUser.uid);
+          setCurrentUser(user);
 
-        if (userForRole) {
-            const userRequests = allRequests.filter(r => r.userId === userForRole!.id);
-            setLeaveRequests(userRequests);
-        } else {
-            setLeaveRequests(allRequests);
-        }
-
+          // Fetch different data based on role
+          if (user && (user.role === 'Employee')) {
+               const userRequests = await getLeaveRequests(user.id);
+               setLeaveRequests(userRequests);
+          } else {
+              // For managers/admins, fetch broader data
+              const [employees, departments, allRequests] = await Promise.all([
+                  getEmployees(),
+                  getDepartments(),
+                  getLeaveRequests(),
+              ]);
+              setTotalEmployees(employees.length);
+              setTotalDepartments(departments.length);
+              setLeaveRequests(allRequests);
+          }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
@@ -259,3 +257,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
