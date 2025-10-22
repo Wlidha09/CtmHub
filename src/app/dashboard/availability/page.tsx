@@ -39,11 +39,10 @@ function AvailabilityPage() {
   const weekStartDate = format(weekStart, 'yyyy-MM-dd');
 
   const fetchData = React.useCallback(async () => {
-    if (!authUser?.email) return;
+    if (!authUser?.uid) return;
     setIsLoading(true);
     try {
-      const allEmployees = await getEmployees();
-      const user = allEmployees.find(emp => emp.email === authUser.email) || null;
+      const user = await getEmployee(authUser.uid);
       setCurrentUser(user);
       
       const schedule = await getWeeklySchedule();

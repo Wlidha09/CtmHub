@@ -24,11 +24,9 @@ import { useLanguage } from "@/hooks/use-language";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import { withPermission } from "@/components/with-permission";
+import { useAuth } from "@/hooks/use-auth";
 
 const translations = { en, fr };
-
-// In a real app, this would come from the authenticated user
-const FAKE_CURRENT_USER_ID = "e2";
 
 function BookRoomPage() {
   const [rooms, setRooms] = React.useState<MeetingRoom[]>([]);
@@ -42,16 +40,18 @@ function BookRoomPage() {
   const [editingBooking, setEditingBooking] = React.useState<Booking | null>(null);
   const { toast } = useToast();
   const { language } = useLanguage();
+  const { user: authUser } = useAuth();
   const t = translations[language].book_room_page;
 
   const fetchInitialData = React.useCallback(async () => {
+    if (!authUser?.uid) return;
     setIsLoading(true);
     try {
       const [roomList, employeeList, departmentList, user] = await Promise.all([
         getRooms(),
         getEmployees(),
         getDepartments(),
-        getEmployee(FAKE_CURRENT_USER_ID)
+        getEmployee(authUser.uid)
       ]);
       setRooms(roomList);
       setEmployees(employeeList);
@@ -70,7 +70,7 @@ function BookRoomPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, selectedRoomId, t]);
+  }, [toast, selectedRoomId, t, authUser]);
 
   React.useEffect(() => {
     fetchInitialData();

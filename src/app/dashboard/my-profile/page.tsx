@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getEmployees, updateEmployee } from "@/lib/firebase/employees";
+import { updateEmployee } from "@/lib/firebase/employees";
 import { getDepartments } from "@/lib/firebase/departments";
 import type { Employee, Department } from "@/lib/types";
 import { EmployeeForm } from "../employees/employee-form";
@@ -66,8 +66,10 @@ function MyProfilePage() {
   }, [authUser, toast, t]);
 
   React.useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (authUser) {
+      fetchData();
+    }
+  }, [authUser, fetchData]);
 
   const handleSave = async (employeeData: Partial<Employee>) => {
     if (!currentUser) return;

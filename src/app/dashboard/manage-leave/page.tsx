@@ -59,17 +59,16 @@ function ManageLeavePage() {
   const canManageAll = currentRole === 'Owner' || currentRole === 'RH' || currentRole === 'Dev';
 
   const fetchRequests = React.useCallback(async () => {
-    if (!authUser) return;
+    if (!authUser?.uid) return;
     setIsLoading(true);
 
     try {
-      const [leaveRequests, allEmployees, departments] = await Promise.all([
+      const [leaveRequests, allEmployees, departments, currentUser] = await Promise.all([
         getLeaveRequests(),
         getEmployees(),
         getDepartments(),
+        getEmployee(authUser.uid),
       ]);
-
-      const currentUser = allEmployees.find(e => e.email === authUser.email);
       
       const employeeMap = new Map(allEmployees.map((e) => [e.id, e]));
       const departmentMap = new Map(departments.map((d) => [d.id, d.name]));
